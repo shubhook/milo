@@ -211,10 +211,10 @@
 @keyframes rakazo-organic-idle {
   0%,
   100% {
-    transform: translateY(1.2px) scale(1.012, 0.988);
+    transform: translateY(0.6px) scale(1.006, 0.994);
   }
   50% {
-    transform: translateY(-1.4px) scale(0.988, 1.012);
+    transform: translateY(-0.6px) scale(0.994, 1.006);
   }
 }
 

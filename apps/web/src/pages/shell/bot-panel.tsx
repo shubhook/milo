@@ -616,6 +616,7 @@ export function BotSettings({
       <div className="mt-5 flex flex-col items-start gap-3">
         <Button
           disabled={saving}
+          className="h-[30px] rounded-full px-3.5"
           onClick={() => {
             void enqueueSave({
               name,
@@ -628,13 +629,16 @@ export function BotSettings({
         >
           <Trans>Save</Trans>
         </Button>
-        <Button variant="ghost" size="sm" className="-ms-2.5" onClick={() => void onExport()}>
+        <Button
+          variant="outline"
+          className="h-[30px] rounded-full px-3.5"
+          onClick={() => void onExport()}
+        >
           <Trans>Export</Trans>
         </Button>
         <Button
-          variant="ghost"
-          size="sm"
-          className="-ms-2.5 text-destructive hover:text-destructive"
+          variant="outline"
+          className="h-[30px] rounded-full px-3.5 text-destructive hover:text-destructive"
           onClick={onClear}
         >
           <Trans>Clear conversation</Trans>

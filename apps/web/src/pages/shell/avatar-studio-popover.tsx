@@ -113,14 +113,14 @@ export function AvatarStudioPopover({
         type="button"
         disabled={disabled}
         onClick={() => setOpen(true)}
-        className="group relative cursor-pointer rounded-2xl outline-none transition-transform hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative inline-flex cursor-pointer pe-6 pb-6 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed"
         aria-label={t`Customize bot avatar`}
         data-testid="avatar-studio-trigger"
       >
         <BotAvatar color={value} identity={identity} size={size} status={status} />
-        <div className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-background bg-secondary text-foreground shadow-md transition-transform group-hover:scale-110">
-          <Pencil size={12} strokeWidth={2.2} />
-        </div>
+        <span className="absolute end-0 bottom-0 flex size-[30px] items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm">
+          <Pencil size={14} strokeWidth={2} />
+        </span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

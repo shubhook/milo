@@ -182,13 +182,14 @@ export const BotAvatar = memo(function BotAvatar({
       }}
       data-working={isWorking}
     >
+      {isWorking ? (
       <svg
         className="rakazo-bot-avatar-ring absolute pointer-events-none"
         style={{
-          inset: -4,
-          width: size + 8,
-          height: size + 8,
-          filter: `drop-shadow(0 0 6px ${colorDef.light}) drop-shadow(0 0 10px #ffffff)`,
+          inset: -3,
+          width: size + 6,
+          height: size + 6,
+          filter: `drop-shadow(0 0 4px ${colorDef.light})`,
         }}
         viewBox="0 0 48 48"
         fill="none"
@@ -203,30 +204,28 @@ export const BotAvatar = memo(function BotAvatar({
           strokeLinecap="round"
           strokeDasharray="45 80"
         />
-        <circle cx="43" cy="24" r="2.8" fill="#ffffff" />
+        <circle cx="43" cy="24" r="2.4" fill={colorDef.light} />
         <defs>
           <linearGradient id={`${id}-ring`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-            <stop offset="60%" stopColor={colorDef.light} stopOpacity="0.9" />
+            <stop offset="0%" stopColor={colorDef.light} stopOpacity="1" />
             <stop offset="100%" stopColor={colorDef.light} stopOpacity="0" />
           </linearGradient>
         </defs>
       </svg>
+      ) : null}
       <svg
         viewBox={VIEWBOX}
         width={size}
         height={size}
         aria-hidden="true"
         className={cn(
-          "overflow-visible transition-transform duration-300",
-          isWorking
-            ? "animate-pulse scale-[1.04] motion-reduce:animate-none"
-            : "hover:scale-[1.03] motion-reduce:hover:scale-100",
+          "overflow-hidden",
+          isWorking ? "animate-pulse motion-reduce:animate-none" : "",
         )}
         style={{
           filter: isWorking
-            ? `drop-shadow(0 0 8px ${colorDef.light}) drop-shadow(0 0 2px #ffffff)`
-            : "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
+            ? `drop-shadow(0 0 6px ${colorDef.light})`
+            : "drop-shadow(0 1px 2px rgba(0,0,0,0.28))",
         }}
       >
         <defs>
@@ -268,13 +267,13 @@ function OrganicAvatar({
   const seed = avatarIdentitySeed(identity || color || DEFAULT_GROK_BOT_COLOR);
   const duration = `${4.8 + (seed % 24) / 10}s`;
   const shapeA = organicAvatarPath(seed);
-  const shapeB = organicAvatarPath(seed, 0.42);
+  const shapeB = organicAvatarPath(seed, 0.18);
 
   return (
     <svg
       viewBox="-60 -60 120 120"
       aria-hidden="true"
-      className={cn("rakazo-organic-avatar overflow-visible select-none", className)}
+      className={cn("rakazo-organic-avatar block overflow-hidden select-none", className)}
       data-working={isWorking}
       data-shape-family={seed % 10}
       data-eye-pattern={seed % 4}
@@ -296,7 +295,7 @@ function OrganicAvatar({
               filter:
                 mode === "working"
                   ? `drop-shadow(0 0 ${Math.round(size * 0.16)}px ${color})`
-                  : "drop-shadow(0 2px 3px rgba(0,0,0,.34))",
+                  : "drop-shadow(0 1px 2px rgba(0,0,0,.22))",
             } as CSSProperties
           }
         >
