@@ -85,6 +85,7 @@ import {
 import {
   ArrowDown,
   ArrowUp,
+  AudioLines,
   Bell,
   Box,
   ChevronDown,
@@ -97,7 +98,6 @@ import {
   LogOut,
   Maximize2,
   Menu,
-  Mic,
   Monitor,
   MoreHorizontal,
   PanelLeftClose,
@@ -115,6 +115,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import {
   type ClipboardEvent,
   type DragEvent,
@@ -1518,7 +1519,10 @@ export function ShellPage() {
           ? group.title
             ? `${space.name} · ${group.title}`
             : space.name
-          : group.title,
+          : // Pinned bots render as tiles, so the rest of the list needs no heading of its own.
+            group.key === "unassigned" && space.botSections.length === 0
+            ? null
+            : group.title,
         showLock: showSpaceNames,
         emptySpaceId: undefined as string | undefined,
         spaceId: space.id,
@@ -2735,6 +2739,15 @@ export function ShellPage() {
     .slice(0, 2)
     .toUpperCase();
 
+  const activeColorDef =
+    !inGroup && active ? resolvePersonaColorDef(active.id, active.color) : null;
+  const botAccentStyle = activeColorDef
+    ? ({
+        "--bot-accent": activeColorDef.dark,
+        "--bot-accent-foreground": activeColorDef.eyeColor,
+      } as CSSProperties)
+    : undefined;
+
   const shell = (
     <div
       data-testid="shell-root"
@@ -2809,17 +2822,18 @@ export function ShellPage() {
         data-testid="bots-sidebar"
         data-collapsed={botsSidebarCollapsed ? "true" : "false"}
         inert={botsSidebarCollapsed && !mobileSidebarOpen ? true : undefined}
-        className={`absolute inset-y-0 start-0 z-40 flex w-[calc(100%-48px)] max-w-[316px] shrink-0 flex-col border-e border-sidebar-border bg-sidebar transition-[transform,width,opacity] md:static md:z-auto md:translate-x-0 ${
-          mobileSidebarOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full"
-        } ${
-          botsSidebarCollapsed
-            ? "md:w-0 md:max-w-0 md:overflow-hidden md:border-e-0 md:opacity-0 md:pointer-events-none"
-            : "md:w-[316px]"
-        }`}
+        className={`absolute inset-y-0 start-0 z-40 flex w-[min(316px,calc(100%-48px))] shrink-0 overflow-hidden border-e border-sidebar-border bg-sidebar transition-[width,translate] duration-300 ease-out motion-reduce:transition-none md:static md:z-auto ${
+          mobileSidebarOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:translate-x-0"
+        } ${botsSidebarCollapsed ? "md:w-0 md:border-e-0" : "md:w-[316px]"}`}
       >
-        <div className="app-drag flex items-center justify-between px-[18px] pb-3 pt-4">
+        <div
+          className={`flex h-full w-full min-w-0 flex-col transition-[translate] duration-300 ease-out motion-reduce:transition-none md:w-[316px] md:min-w-[316px] ${
+            botsSidebarCollapsed ? "md:-translate-x-full rtl:md:translate-x-full" : "md:translate-x-0"
+          }`}
+        >
+        <div className="app-drag flex items-center justify-between px-3 pb-2 pt-3">
           <WindowChrome />
-          <div className="relative flex items-center gap-2.5">
+          <div className="relative flex items-center gap-1.5">
             <button
               type="button"
               aria-label={t`Activity`}
@@ -2827,10 +2841,10 @@ export function ShellPage() {
               title={t`Activity`}
               data-activity-mode={activityMode ? "on" : "off"}
               onClick={toggleActivityMode}
-              className={`app-no-drag flex h-7 w-7 items-center justify-center rounded-full ${
+              className={`app-no-drag flex size-[30px] items-center justify-center rounded-full ${
                 activityMode
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground/70 hover:text-foreground/75"
+                  : "border border-border bg-card text-foreground/75 hover:bg-accent"
               }`}
             >
               <Bell
@@ -2842,7 +2856,7 @@ export function ShellPage() {
             </button>
             <button
               type="button"
-              className="app-no-drag hidden h-7 w-7 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground/75 md:inline-flex"
+              className="app-no-drag hidden size-[30px] items-center justify-center rounded-full border border-border bg-card text-foreground/75 hover:bg-accent md:inline-flex"
               aria-label={t`Minimize bots`}
               title={t`Minimize bots`}
               data-testid="minimize-bots-sidebar"
@@ -2852,12 +2866,12 @@ export function ShellPage() {
             </button>
             <Popover open={createMenuOpen} onOpenChange={setCreateMenuOpen}>
               <PopoverTrigger
-                className="app-no-drag text-[21px] text-muted-foreground/70 hover:text-foreground/75"
+                className="app-no-drag flex size-[30px] items-center justify-center rounded-full border border-border bg-card text-foreground/75 hover:bg-accent"
                 title={t`Create`}
                 aria-label={t`Create`}
                 data-testid="create-menu-trigger"
               >
-                +
+                <Plus size={16} strokeWidth={1.8} aria-hidden="true" />
               </PopoverTrigger>
               {/* Unmount with the state change so the panel it opens never coexists with the menu. */}
               {createMenuOpen ? (
@@ -2905,7 +2919,7 @@ export function ShellPage() {
         </div>
         <InputGroup
           data-testid="sidebar-search"
-          className="mx-2.5 mb-3 w-auto rounded-xl bg-card dark:bg-input border border-border text-muted-foreground focus-within:border-ring"
+          className="mx-3 mb-2 w-auto rounded-full border border-border bg-card text-muted-foreground focus-within:border-ring dark:bg-input"
         >
           <InputGroupAddon>
             <Search size={16} strokeWidth={1.8} aria-hidden="true" />
@@ -2951,6 +2965,90 @@ export function ShellPage() {
                   nestedRows.flatMap((row) =>
                     row.item.kind === "bot" && row.parentId === parentId ? [row.item.chat.id] : [],
                   );
+                if (group.key === "pinned") {
+                  return (
+                    <div
+                      key={group.key}
+                      data-sidebar-group={group.key}
+                      className="flex flex-wrap justify-center gap-1 pb-2"
+                    >
+                      {group.bots.map((item) => {
+                        const selected =
+                          (item.kind === "bot" && !inGroup && active?.id === item.chat.id) ||
+                          (item.kind === "group" && inGroup && activeGroup?.id === item.chat.id);
+                        const peek = item.chat.preview.trim();
+                        return (
+                          <button
+                            key={`${item.kind}:${item.chat.id}`}
+                            type="button"
+                            onClick={() => {
+                              openSpaceChat(
+                                item.chat.spaceId,
+                                item.kind === "bot"
+                                  ? `/app/${item.chat.id}`
+                                  : `/app/g/${item.chat.id}`,
+                              );
+                            }}
+                            onContextMenu={(event) => {
+                              if (item.chat.spaceId !== bootstrapMe?.spaceId) return;
+                              event.preventDefault();
+                              botMenuAnchor.current = event.currentTarget;
+                              setBotMenu({
+                                kind: item.kind,
+                                id: item.chat.id,
+                                position: { x: event.clientX, y: event.clientY },
+                              });
+                            }}
+                            className={`relative flex w-[148px] flex-col items-center gap-1 rounded-2xl px-2 pb-2 pt-2 hover:bg-sidebar-accent ${
+                              selected ? "bg-sidebar-accent" : ""
+                            }`}
+                          >
+                            {item.kind === "bot" ? (
+                              <BotAvatar
+                                color={item.chat.color}
+                                identity={item.chat.id}
+                                size={46}
+                                status={item.chat.status}
+                              />
+                            ) : (
+                              <GroupAvatar members={item.chat.members} size={46} />
+                            )}
+                            <span
+                              dir="auto"
+                              className="max-w-full truncate text-[12.5px] text-foreground"
+                            >
+                              {item.chat.name}
+                            </span>
+                            {peek ? (
+                              <span
+                                dir="auto"
+                                className="line-clamp-2 max-w-full text-center text-[11px] leading-snug text-muted-foreground"
+                              >
+                                {peek}
+                              </span>
+                            ) : null}
+                            {item.kind === "bot" && item.chat.title ? (
+                              <span className="max-w-full truncate rounded-md bg-accent px-1.5 text-[10.5px] leading-[15px] text-muted-foreground">
+                                {item.chat.title}
+                              </span>
+                            ) : null}
+                            {item.chat.unread ? (
+                              <>
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute end-3 top-2.5 size-2 rounded-full bg-foreground"
+                                />
+                                <span className="sr-only">
+                                  <Trans> (unread)</Trans>
+                                </span>
+                              </>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }
                 return (
                   <div key={group.key} data-sidebar-group={group.key}>
                     {group.title ? (
@@ -3338,90 +3436,88 @@ export function ShellPage() {
             </div>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={() => setPluginsOpen(true)}
-          className="mx-3 mb-1 flex items-center gap-3 rounded-xl px-2.5 py-2 hover:bg-sidebar-accent"
-        >
-          <span className="grid h-[30px] w-[30px] place-items-center rounded-lg bg-accent text-foreground/80">
-            <LayoutGrid size={15} strokeWidth={1.8} />
-          </span>
-          <span className="text-[14px] font-medium text-foreground/90">
-            <Trans>Integrations</Trans>
-          </span>
-        </button>
-        <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-          <PopoverTrigger
-            data-testid="user-menu-trigger"
-            className="flex items-center gap-[11px] px-[18px] py-3.5"
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-accent text-[12px] text-foreground/75">
-              {initials}
-            </span>
-            <span className="text-[14.5px] text-foreground/90">{userName}</span>
-          </PopoverTrigger>
-          {menuOpen ? (
-            <PopoverContent
-              side="top"
-              align="start"
-              className="w-[calc(316px-1.5rem)] max-w-[calc(100vw-3rem)] gap-0 p-1 data-closed:animate-none"
+        <div className="flex items-center gap-2 px-3 pb-3 pt-2.5">
+          <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+            <PopoverTrigger
+              data-testid="user-menu-trigger"
+              aria-label={userName}
+              title={userName}
+              className="grid size-[30px] shrink-0 place-items-center rounded-full bg-primary text-[12px] font-semibold text-primary-foreground"
             >
-              <Button
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setMobileSidebarOpen(false);
-                  navigate("/app/artifacts");
-                }}
+              {initials}
+            </PopoverTrigger>
+            {menuOpen ? (
+              <PopoverContent
+                side="top"
+                align="start"
+                className="w-[calc(316px-1.5rem)] max-w-[calc(100vw-3rem)] gap-0 p-1 data-closed:animate-none"
               >
-                <FolderOpen className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>Artifacts</Trans>
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                aria-label={t`Settings`}
-                onClick={() => {
-                  setMenuOpen(false);
-                  openSettings("general");
-                }}
-              >
-                <Settings className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>Settings</Trans>
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                aria-label={t`Usage`}
-                onClick={() => {
-                  setMenuOpen(false);
-                  void rpc.usage
-                    .summary()
-                    .then(setUsage)
-                    .catch(() => undefined);
-                  openSettings("usage");
-                }}
-              >
-                <Gauge className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>Usage</Trans>
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                onClick={() =>
-                  void authClient.signOut().then(() => {
-                    clearSpaceSelection();
-                    navigate("/");
-                  })
-                }
-              >
-                <LogOut className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>Log out</Trans>
-              </Button>
-            </PopoverContent>
-          ) : null}
-        </Popover>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setMobileSidebarOpen(false);
+                    navigate("/app/artifacts");
+                  }}
+                >
+                  <FolderOpen className="text-muted-foreground" strokeWidth={1.75} />
+                  <Trans>Artifacts</Trans>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  aria-label={t`Settings`}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    openSettings("general");
+                  }}
+                >
+                  <Settings className="text-muted-foreground" strokeWidth={1.75} />
+                  <Trans>Settings</Trans>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  aria-label={t`Usage`}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void rpc.usage
+                      .summary()
+                      .then(setUsage)
+                      .catch(() => undefined);
+                    openSettings("usage");
+                  }}
+                >
+                  <Gauge className="text-muted-foreground" strokeWidth={1.75} />
+                  <Trans>Usage</Trans>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  onClick={() =>
+                    void authClient.signOut().then(() => {
+                      clearSpaceSelection();
+                      navigate("/");
+                    })
+                  }
+                >
+                  <LogOut className="text-muted-foreground" strokeWidth={1.75} />
+                  <Trans>Log out</Trans>
+                </Button>
+              </PopoverContent>
+            ) : null}
+          </Popover>
+          <button
+            type="button"
+            onClick={() => setPluginsOpen(true)}
+            className="flex h-[30px] min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-card text-[13.5px] font-medium text-foreground hover:bg-accent"
+          >
+            <LayoutGrid size={14} strokeWidth={1.8} aria-hidden="true" />
+            <Trans>Integrations</Trans>
+          </button>
+        </div>
+        </div>
       </aside>
 
       {/* The full-screen computer covers the sidebar, so its edge must not catch clicks there. */}
@@ -3431,7 +3527,7 @@ export function ShellPage() {
           data-testid="bots-sidebar-edge"
           aria-label={botsSidebarCollapsed ? t`Show bots` : t`Hide bots`}
           aria-pressed={!botsSidebarCollapsed}
-          className={`absolute inset-y-0 z-50 hidden w-2 cursor-ew-resize touch-none border-0 bg-transparent p-0 md:block ${
+          className={`absolute inset-y-0 z-50 hidden w-2 cursor-ew-resize touch-none border-0 bg-transparent p-0 transition-[inset-inline-start] duration-300 ease-out motion-reduce:transition-none md:block ${
             botsSidebarCollapsed ? "start-0" : "start-[308px]"
           }`}
           onPointerDown={(event) => {
@@ -3474,8 +3570,9 @@ export function ShellPage() {
         aria-hidden={mobileSidebarOpen || undefined}
         inert={mobileSidebarOpen}
         className="flex min-w-0 flex-1 flex-col bg-background"
+        style={botAccentStyle}
       >
-        <div className="app-drag flex items-center justify-between border-b border-sidebar-border px-3 py-[17px] md:px-[22px]">
+        <div className="app-drag grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-2.5 md:px-5">
           <div className="flex min-w-0 items-center gap-2">
             {/* Collapsed bots sidebar: this header is the leading edge for window chrome. */}
             {botsSidebarCollapsed && desktopBridge() ? <WindowChrome /> : null}
@@ -3499,27 +3596,32 @@ export function ShellPage() {
                 <PanelLeftOpen size={19} strokeWidth={1.7} aria-hidden="true" />
               </button>
             ) : null}
+          </div>
+          <div className="flex min-w-0 justify-center">
             <button
               type="button"
               data-testid="bot-settings-trigger"
               onClick={() => setPanel(inGroup ? "group-settings" : "settings")}
-              className="app-no-drag flex min-w-0 items-center gap-3"
+              className="app-no-drag flex h-[30px] min-w-0 items-center gap-2 rounded-full bg-card pe-3 ps-1 shadow-sm ring-1 ring-border hover:bg-accent"
             >
               {inGroup ? (
                 <GroupAvatar
                   members={activeSnapshot?.members ?? activeGroup?.members ?? []}
-                  size={26}
+                  size={22}
                 />
               ) : active ? (
                 <BotAvatar
                   color={active.color}
                   identity={active.id}
-                  size={26}
+                  size={22}
                   status={active.status}
                 />
               ) : null}
               <span className="min-w-0">
-                <span className="block truncate text-[16px] font-medium text-foreground" dir="auto">
+                <span
+                  className="block truncate text-[14px] font-medium text-foreground"
+                  dir="auto"
+                >
                   {inGroup
                     ? (activeGroup?.name ?? activeSnapshot?.groupName ?? t`Group`)
                     : (active?.name ?? t`Select a bot`)}
@@ -3527,7 +3629,7 @@ export function ShellPage() {
               </span>
             </button>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-end gap-1">
             {!inGroup && active ? (
               <button
                 type="button"
@@ -3541,9 +3643,9 @@ export function ShellPage() {
                   }
                 }}
                 data-active={panel === "computer" ? "" : undefined}
-                className="app-no-drag grid h-[30px] w-[34px] place-items-center rounded-[9px] hover:bg-accent data-active:bg-accent"
+                className="app-no-drag grid size-[30px] place-items-center rounded-full border border-border bg-card hover:bg-accent data-active:bg-accent"
               >
-                <Monitor size={18} strokeWidth={1.6} className="text-foreground/75" />
+                <Monitor size={16} strokeWidth={1.7} className="text-foreground/75" />
               </button>
             ) : null}
           </div>
@@ -4934,7 +5036,7 @@ const Transcript = memo(function Transcript({
             following.current = false;
           }
         }}
-        className="rk-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-5 md:px-7 md:py-6"
+        className="rk-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4 md:px-6 md:py-5"
       >
         {olderCursor != null ? (
           <button
@@ -5534,7 +5636,7 @@ const Composer = memo(function Composer({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`relative z-30 m-0 min-w-0 border-0 px-3 pb-4 pt-3 md:px-6 md:pb-6 ${
+      className={`relative z-30 m-0 min-w-0 border-0 px-3 pb-3.5 pt-2.5 md:px-6 md:pb-5 ${
         draggingFiles ? "rounded-[14px] ring-2 ring-inset ring-ring" : ""
       }`}
     >
@@ -5714,7 +5816,7 @@ const Composer = memo(function Composer({
       ) : null}
       <div
         data-testid="composer-bar"
-        className="flex items-center gap-3.5 rounded-full border border-border bg-background py-[9px] pe-2.5 ps-3 transition-colors focus-within:border-ring"
+        className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pe-1.5 ps-1.5 shadow-sm transition-colors focus-within:border-ring"
       >
         <input
           ref={fileInputRef}
@@ -5730,7 +5832,7 @@ const Composer = memo(function Composer({
           aria-label={t`Attach file`}
           disabled={disabled}
           onClick={() => fileInputRef.current?.click()}
-          className="size-8 shrink-0 rounded-full border border-border bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="size-[30px] shrink-0 rounded-full bg-muted text-foreground/70 transition-colors hover:bg-accent hover:text-foreground"
         >
           <Plus size={16} strokeWidth={2} />
         </Button>
@@ -5845,20 +5947,19 @@ const Composer = memo(function Composer({
             autoComplete="off"
             dir="auto"
             rows={1}
-            className="max-h-32 min-h-[24px] min-w-[8rem] flex-1 resize-none overflow-y-auto bg-transparent py-0.5 text-[15.5px] leading-6 text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-40"
+            className="max-h-32 min-h-6 min-w-[8rem] flex-1 resize-none overflow-y-auto bg-transparent py-0.5 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground disabled:opacity-40"
           />
         </div>
         {onVoice && draft.trim().length === 0 ? (
           <Button
-            variant="outline"
             size="icon"
             aria-label={t`Voice`}
             title={t`Voice`}
             disabled={disabled}
             onClick={onVoice}
-            className="size-8 shrink-0 rounded-full text-foreground/75"
+            className="size-[30px] shrink-0 rounded-full bg-muted text-foreground/70 hover:bg-accent hover:text-foreground"
           >
-            <Mic size={16} strokeWidth={1.8} />
+            <AudioLines size={16} strokeWidth={1.9} />
           </Button>
         ) : null}
         {running ? (
@@ -5868,7 +5969,7 @@ const Composer = memo(function Composer({
               aria-label={t`Send`}
               disabled={sending || !canSend || disabled}
               onClick={send}
-              className="size-8 rounded-full bg-white text-black hover:bg-white/90 shadow-sm transition-transform active:scale-95"
+              className="size-[30px] rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <ArrowUp size={16} strokeWidth={2.2} />
             </Button>
@@ -5878,7 +5979,7 @@ const Composer = memo(function Composer({
               aria-label={t`Stop`}
               disabled={sending}
               onClick={() => void onStop()}
-              className="size-8 rounded-full border border-border bg-muted text-foreground/80 shadow-sm transition-colors hover:bg-accent hover:text-foreground"
+              className="size-[30px] rounded-full border-0 bg-muted text-foreground/70 transition-colors hover:bg-accent hover:text-foreground"
             >
               <Square size={11} strokeWidth={0} fill="currentColor" />
             </Button>
@@ -5889,7 +5990,7 @@ const Composer = memo(function Composer({
             aria-label={t`Send`}
             disabled={sending || !canSend || disabled}
             onClick={send}
-            className="size-8 shrink-0 rounded-full bg-white text-black hover:bg-white/90 shadow-sm transition-transform active:scale-95 disabled:bg-white/10 disabled:text-muted-foreground/30 disabled:shadow-none"
+            className="size-[30px] shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground/40 disabled:opacity-100"
           >
             <ArrowUp size={16} strokeWidth={2.2} />
           </Button>
@@ -6403,7 +6504,7 @@ const MessageView = memo(function MessageView({
             >
               <div
                 data-testid="message-bot-bubble"
-                className="max-w-full rounded-[20px] bg-muted px-[18px] py-3 text-[15.5px] leading-[1.5] text-foreground/90"
+                className="max-w-full rounded-[18px] bg-muted px-4 py-2.5 text-[15px] leading-snug text-foreground/90"
                 dir="auto"
               >
                 <ChatMarkdown streaming>{block.text}</ChatMarkdown>
@@ -6556,7 +6657,7 @@ const MessageView = memo(function MessageView({
               <div
                 data-testid="message-user-bubble"
                 data-quote-message-id={quoteMessageId}
-                className="max-w-full whitespace-pre-wrap wrap-anywhere rounded-[20px] bg-chat-user px-[18px] py-3 text-[15.5px] leading-[1.45] text-chat-user-foreground"
+                className="bot-accent-bubble max-w-full whitespace-pre-wrap wrap-anywhere rounded-[18px] px-4 py-2.5 text-[15px] leading-snug"
                 dir="auto"
               >
                 <LinkifiedText>{block.text}</LinkifiedText>
@@ -6572,7 +6673,7 @@ const MessageView = memo(function MessageView({
             >
               <div
                 data-testid="message-bot-bubble"
-                className="max-w-full rounded-[20px] bg-muted px-[18px] py-3 text-[15.5px] leading-[1.5] text-foreground/90"
+                className="max-w-full rounded-[18px] bg-muted px-4 py-2.5 text-[15px] leading-snug text-foreground/90"
                 dir="auto"
               >
                 <div data-quote-message-id={quoteMessageId}>
@@ -6599,7 +6700,7 @@ const MessageView = memo(function MessageView({
                 {block.lines.map((line) => (
                   <div key={line.k} className="flex items-baseline gap-2.5 text-[15px]">
                     <span className="text-success">✓</span>
-                    <span className="font-semibold text-white">{line.k}</span>
+                    <span className="font-semibold text-foreground">{line.k}</span>
                     <span className="text-muted-foreground">→</span>
                     <span>{line.v}</span>
                   </div>

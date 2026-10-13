@@ -54,7 +54,7 @@ export function ChoiceCard({
 
   return (
     <div className="flex justify-start">
-      <div className="relative w-[420px] max-w-full rounded-[20px] border border-border bg-card px-[18px] py-[14px]">
+      <div className="relative w-[400px] max-w-full rounded-[18px] border border-border bg-card px-4 py-3">
         {!block.answerId ? (
           <Button
             variant="ghost"
@@ -67,13 +67,13 @@ export function ChoiceCard({
             <X size={16} strokeWidth={1.8} />
           </Button>
         ) : null}
-        <div className="pe-8 text-[15.5px] text-foreground/90">
+        <div className="pe-8 text-[15px] text-foreground/90">
           <OnboardingFocusQuestion question={block.question} />
         </div>
         {block.subtitle ? (
           <div className="mt-0.5 text-[13px] text-foreground/75">{block.subtitle}</div>
         ) : null}
-        <div className="mt-3 space-y-2.5">
+        <div className="mt-2.5 space-y-1.5">
           {block.options
             .filter((option) => !block.answerId || option.id === block.answerId)
             .map((option) => (
@@ -82,13 +82,13 @@ export function ChoiceCard({
                 type="button"
                 disabled={Boolean(block.answerId) || pending}
                 onClick={() => void choose(option.id)}
-                className={`flex w-full items-start gap-3 rounded-xl px-3.5 py-3.5 text-start text-foreground disabled:opacity-60 ${block.answerId ? "bg-accent" : "bg-muted hover:bg-accent"}`}
+                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-foreground disabled:opacity-60 ${block.answerId ? "bg-accent" : "bg-muted hover:bg-accent"}`}
               >
-                <span className="mt-0.5 grid h-[24px] w-[24px] shrink-0 place-items-center rounded-[7px] bg-background text-[12.5px] font-medium text-foreground/75">
+                <span className="grid size-6 shrink-0 place-items-center rounded-md bg-background text-xs font-medium text-foreground/75">
                   {option.letter}
                 </span>
                 <span
-                  className={`flex-1 text-[15px] leading-[1.35] ${block.answerId ? "text-foreground/75" : "text-foreground"}`}
+                  className={`flex-1 text-[14px] leading-snug ${block.answerId ? "text-foreground/75" : "text-foreground"}`}
                 >
                   <OnboardingFocusOptionLabel
                     id={option.id}
