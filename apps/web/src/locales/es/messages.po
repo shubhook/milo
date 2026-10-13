@@ -868,7 +868,6 @@ msgid "Close messaging settings"
 msgstr "Cerrar configuración de mensajería"
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/SettingsOverlay.tsx
 msgid "Close model settings"
 msgstr "Cerrar configuración de modelos"
 
@@ -883,6 +882,10 @@ msgstr "Cerrar panel"
 #: src/components/ArtifactFileCard.tsx
 msgid "Close preview"
 msgstr "Cerrar vista previa"
+
+#: src/pages/SettingsOverlay.tsx
+msgid "Close usage settings"
+msgstr ""
 
 #: src/pages/SettingsOverlay.tsx
 msgid "Close user settings"
@@ -2561,7 +2564,6 @@ msgstr "Modelo actualizado."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "Modelos"
 
@@ -4058,7 +4060,6 @@ msgstr "Actualizando…"
 msgid "Upload"
 msgstr "Subir"
 
-#: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"

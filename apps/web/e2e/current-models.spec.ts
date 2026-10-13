@@ -4,7 +4,7 @@ import { captureScreenshot, completeOnboarding, openUserSettings, signup } from 
 test("current subscription models appear in the picker", async ({ page }, testInfo) => {
   await signup(page, `current-models-${Date.now()}@rakazo.test`, "password12", "Model Picker");
   await completeOnboarding(page);
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   for (const [provider, model, screenshot] of [
     ["Anthropic", "Claude Sonnet 5.5", "model-sonnet-55"],
     ["OpenAI Codex", "GPT-6.1 Sol", "model-sol-61"],

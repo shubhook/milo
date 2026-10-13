@@ -40,11 +40,12 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
     .poll(() => page.evaluate(() => window.localStorage.getItem("rakazo.responseStreaming")))
     .toBe("on");
 
-  await settings.getByTestId("settings-nav-models").click();
-  await expect(settings).toHaveAttribute("data-settings-section", "models");
-  await expect(settings.getByRole("heading", { name: "Models", exact: true })).toBeVisible();
+  await settings.getByTestId("settings-nav-usage").click();
+  await expect(settings).toHaveAttribute("data-settings-section", "usage");
+  await expect(settings.getByTestId("settings-nav-models")).toHaveCount(0);
+  await expect(settings.getByTestId("usage-settings")).toBeVisible();
   await expect(settings.getByTestId("model-settings")).toBeVisible();
-  await captureScreenshot(page, testInfo, "settings-shell-models");
+  await captureScreenshot(page, testInfo, "settings-shell-usage-models");
 
   await settings.getByTestId("settings-nav-memory").click();
   await expect(settings).toHaveAttribute("data-settings-section", "memory");

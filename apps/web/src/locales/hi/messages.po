@@ -868,7 +868,6 @@ msgid "Close messaging settings"
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/SettingsOverlay.tsx
 msgid "Close model settings"
 msgstr "मॉडल सेटिंग्स बंद करें"
 
@@ -883,6 +882,10 @@ msgstr "पैनल बंद करें"
 #: src/components/ArtifactFileCard.tsx
 msgid "Close preview"
 msgstr "प्रीव्यू बंद करें"
+
+#: src/pages/SettingsOverlay.tsx
+msgid "Close usage settings"
+msgstr ""
 
 #: src/pages/SettingsOverlay.tsx
 msgid "Close user settings"
@@ -2561,7 +2564,6 @@ msgstr "मॉडल अपडेट किया गया।"
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "मॉडल्स"
 
@@ -4058,7 +4060,6 @@ msgstr "अपडेट हो रहा है…"
 msgid "Upload"
 msgstr "अपलोड"
 
-#: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
