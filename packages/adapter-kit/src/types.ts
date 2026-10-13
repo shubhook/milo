@@ -1,4 +1,4 @@
-import type { ConnectionCatalogItem, SandboxKind } from "@milo/contracts";
+import type { ConnectionCatalogItem, ModelUsageWindow, SandboxKind } from "@milo/contracts";
 
 export interface AdapterContext {
   operationId: string;
@@ -499,6 +499,8 @@ export type AgentRuntimeEvent =
       provider: string;
       model: string;
     }
+  /** The plan usage limits the provider reported for this run's model. */
+  | { type: "limits"; provider: string; windows: ModelUsageWindow[] }
   | { type: "checkpoint"; blob: string }
   | {
       type: "subagent";

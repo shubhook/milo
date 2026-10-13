@@ -68,7 +68,7 @@ async function collect(runtime: AgentRuntime, input: AgentRunRequest) {
 }
 
 describe("ClaudeCodeAgentRuntime", () => {
-  it("streams text, usage, and the final answer", async () => {
+  it("streams text, usage, limits, and the final answer", async () => {
     const seen: { args?: string[]; env?: NodeJS.ProcessEnv } = {};
     const runtime = new ClaudeCodeAgentRuntime({
       spawn: fakeCli("text", seen),
@@ -89,6 +89,14 @@ describe("ClaudeCodeAgentRuntime", () => {
       cacheWriteTokens: 2,
       provider: "claude-code",
       model: "claude-test-1",
+    });
+    expect(events).toContainEqual({
+      type: "limits",
+      provider: "claude-code",
+      windows: [
+        { windowMinutes: 300, usedPercent: 25, resetsAt: "2026-10-13T13:10:00.000Z" },
+        { windowMinutes: 10_080, usedPercent: 50, resetsAt: "2026-10-20T05:00:00.000Z" },
+      ],
     });
     expect(events.at(-1)).toEqual({ type: "done", text: "Hello there" });
     expect(seen.args).toEqual(expect.arrayContaining(["--model", "sonnet", "--effort", "high"]));

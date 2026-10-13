@@ -73,3 +73,85 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await expect(page.getByTestId("usage-settings")).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-shell-usage");
 });
+
+test("usage lists the agent's models with their plan limits", async ({ page }, testInfo) => {
+  const stamp = Date.now();
+  await page.route("**/rpc/bootstrap", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.json.me = {
+      ...body.json.me,
+      modelManaged: true,
+      defaultProvider: "claude-code",
+      defaultModel: "sonnet",
+    };
+    await route.fulfill({ response, json: body });
+  });
+  const hour = 60 * 60 * 1000;
+  await page.route("**/rpc/agent/models", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        json: [
+          {
+            provider: "claude-code",
+            label: "Claude Code",
+            model: "sonnet",
+            inUse: true,
+            limits: [
+              {
+                windowMinutes: 300,
+                usedPercent: 47,
+                resetsAt: new Date(Date.now() + 2 * hour).toISOString(),
+              },
+              {
+                windowMinutes: 10_080,
+                usedPercent: 6,
+                resetsAt: new Date(Date.now() + 96 * hour).toISOString(),
+              },
+            ],
+            limitsUpdatedAt: new Date().toISOString(),
+          },
+          {
+            provider: "chatgpt",
+            label: "ChatGPT",
+            model: "GPT-6 Sol",
+            inUse: false,
+            limits: [],
+            limitsUpdatedAt: null,
+          },
+          {
+            provider: "codex",
+            label: "Codex",
+            model: "ChatGPT Plus",
+            inUse: false,
+            limits: [
+              {
+                windowMinutes: 43_200,
+                usedPercent: 12,
+                resetsAt: new Date(Date.now() + 240 * hour).toISOString(),
+              },
+            ],
+            limitsUpdatedAt: new Date().toISOString(),
+          },
+        ],
+      }),
+    }),
+  );
+  await signup(page, `agent-models-${stamp}@rakazo.test`, "password12", `Agent models ${stamp}`);
+  await completeOnboarding(page);
+
+  const settings = await openUserSettings(page, "usage");
+  const claude = settings.getByTestId("agent-model-claude-code");
+  await expect(claude.getByRole("heading", { name: "Claude Code" })).toBeVisible();
+  await expect(claude.getByText("In use", { exact: true })).toBeVisible();
+  await expect(claude.getByRole("progressbar", { name: "5-hour" })).toBeVisible();
+  await expect(claude.getByText("47% used")).toBeVisible();
+  await expect(claude.getByRole("progressbar", { name: "Weekly" })).toBeVisible();
+  const chatgpt = settings.getByTestId("agent-model-chatgpt");
+  await expect(chatgpt.getByText("Limits show after the next run.")).toBeVisible();
+  const codex = settings.getByTestId("agent-model-codex");
+  await expect(codex.getByRole("progressbar", { name: "30-day" })).toBeVisible();
+  await expect(settings.getByTestId("model-settings")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "settings-agent-models");
+});

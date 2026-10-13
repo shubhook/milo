@@ -42,8 +42,11 @@ import {
   CHATGPT_OAUTH_PROVIDER,
   CHATGPT_PLAN_DEFAULT_MODEL,
   CHATGPT_PLAN_PROVIDER,
+  CLAUDE_CODE_DEFAULT_MODEL,
   CLAUDE_CODE_PROVIDER,
+  CODEX_CLI_PROVIDER,
   CodexCatalogCache,
+  type CodexUsage,
   ComputerBusyError,
   cancelComputerRunWork,
   checkpointAndRecordComputerWorkspace,
@@ -88,6 +91,7 @@ import {
   probeOpenAiCompatibleModels,
   provisionComputer,
   queueComputerUpdate,
+  readCodexUsage,
   readStoredModelAuth,
   releaseComputerExecutionLease,
   replaceComputer,
@@ -119,6 +123,7 @@ import {
 import type { Auth } from "@milo/auth";
 import type {
   Actor,
+  AgentModel,
   Bot,
   BotSecretMetadata,
   ComputerReleaseReason,
@@ -544,6 +549,7 @@ export interface RouterDeps {
   ) => void;
   /** Reads the agent CLI's install and sign-in state; defaults to the real CLI. */
   probeClaudeCode?: () => Promise<ClaudeCodeStatus>;
+  readCodexUsage?: () => Promise<CodexUsage | null>;
   integrationSettings?: IntegrationProviderSettings;
   composio?: ComposioProvider;
   mcpOAuth?: McpOAuthBroker;
@@ -4064,6 +4070,7 @@ export function createRouter(deps: RouterDeps) {
           chatgpt: Boolean(chatgpt),
         };
       }),
+      models: authed.agent.models.handler(({ context }) => agentModels(deps, context.actor)),
     },
     integrationSetup: {
       get: authed.integrationSetup.get.handler(async ({ context }) => {
@@ -5773,6 +5780,54 @@ async function meDto(deps: RouterDeps, actor: Actor): Promise<Me> {
     sandboxProvider: deps.env.sandboxProvider,
     avatarStyle: user.avatarStyle === "organic" ? "organic" : "robot",
   };
+}
+
+/**
+ * Claude Code runs bots until the person signs in with ChatGPT; then their plan does.
+ * Each entry carries the plan limits its latest run reported. The Codex CLI on the
+ * server's machine reports its plan live.
+ */
+async function agentModels(deps: RouterDeps, actor: Actor): Promise<AgentModel[]> {
+  const fallback = runtimeModel(deps.env.agentRuntime);
+  if (!fallback) return [];
+  const [managed, chatgpt, limits, codex] = await Promise.all([
+    selectRuntimeModel(deps.prisma, actor, fallback),
+    findModelCredential(deps.prisma, actor, CHATGPT_PLAN_PROVIDER),
+    deps.prisma.modelUsageLimit.findMany({ where: { userId: actor.userId } }),
+    // The Codex CLI belongs to whoever runs the server, so only the owner sees its plan.
+    actor.isDeploymentOwner ? (deps.readCodexUsage ?? readCodexUsage)() : null,
+  ]);
+  const entry = (provider: string, label: string, model: string): AgentModel => {
+    const reported = limits.find((row) => row.provider === provider);
+    return {
+      provider,
+      label,
+      model,
+      inUse: managed?.provider === provider,
+      limits: reported ? (reported.windows as AgentModel["limits"]) : [],
+      limitsUpdatedAt: reported?.updatedAt.toISOString() ?? null,
+    };
+  };
+  const models = [entry(CLAUDE_CODE_PROVIDER, "Claude Code", CLAUDE_CODE_DEFAULT_MODEL)];
+  if (chatgpt) {
+    const id = usableModelId(chatgpt.defaultModel) ?? CHATGPT_PLAN_DEFAULT_MODEL;
+    const label = listPiCatalog().find(
+      (item) => item.provider === CHATGPT_PLAN_PROVIDER && item.id === id,
+    )?.label;
+    models.push(entry(CHATGPT_PLAN_PROVIDER, "ChatGPT", label ?? id));
+  }
+  if (codex?.windows.length) {
+    const plan = codex.plan ? codex.plan[0]!.toUpperCase() + codex.plan.slice(1) : null;
+    models.push({
+      provider: CODEX_CLI_PROVIDER,
+      label: "Codex",
+      model: plan ? `ChatGPT ${plan}` : "ChatGPT",
+      inUse: false,
+      limits: codex.windows,
+      limitsUpdatedAt: new Date().toISOString(),
+    });
+  }
+  return models;
 }
 
 async function modelSetup(deps: RouterDeps, actor: Actor) {

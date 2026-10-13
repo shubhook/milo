@@ -36,6 +36,7 @@ import { isToolPauseResult } from "./approval-effect.js";
 import { connectionIdArgument, credentialArgument } from "./bot-secrets.js";
 import { builtinAgentTools, DELEGATION_TOOL_NAMES } from "./builtin-tools.js";
 import { DEFAULT_OPENROUTER_MODEL_ID } from "./deployment-model.js";
+import { codexUsageLimits } from "./model-usage-limits.js";
 import {
   normalizeOpenAiToolParameters,
   openAiToolParametersNeedNormalization,
@@ -283,7 +284,16 @@ export class PiAgentRuntime implements AgentRuntime {
               models,
               m,
               ctx,
-              options,
+              {
+                ...options,
+                onResponse: (response, requestModel) => {
+                  const windows = codexUsageLimits(response.headers);
+                  if (windows.length) {
+                    queue.push({ type: "limits", provider: request.model.provider, windows });
+                  }
+                  return options?.onResponse?.(response, requestModel);
+                },
+              },
               request.model.maxTokens,
               () => selectedModel.credentials?.accessToken ?? apiKey,
             ),

@@ -137,7 +137,9 @@ describe("model setup gate", () => {
     deploymentModelCredentialCipher?: string;
     isDeploymentOwner?: boolean;
     probeClaudeCode?: RouterDeps["probeClaudeCode"];
+    readCodexUsage?: RouterDeps["readCodexUsage"];
     chatgpt?: boolean;
+    usageLimits?: Array<{ provider: string; windows: unknown; updatedAt: Date }>;
   }) {
     const chatgpt = options.chatgpt
       ? [
@@ -171,6 +173,9 @@ describe("model setup gate", () => {
             chatgpt.filter((credential) => credential.provider === where.provider),
           ),
       },
+      modelUsageLimit: {
+        findMany: vi.fn().mockResolvedValue(options.usageLimits ?? []),
+      },
       deploymentSettings: {
         findUnique: vi
           .fn()
@@ -194,6 +199,7 @@ describe("model setup gate", () => {
       },
       dataDir: "/tmp/rakazo-router-test",
       probeClaudeCode: options.probeClaudeCode,
+      readCodexUsage: options.readCodexUsage ?? (async () => null),
     } as unknown as RouterDeps;
     const actor = {
       spaceId: "workspace-1",
@@ -297,6 +303,70 @@ describe("model setup gate", () => {
     });
     const status = await call(handler, actor, "agent/status", null);
     await expect(status.json()).resolves.toMatchObject({ json: { chatgpt: true } });
+  });
+
+  it("lists the agent's models with the limits their runs reported", async () => {
+    const windows = [
+      { windowMinutes: 300, usedPercent: 47, resetsAt: "2026-10-13T13:10:00.000Z" },
+      { windowMinutes: 10_080, usedPercent: 6, resetsAt: "2026-10-20T05:00:00.000Z" },
+    ];
+    const updatedAt = new Date("2026-10-13T12:00:00.000Z");
+    const { actor, handler } = modelGateDeps({
+      agentRuntime: "claude-code",
+      chatgpt: true,
+      usageLimits: [{ provider: "claude-code", windows, updatedAt }],
+    });
+
+    const response = await call(handler, actor, "agent/models", null);
+
+    await expect(response.json()).resolves.toEqual({
+      json: [
+        {
+          provider: "claude-code",
+          label: "Claude Code",
+          model: "sonnet",
+          inUse: false,
+          limits: windows,
+          limitsUpdatedAt: updatedAt.toISOString(),
+        },
+        expect.objectContaining({
+          provider: "chatgpt",
+          label: "ChatGPT",
+          inUse: true,
+          limits: [],
+          limitsUpdatedAt: null,
+        }),
+      ],
+    });
+  });
+
+  it("shows the server's Codex plan to its owner only", async () => {
+    const windows = [
+      { windowMinutes: 43_200, usedPercent: 3, resetsAt: "2026-11-12T12:00:00.000Z" },
+    ];
+    const readCodexUsage = vi.fn().mockResolvedValue({ plan: "go", windows });
+    for (const isDeploymentOwner of [true, false]) {
+      const { actor, handler } = modelGateDeps({
+        agentRuntime: "claude-code",
+        isDeploymentOwner,
+        readCodexUsage,
+      });
+      const response = await call(handler, actor, "agent/models", null);
+      const { json } = (await response.json()) as { json: Array<Record<string, unknown>> };
+      const codex = json.find((model) => model.provider === "codex");
+      if (isDeploymentOwner) {
+        expect(codex).toMatchObject({ label: "Codex", model: "ChatGPT Go", limits: windows });
+      } else {
+        expect(codex).toBeUndefined();
+      }
+    }
+    expect(readCodexUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it("lists no agent models when people connect their own", async () => {
+    const { actor, handler } = modelGateDeps({ agentRuntime: "pi" });
+    const response = await call(handler, actor, "agent/models", null);
+    await expect(response.json()).resolves.toEqual({ json: [] });
   });
 
   it("skips the agent CLI check off its runtime and for people who cannot fix it", async () => {

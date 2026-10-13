@@ -28,6 +28,7 @@ import {
   spawnClaudeCode,
 } from "./claude-code-cli.js";
 import { type ClaudeCodeToolServer, startClaudeCodeToolServer } from "./claude-code-tool-server.js";
+import { claudeCodeUsageLimits } from "./model-usage-limits.js";
 import {
   createQueue,
   describeToolActivity,
@@ -277,6 +278,12 @@ export class ClaudeCodeAgentRuntime implements AgentRuntime {
           }
           state.streamed += text;
           queue.push({ type: "text", text });
+          continue;
+        }
+        if (message.type === "rate_limit_event") {
+          const windows = claudeCodeUsageLimits(message);
+          if (windows.length)
+            queue.push({ type: "limits", provider: CLAUDE_CODE_PROVIDER, windows });
           continue;
         }
         if (message.type !== "result") continue;

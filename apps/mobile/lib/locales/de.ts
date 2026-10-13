@@ -656,4 +656,13 @@ export const DE_MESSAGES: Record<string, string> = {
   Transcript: "Transkript",
   Unmute: "Stummschaltung aufheben",
   "Voice chat": "Sprachchat",
+  // app/agent-models.tsx
+  "Could not load models.": "Modelle konnten nicht geladen werden.",
+  "In use": "Aktiv",
+  "Limits show after the next run.": "Limits erscheinen nach dem nächsten Lauf.",
+  "{used}% used": "{used} % genutzt",
+  "Resets {time}": "Setzt zurück {time}",
+  Weekly: "Wöchentlich",
+  "{days}-day": "{days} Tage",
+  "{hours}-hour": "{hours} Stunden",
 };

@@ -95,7 +95,7 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await captureScreenshot(page, testInfo, "38-protected-deep-link-sign-in");
 
   await page.getByPlaceholder("Your email address").fill(email);
-  await page.getByPlaceholder("Password").fill("wrong-password12");
+  await page.getByLabel("Password", { exact: true }).fill("wrong-password12");
   await page.getByRole("button", { name: "Continue with email" }).click();
   await expect(
     page
@@ -105,7 +105,7 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await expect(page).toHaveURL(/\/sign-in$/);
   await captureScreenshot(page, testInfo, "39-invalid-credentials");
 
-  await page.getByPlaceholder("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Continue with email" }).click();
   await page.waitForURL((url) => url.pathname === protectedBotPath, {
     timeout: 20_000,
