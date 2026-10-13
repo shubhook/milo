@@ -191,6 +191,34 @@ test("chat composer controls are vertically centered", async ({ page }) => {
   );
 
   expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(1);
+
+  const alignment = await page.evaluate(() => {
+    const box = (element: Element | null) => {
+      if (!element) return null;
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom };
+    };
+    return {
+      avatar: box(document.querySelector("[data-testid='user-menu-trigger']")),
+      integrations: box(
+        [...document.querySelectorAll("aside button")].find(
+          (button) => button.textContent?.trim() === "Integrations",
+        ) ?? null,
+      ),
+      composer: box(document.querySelector("[data-testid='composer-bar']")),
+    };
+  });
+  expect(alignment.avatar).toBeTruthy();
+  expect(alignment.integrations).toBeTruthy();
+  expect(alignment.composer).toBeTruthy();
+  if (alignment.avatar && alignment.integrations && alignment.composer) {
+    expect(Math.abs(alignment.avatar.top - alignment.composer.top)).toBeLessThanOrEqual(1);
+    expect(Math.abs(alignment.avatar.bottom - alignment.composer.bottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(alignment.integrations.top - alignment.composer.top)).toBeLessThanOrEqual(1);
+    expect(Math.abs(alignment.integrations.bottom - alignment.composer.bottom)).toBeLessThanOrEqual(
+      1,
+    );
+  }
 });
 
 test("group chats share every context-menu action", async ({ page }, testInfo) => {

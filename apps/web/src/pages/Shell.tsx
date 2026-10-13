@@ -3436,13 +3436,13 @@ export function ShellPage() {
             </div>
           ) : null}
         </div>
-        <div className="flex items-center gap-2 px-3 pb-3 pt-2.5">
+        <div className="flex items-center gap-2 px-3 pb-3.5 pt-2.5 md:pb-5">
           <Popover open={menuOpen} onOpenChange={setMenuOpen}>
             <PopoverTrigger
               data-testid="user-menu-trigger"
               aria-label={userName}
               title={userName}
-              className="grid size-[30px] shrink-0 place-items-center rounded-full bg-primary text-[12px] font-semibold text-primary-foreground"
+              className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-[12px] font-semibold text-primary-foreground"
             >
               {initials}
             </PopoverTrigger>
@@ -3511,7 +3511,7 @@ export function ShellPage() {
           <button
             type="button"
             onClick={() => setPluginsOpen(true)}
-            className="flex h-[30px] min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-card text-[13.5px] font-medium text-foreground hover:bg-accent"
+            className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-card text-[13.5px] font-medium text-foreground hover:bg-accent"
           >
             <LayoutGrid size={14} strokeWidth={1.8} aria-hidden="true" />
             <Trans>Integrations</Trans>
