@@ -34,7 +34,56 @@ https://github.com/user-attachments/assets/dccdeddb-2134-4a56-8eed-b2e591736b1c
 - Docker, E2B, Daytona, CreateOS, and Box
 - Composio, Pipedream Connect, MCP, and OpenAPI integrations
 
-## Quick start (published images)
+## Quick start
+
+This runs the whole stack from source on your machine: web app, API, worker, sandbox supervisor,
+and Postgres.
+
+You need:
+
+- Node.js 22.22.2+ (22.x), 24.x, or 26+. Node 23 and 25 are not supported.
+- pnpm 9 (`corepack enable` picks up the pinned version)
+- Docker Desktop, OrbStack, or Docker Engine, running
+- The [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), signed in with
+  `claude auth login`. Bots run on it by default. You can skip it and sign in with ChatGPT or
+  connect a model instead.
+
+```bash
+git clone https://github.com/shubhook/rakazo.git milo
+cd milo
+pnpm install
+pnpm dev:setup      # writes .env with fresh secrets, starts Postgres, runs migrations
+pnpm sandbox:build  # once; builds the bot computer image
+pnpm dev
+```
+
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173), create an account, and create your first bot.
+
+| Service | Address |
+| --- | --- |
+| Web app | http://127.0.0.1:5173 |
+| API | http://127.0.0.1:3100 (`/health` returns `{"ok":true}`) |
+| Sandbox supervisor | http://127.0.0.1:7091 |
+| Postgres | 127.0.0.1:5433 |
+
+To open the desktop app against this stack, run `pnpm --filter @milo/desktop dev` in a second
+terminal and choose **Existing instance** with `http://127.0.0.1:5173`.
+
+Stop the stack with Ctrl+C. Postgres keeps running in Docker; `pnpm compose:down` stops it, and
+`pnpm compose:reset` deletes its data.
+
+### Troubleshooting
+
+- `P1000: Authentication failed` during migrations means `.env` doesn't match the password the
+  Postgres volume was created with. Every checkout on a machine, including git worktrees, shares
+  one volume (`compose_pgdata`), so copy the `.env` from the checkout that created it. If the data
+  is disposable, run `pnpm compose:reset` and then `pnpm dev:setup` again.
+- `Postgres data already exists but .env is missing` is the same problem from the other side.
+  Restore that `.env` before running setup.
+- If port 5433 is taken, change `POSTGRES_HOST_PORT` and the port in `DATABASE_URL` in `.env`.
+- `Docker is not running` means setup couldn't reach the Docker daemon. Start Docker and rerun.
+
+## Install from published images
 
 You need Docker Engine, the Compose plugin, curl, and OpenSSL. No clone or Node install.
 
@@ -78,20 +127,8 @@ the `https://` address.
 
 ## Local development (source checkout)
 
-You need Node.js 22.22.2 or newer in the 22.x line, Node.js 24.x, or Node.js 26+;
-pnpm 9; and Docker. Node.js 23.x and 25.x are not supported.
-
-```bash
-git clone https://github.com/elie222/rakazo.git
-cd rakazo
-pnpm install
-pnpm dev:setup
-pnpm dev
-```
-
-`pnpm dev:setup` creates `.env` with fresh secrets (an existing `.env` is kept), starts Postgres,
-and applies migrations. Run `pnpm sandbox:build` once before bots use their computers. To set up
-by hand instead, run `cp .env.example .env`.
+[Quick start](#quick-start) covers prerequisites and the one-command setup. To set up by hand
+instead, run `cp .env.example .env` and fill it in as below.
 
 Set `POSTGRES_PASSWORD` (for example `openssl rand -hex 16`), then put the same value in
 `DATABASE_URL`. Set `BETTER_AUTH_SECRET`, `ENCRYPTION_KEY`, and `SCREEN_PROXY_SECRET` to
