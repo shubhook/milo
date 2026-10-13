@@ -1,19 +1,16 @@
-# Mobile emulator smoke test
+# Mobile smoke test
 
-This opt-in [Maestro](https://maestro.mobile.dev/) flow exercises sign-in, bot creation,
-thread messaging, and computer takeover/release on a real Android emulator or iOS simulator. It
-expects a running Milo stack and deliberately stays out of ordinary pull-request CI.
+A [Maestro](https://maestro.mobile.dev/) flow that signs in, creates a bot, sends a message, and
+takes over and releases the bot's computer on an Android emulator or iOS simulator. It is opt-in
+and does not run in pull-request CI.
 
-## Prerequisites
+## Setup
 
-1. Install the Maestro CLI and start an Android emulator or iOS simulator.
-2. Start Milo's database, API, worker, and sandbox supervisor. The computer portion requires a
-   working sandbox provider (the normal local Docker provider is sufficient).
-3. Create a disposable test account through the mobile or web sign-up screen. Never use a
-   production account or put credentials in this repository.
-4. Build/install the native app with an API URL that the emulator can reach. For the standard local
-   ports, use `http://10.0.2.2:3100` on the Android emulator and `http://127.0.0.1:3100` on the iOS
-   simulator. For example:
+1. Install the Maestro CLI and start an emulator or simulator.
+2. Run the Milo stack (`pnpm dev`) with a working sandbox provider. Local Docker is enough.
+3. Sign up a throwaway test account. Never use a real account.
+4. Install the app pointed at your API: `http://10.0.2.2:3100` on Android, `http://127.0.0.1:3100`
+   on iOS.
 
    ```sh
    EXPO_PUBLIC_API_URL=http://10.0.2.2:3100 pnpm --filter @milo/mobile android
@@ -21,21 +18,20 @@ expects a running Milo stack and deliberately stays out of ordinary pull-request
 
 ## Run
 
-Pass all fixture values at invocation time so credentials never land in source control:
+Pass credentials on the command line so they never land in the repo:
 
 ```sh
 pnpm --filter @milo/mobile test:e2e -- \
   -e RAKAZO_E2E_EMAIL=mobile-smoke@example.test \
-  -e RAKAZO_E2E_PASSWORD='replace-with-the-disposable-password' \
+  -e RAKAZO_E2E_PASSWORD='replace-with-the-test-password' \
   -e RAKAZO_E2E_BOT_NAME=MaestroSmoke-001 \
   -e RAKAZO_E2E_MESSAGE=mobile-smoke-message
 ```
 
-Use a new bot name for each run if the backing database is persistent. `clearState` resets the app's
-local session and endpoint data; it does not delete server-side bots.
+Use a new bot name each run if the database persists. The flow clears the app's local state, not
+server-side bots.
 
-## Screenshot catalog
+## Screenshots
 
-Run **Actions → mobile Android screenshots → Run workflow** to build the app, seed an isolated fake
-workspace, capture light and dark Android emulator views, upload diagnostics for seven days, and publish a
-persistent gallery beside the Playwright reports.
+**Actions → mobile Android screenshots → Run workflow** captures light and dark screens from a
+seeded fake workspace and publishes them next to the Playwright reports.
