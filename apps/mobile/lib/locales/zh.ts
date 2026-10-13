@@ -638,4 +638,13 @@ export const ZH_MESSAGES: Record<string, string> = {
   "Voice chat": "语音通话",
   "Show transcript": "显示字幕",
   "Hide transcript": "隐藏字幕",
+  // app/agent-models.tsx
+  "Could not load models.": "无法加载模型。",
+  "In use": "使用中",
+  "Limits show after the next run.": "下次运行后显示限额。",
+  "{used}% used": "已用 {used}%",
+  "Resets {time}": "{time} 重置",
+  Weekly: "每周",
+  "{days}-day": "{days} 天",
+  "{hours}-hour": "{hours} 小时",
 };

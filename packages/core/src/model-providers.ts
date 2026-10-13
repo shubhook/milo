@@ -1,4 +1,4 @@
-import type { ModelCatalogEntry } from "@milo/contracts";
+import type { ModelCatalogEntry, ModelUsageWindow } from "@milo/contracts";
 import { matchesSearchQuery } from "./search.js";
 
 /** Effort choices an OpenAI-compatible endpoint stores when reasoning is enabled. */
@@ -122,4 +122,13 @@ export function filterModelCatalog(
   return entries.filter((entry) =>
     matchesSearchQuery(query, entry.label, entry.id, entry.providerName ?? entry.provider),
   );
+}
+
+/** A window whose reset time has passed has started over, so it reads as unused. */
+export function currentUsageWindow(
+  window: ModelUsageWindow,
+  now: number = Date.now(),
+): ModelUsageWindow {
+  if (!window.resetsAt || Date.parse(window.resetsAt) > now) return window;
+  return { ...window, usedPercent: 0, resetsAt: null };
 }

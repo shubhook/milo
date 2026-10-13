@@ -658,4 +658,13 @@ export const RU_MESSAGES: Record<string, string> = {
   "Voice chat": "Голосовой чат",
   "Show transcript": "Показать расшифровку",
   "Hide transcript": "Скрыть расшифровку",
+  // app/agent-models.tsx
+  "Could not load models.": "Не удалось загрузить модели.",
+  "In use": "Используется",
+  "Limits show after the next run.": "Лимиты появятся после следующего запуска.",
+  "{used}% used": "Использовано {used}%",
+  "Resets {time}": "Сброс {time}",
+  Weekly: "Неделя",
+  "{days}-day": "{days} дн.",
+  "{hours}-hour": "{hours} ч",
 };

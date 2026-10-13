@@ -45,6 +45,7 @@ model User {
   createdSpaces               Space[]                      @relation("SpaceCreator")
   botSecrets BotSecret[]
   agentSecrets               AgentSecret[]
+  modelUsageLimits           ModelUsageLimit[]
 
   @@unique([email])
   @@map("user")
@@ -999,6 +1000,19 @@ model Artifact {
   @@index([rootArtifactId])
   // artifacts_family_version_key is raw SQL: Prisma cannot express COALESCE indexes.
   @@map("artifacts")
+}
+
+/// The latest plan usage limits an agent reported on one of the person's runs.
+/// `windows` holds `{ windowMinutes, usedPercent, resetsAt }` entries; a newer report replaces it.
+model ModelUsageLimit {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider  String
+  windows   Json
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, provider])
+  @@map("model_usage_limits")
 }
 
 model UsageRecord {

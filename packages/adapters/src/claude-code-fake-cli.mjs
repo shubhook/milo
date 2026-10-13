@@ -69,6 +69,16 @@ const first = await nextUser();
 if (scenario === "text") {
   text("Hello ");
   text("there");
+  emit({
+    type: "rate_limit_event",
+    rate_limit_info: {
+      status: "allowed",
+      unifiedWindows: {
+        five_hour: { utilization: 0.25, resetsAt: 1_791_897_000 },
+        seven_day: { utilization: 0.5, resetsAt: 1_792_472_400 },
+      },
+    },
+  });
   result();
 } else if (scenario === "echo-prompt") {
   text(userText(first));

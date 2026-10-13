@@ -97,6 +97,10 @@ msgstr "Экран {0}"
 msgid "{botName}’s computer"
 msgstr "Компьютер {botName}"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "{days}-day"
+msgstr ""
+
 #: src/lib/relative-time.ts
 #: src/pages/ActivityList.tsx
 msgid "{days}d ago"
@@ -104,6 +108,10 @@ msgstr "{days} дн. назад"
 
 #: src/components/ToolActivityDisclosure.tsx
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
+msgstr ""
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "{hours}-hour"
 msgstr ""
 
 #: src/lib/relative-time.ts
@@ -154,6 +162,10 @@ msgstr "{title}, {label}"
 #: src/pages/PluginsOverlay.tsx
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# инструмент} few {# инструмента} many {# инструментов} other {# инструмента}}"
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "{used}% used"
+msgstr ""
 
 #: src/pages/Shell.tsx
 msgid "{workingBotName} is working"
@@ -1294,6 +1306,10 @@ msgstr "Не удалось загрузить серверы MCP."
 msgid "Could not load model settings"
 msgstr "Не удалось загрузить настройки модели."
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "Could not load models."
+msgstr ""
+
 #: src/pages/RoutineRunHistory.tsx
 msgid "Could not load run history"
 msgstr "Не удалось загрузить историю запусков"
@@ -2145,6 +2161,10 @@ msgstr "Область загрузки изображения"
 msgid "Import OpenAPI JSON"
 msgstr "Импортировать OpenAPI JSON"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "In use"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Inbox & email"
 msgstr ""
@@ -2266,6 +2286,10 @@ msgstr "Выйти"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Light"
 msgstr "Светлая"
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "Limits show after the next run."
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Linear issue"
@@ -3269,6 +3293,10 @@ msgstr "Сбросить пароль"
 msgid "Reset your password"
 msgstr "Сбросить пароль"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "Resets {resetsAt}"
+msgstr ""
+
 #: src/components/ComputerMaintenanceActions.tsx
 msgid "Resetting…"
 msgstr "Сброс…"
@@ -4155,6 +4183,10 @@ msgstr ""
 #: src/pages/RoutineSchedule.tsx
 msgid "Weekdays"
 msgstr "Будни"
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "Weekly"
+msgstr ""
 
 #: src/pages/shell/dialogs.tsx
 msgid "What about its memories?"

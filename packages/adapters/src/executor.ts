@@ -252,6 +252,7 @@ import {
   validateConnectedModelChoice,
   validateModelAuthAvailability,
 } from "./model-selection.js";
+import { saveModelUsageLimits } from "./model-usage-limits.js";
 import {
   filterImageReturningComputerTools,
   IMAGE_RETURNING_COMPUTER_TOOLS,
@@ -6600,6 +6601,8 @@ export function createRunExecutor(deps: ExecutorDeps) {
                   cacheWriteTokens: event.cacheWriteTokens,
                 },
               });
+            } else if (event.type === "limits") {
+              await saveModelUsageLimits(deps.prisma, run.userId, event.provider, event.windows);
             } else if (event.type === "done") {
               if (!assembled && event.text) {
                 if (publishedMidTurnUserMessage || discardedMidTurnNarration) {

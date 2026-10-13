@@ -232,10 +232,19 @@ export function GeneralSettingsPanels({
 export function UsageSettingsPanel({
   usage,
   panelRef,
+  ownKeys = true,
 }: {
   usage?: { runs: number; inputTokens: number; outputTokens: number } | null;
   panelRef?: RefObject<HTMLDivElement | null>;
+  /** Spend goes to the person's provider keys rather than an agent's plan. */
+  ownKeys?: boolean;
 }) {
+  // Nothing to say yet: keep only the focus target so the plan cards lead.
+  if (!usage && !ownKeys) {
+    return (
+      <div ref={panelRef} tabIndex={-1} data-testid="usage-settings" className="outline-none" />
+    );
+  }
   return (
     <div
       ref={panelRef}
@@ -250,9 +259,11 @@ export function UsageSettingsPanel({
           </Trans>
         </p>
       ) : null}
-      <p className={`text-[12.5px] text-muted-foreground/80 ${usage ? "mt-2" : ""}`}>
-        <Trans>Model spend uses your provider keys.</Trans>
-      </p>
+      {ownKeys ? (
+        <p className={`text-[12.5px] text-muted-foreground/80 ${usage ? "mt-2" : ""}`}>
+          <Trans>Model spend uses your provider keys.</Trans>
+        </p>
+      ) : null}
     </div>
   );
 }

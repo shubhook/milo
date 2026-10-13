@@ -97,6 +97,10 @@ msgstr ""
 msgid "{botName}’s computer"
 msgstr "{botName} adlı botun bilgisayarı"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "{days}-day"
+msgstr ""
+
 #: src/lib/relative-time.ts
 #: src/pages/ActivityList.tsx
 msgid "{days}d ago"
@@ -104,6 +108,10 @@ msgstr "{days} g önce"
 
 #: src/components/ToolActivityDisclosure.tsx
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
+msgstr ""
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "{hours}-hour"
 msgstr ""
 
 #: src/lib/relative-time.ts
@@ -153,6 +161,10 @@ msgstr "{title}, {label}"
 
 #: src/pages/PluginsOverlay.tsx
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
+msgstr ""
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "{used}% used"
 msgstr ""
 
 #: src/pages/Shell.tsx
@@ -1294,6 +1306,10 @@ msgstr "MCP sunucuları yüklenemedi"
 msgid "Could not load model settings"
 msgstr "Model ayarları yüklenemedi"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "Could not load models."
+msgstr ""
+
 #: src/pages/RoutineRunHistory.tsx
 msgid "Could not load run history"
 msgstr "Çalıştırma geçmişi yüklenemedi"
@@ -2145,6 +2161,10 @@ msgstr "Görüntü yükleme alanı"
 msgid "Import OpenAPI JSON"
 msgstr "OpenAPI JSON içe aktar"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "In use"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Inbox & email"
 msgstr ""
@@ -2266,6 +2286,10 @@ msgstr ""
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Light"
 msgstr "Açık"
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "Limits show after the next run."
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Linear issue"
@@ -3269,6 +3293,10 @@ msgstr "Parolayı sıfırla"
 msgid "Reset your password"
 msgstr "Parolanızı sıfırlayın"
 
+#: src/pages/AgentModelsPanel.tsx
+msgid "Resets {resetsAt}"
+msgstr ""
+
 #: src/components/ComputerMaintenanceActions.tsx
 msgid "Resetting…"
 msgstr ""
@@ -4155,6 +4183,10 @@ msgstr ""
 #: src/pages/RoutineSchedule.tsx
 msgid "Weekdays"
 msgstr "Hafta içi"
+
+#: src/pages/AgentModelsPanel.tsx
+msgid "Weekly"
+msgstr ""
 
 #: src/pages/shell/dialogs.tsx
 msgid "What about its memories?"

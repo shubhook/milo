@@ -1230,6 +1230,29 @@ export const AgentStatusSchema = z.object({
 });
 export type AgentStatus = z.infer<typeof AgentStatusSchema>;
 
+/** One plan usage window an agent reported, such as the 5-hour or weekly limit. */
+export const ModelUsageWindowSchema = z.object({
+  windowMinutes: z.number().int().positive(),
+  usedPercent: z.number().min(0).max(100),
+  resetsAt: z.string().datetime().nullable(),
+});
+export type ModelUsageWindow = z.infer<typeof ModelUsageWindowSchema>;
+
+/** A model an agent runs bots on, with the plan limits its latest run reported. */
+export const AgentModelSchema = z.object({
+  provider: z.string(),
+  /** Display name of the agent or plan, such as Claude Code or ChatGPT. */
+  label: z.string(),
+  /** Display name of the model it runs. */
+  model: z.string(),
+  /** This model runs the caller's bots; the others are connected but idle. */
+  inUse: z.boolean(),
+  limits: z.array(ModelUsageWindowSchema),
+  /** When the limits were reported; null until a run on this model reports them. */
+  limitsUpdatedAt: z.string().datetime().nullable(),
+});
+export type AgentModel = z.infer<typeof AgentModelSchema>;
+
 export const MeSchema = z.object({
   userId: Id,
   email: z.string().email(),

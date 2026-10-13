@@ -11,6 +11,7 @@ import { BotSecretMetadata, BotSecretPutInput, StoredBotSecretName } from "./bot
 import {
   ActionApprovalRuleSchema,
   ActionAutoReviewSettingsSchema,
+  AgentModelSchema,
   AgentSecretInputSchema,
   AgentSecretSchema,
   AgentSkillCatalogEntrySchema,
@@ -691,6 +692,8 @@ export const appContract = {
   agent: {
     /** Null unless bots run on an agent CLI and the caller owns the deployment. */
     status: oc.output(AgentStatusSchema.nullable()),
+    /** Models the agent runtime runs bots on; empty when people connect their own models. */
+    models: oc.output(z.array(AgentModelSchema)),
   },
   integrationSetup: {
     get: oc.output(IntegrationSetupStateSchema),

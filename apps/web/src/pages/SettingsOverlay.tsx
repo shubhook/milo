@@ -10,6 +10,7 @@ import {
   UpdatesSettingsPanel,
   UsageSettingsPanel,
 } from "./AccountSettingsOverlay";
+import { AgentModelsPanel } from "./AgentModelsPanel";
 import { MemorySettingsOverlay } from "./MemorySettingsOverlay";
 import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
@@ -203,7 +204,12 @@ export function SettingsOverlay({
                 />
               ) : null}
               {section === "usage" && !showModels ? (
-                <UsageSettingsPanel usage={usage} panelRef={usageRef} />
+                <>
+                  <UsageSettingsPanel usage={usage} panelRef={usageRef} ownKeys={false} />
+                  <div className={usage ? "mt-6" : ""}>
+                    <AgentModelsPanel />
+                  </div>
+                </>
               ) : null}
               {section === "computer" && showComputer ? <ComputerSettingsPanel /> : null}
               {section === "updates" ? (
@@ -212,7 +218,7 @@ export function SettingsOverlay({
               {showModels ? (
                 <>
                   <div className="px-6 pb-4 pt-5 sm:px-8">
-                    <UsageSettingsPanel usage={usage} panelRef={usageRef} />
+                    <UsageSettingsPanel usage={usage} panelRef={usageRef} ownKeys />
                   </div>
                   <ModelSettingsOverlay embedded onClose={requestClose} />
                 </>
