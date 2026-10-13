@@ -7,8 +7,8 @@ test("model dropdown search and provider group headers", async ({ page }, testIn
   await signup(page, `model-picker-${stamp}@rakazo.test`, "password12", userName);
   await completeOnboarding(page);
 
-  await openUserSettings(page, "models");
-  await expect(page.getByRole("button", { name: "Close model settings" })).toBeVisible();
+  await openUserSettings(page, "usage");
+  await expect(page.getByRole("button", { name: "Close usage settings" })).toBeVisible();
 
   // OpenRouter has many models so group headers and search are obvious.
   const providerSearch = page.getByPlaceholder("Search providers");

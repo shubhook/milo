@@ -13,7 +13,7 @@ test("custom connections persist reasoning support and bot thinking", async ({
   const userName = `Reasoning ${stamp}`;
   await signup(page, `reasoning-model-${stamp}@rakazo.test`, "password12", userName);
   await completeOnboarding(page);
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   await page.getByPlaceholder("Search providers").fill("openai-compatible");
   await page.getByRole("button", { name: /OpenAI-compatible/ }).click();
   await page.getByLabel("OpenAI-compatible server URL").fill("http://127.0.0.1:8090/v1");
@@ -56,7 +56,7 @@ test("custom connections persist reasoning support and bot thinking", async ({
     1,
   );
   await page.reload();
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   await page.getByText("Advanced", { exact: true }).click();
   await expect(page.getByRole("checkbox", { name: "Supports thinking" })).toBeChecked();
   await expect(page.getByRole("combobox", { name: "Reasoning effort", exact: true })).toHaveValue(
@@ -77,7 +77,7 @@ test("custom connections persist reasoning support and bot thinking", async ({
   expect(
     clearedCredentials.find((entry) => entry.modelId === "arbitrary-model")?.maxImagesPerPrompt,
   ).toBeUndefined();
-  await page.getByRole("button", { name: "Close model settings" }).click();
+  await page.getByRole("button", { name: "Close usage settings" }).click();
   await page.locator("main").getByRole("button", { name: "Chief", exact: true }).click();
   const settings = page.getByTestId("bot-settings");
   await expect(settings).toBeVisible();
@@ -170,7 +170,7 @@ test("connects, lists, and uses an OpenAI-compatible endpoint", async ({ page },
     await signup(page, `local-model-${stamp}@rakazo.test`, "password12", userName);
     await completeOnboarding(page);
 
-    await openUserSettings(page, "models");
+    await openUserSettings(page, "usage");
     const providerSearch = page.getByPlaceholder("Search providers");
     await providerSearch.fill("openai-compatible");
     await page.getByRole("button", { name: /OpenAI-compatible/ }).click();
@@ -215,7 +215,7 @@ test("connects, lists, and uses an OpenAI-compatible endpoint", async ({ page },
     await expect(page.getByRole("button", { name: "Save" })).toBeEnabled();
 
     if (process.env.AGENT_RUNTIME === "pi") {
-      await page.getByRole("button", { name: "Close model settings" }).click();
+      await page.getByRole("button", { name: "Close usage settings" }).click();
       const composer = page.getByPlaceholder(/Message/);
       await composer.fill("Reply with the endpoint verification message.");
       await page.keyboard.press("Enter");
@@ -237,8 +237,8 @@ test("model settings connect, replace, and cancel provider authentication", asyn
   await signup(page, `models-${stamp}@rakazo.test`, "password12", userName);
   await completeOnboarding(page);
 
-  await openUserSettings(page, "models");
-  await expect(page.getByRole("button", { name: "Close model settings" })).toBeVisible();
+  await openUserSettings(page, "usage");
+  await expect(page.getByRole("button", { name: "Close usage settings" })).toBeVisible();
 
   const providerSearch = page.getByPlaceholder("Search providers");
   await providerSearch.fill("scripted");
@@ -269,7 +269,7 @@ test("model settings connect, replace, and cancel provider authentication", asyn
   );
   expect(updated.find((entry) => entry.provider === "scripted")?.maxTokens).toBe(16384);
   await page.reload();
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   await expect(page.getByRole("combobox", { name: "Model" })).toHaveText(/Scripted runtime/);
   await page.getByText("Advanced", { exact: true }).click();
   await expect(page.getByLabel("Maximum output tokens")).toHaveValue("16384");
@@ -415,7 +415,7 @@ test("catalog models keep a space default thinking level per saved model", async
   await signup(page, `catalog-thinking-${stamp}@rakazo.test`, "password12", `Thinking ${stamp}`);
   await completeOnboarding(page);
 
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   const providerSearch = page.getByPlaceholder("Search providers");
 
   // A non-reasoning provider never shows the control.
@@ -448,7 +448,7 @@ test("catalog models keep a space default thinking level per saved model", async
 
   // The level persists across reloads while the same model stays selected.
   await page.reload();
-  await openUserSettings(page, "models");
+  await openUserSettings(page, "usage");
   await providerSearch.fill("anthropic");
   await page.getByRole("button", { name: /^Anthropic / }).click();
   await expect(page.getByRole("combobox", { name: "Thinking", exact: true })).toHaveValue("high");

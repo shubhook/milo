@@ -243,17 +243,14 @@ export function UsageSettingsPanel({
       data-testid="usage-settings"
       className="rounded-xl border border-border px-4 py-4 outline-none"
     >
-      <h3 className="text-[15px] font-medium text-foreground">
-        <Trans>Usage</Trans>
-      </h3>
       {usage ? (
-        <p className="mt-3 text-[14px] text-foreground/75">
+        <p className="text-[14px] text-foreground/75">
           <Trans>
             {usage.runs} runs · {usage.inputTokens + usage.outputTokens} tokens
           </Trans>
         </p>
       ) : null}
-      <p className={`text-[12.5px] text-muted-foreground/80 ${usage ? "mt-2" : "mt-3"}`}>
+      <p className={`text-[12.5px] text-muted-foreground/80 ${usage ? "mt-2" : ""}`}>
         <Trans>Model spend uses your provider keys.</Trans>
       </p>
     </div>

@@ -1,7 +1,7 @@
 import { useLingui } from "@lingui/react/macro";
 import type { AvatarStyle, SpaceMemoryConfig } from "@milo/contracts";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
-import { Brain, CloudDownload, Cpu, Gauge, Monitor, Settings, Volume2, XIcon } from "lucide-react";
+import { Brain, CloudDownload, Gauge, Monitor, Settings, Volume2, XIcon } from "lucide-react";
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { computersAreUnavailable } from "../components/ComputersUnavailableHint";
 import {
@@ -14,14 +14,7 @@ import { MemorySettingsOverlay } from "./MemorySettingsOverlay";
 import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
 
-export type SettingsSection =
-  | "general"
-  | "models"
-  | "memory"
-  | "voice"
-  | "usage"
-  | "computer"
-  | "updates";
+export type SettingsSection = "general" | "memory" | "voice" | "usage" | "computer" | "updates";
 
 type NavItem = {
   id: SettingsSection;
@@ -83,7 +76,6 @@ export function SettingsOverlay({
 
   const navItems: NavItem[] = [
     { id: "general", label: t`General`, icon: Settings },
-    ...(modelManaged ? [] : [{ id: "models" as const, label: t`Models`, icon: Cpu }]),
     { id: "memory", label: t`Memory`, icon: Brain },
     { id: "voice", label: t`Voice`, icon: Volume2 },
     { id: "usage", label: t`Usage`, icon: Gauge },
@@ -96,8 +88,8 @@ export function SettingsOverlay({
     (section === "general" ? t`General` : t`Settings`);
 
   const closeLabel =
-    section === "models"
-      ? t`Close model settings`
+    section === "usage"
+      ? t`Close usage settings`
       : section === "memory"
         ? t`Close memory settings`
         : section === "voice"
@@ -117,7 +109,8 @@ export function SettingsOverlay({
     leaveSettings(onClose);
   }
 
-  const widePane = section === "models" || section === "voice";
+  const showModels = section === "usage" && !modelManaged;
+  const widePane = showModels || section === "voice";
 
   return (
     <Dialog
@@ -191,7 +184,7 @@ export function SettingsOverlay({
 
             <div
               className={`min-h-0 flex-1 ${
-                section === "models" || section === "voice" || section === "memory"
+                showModels || section === "voice" || section === "memory"
                   ? "flex flex-col overflow-hidden"
                   : "rk-scroll overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8"
               }`}
@@ -209,15 +202,20 @@ export function SettingsOverlay({
                   isDeploymentOwner={isDeploymentOwner}
                 />
               ) : null}
-              {section === "usage" ? (
+              {section === "usage" && !showModels ? (
                 <UsageSettingsPanel usage={usage} panelRef={usageRef} />
               ) : null}
               {section === "computer" && showComputer ? <ComputerSettingsPanel /> : null}
               {section === "updates" ? (
                 <UpdatesSettingsPanel isDeploymentOwner={isDeploymentOwner} />
               ) : null}
-              {section === "models" && !modelManaged ? (
-                <ModelSettingsOverlay embedded onClose={requestClose} />
+              {showModels ? (
+                <>
+                  <div className="px-6 pb-4 pt-5 sm:px-8">
+                    <UsageSettingsPanel usage={usage} panelRef={usageRef} />
+                  </div>
+                  <ModelSettingsOverlay embedded onClose={requestClose} />
+                </>
               ) : null}
               {section === "memory" ? (
                 <MemorySettingsOverlay
