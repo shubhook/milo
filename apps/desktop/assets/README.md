@@ -1,10 +1,7 @@
 # Desktop icons
 
-The shared editable source and export notes are in
-[`packages/ui-tokens/assets`](../../../packages/ui-tokens/assets/README.md).
+The editable source lives in [`packages/ui-tokens/assets`](../../../packages/ui-tokens/assets/README.md).
 
-Mac packaging requires Xcode 26 or newer. Electron builder compiles `Milo.icon`
-into `Assets.car` for Tahoe and generates `icon.icns` for older macOS versions.
-`icon-macos.png` is the matching development export with Dock margins.
-
-`icon.png` and `icon.ico` remain the Linux and Windows assets.
+- `Milo.icon` compiles into `Assets.car` (macOS Tahoe) and `icon.icns` (older macOS). Packaging needs Xcode 26+.
+- `icon-macos.png` is the development export, with Dock margins.
+- `icon.png` and `icon.ico` are for Linux and Windows.

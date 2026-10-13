@@ -1,263 +1,96 @@
 # Milo
 
-Milo is an open-source platform for running persistent AI teammates. It is available on the web,
-as an Electron desktop app, and through an Expo mobile app. Bots run on the Claude Code CLI on your
-own machine, and you can run the complete stack locally.
+Milo runs AI teammates on your own machine. Each bot keeps one conversation, its own memory and
+routines, and a computer it can use for browsing, the terminal, and files. Bots run on the
+[Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) you already have signed in.
 
-Milo is a fork of [Rakazo](https://github.com/elie222/rakazo) and is in beta.
-
-## Features
-
-- Persistent bots with their own conversations, memory, routines, and history
-- Voice mode: speak replies, dictate, and call a bot. Bring your own ElevenLabs, OpenAI, Cartesia, or Fish Audio key
-- Shared Team Computers and isolated Private computers
-- Browser, terminal, file, and graphical desktop access
-- Bots that can delegate to peer bots or short-lived subagents
-- Bring-your-own model credentials through Pi
-- App integrations through Composio or Pipedream Connect, plus user-installed Treg, remote MCP, and OpenAPI tool sources
-- Docker, E2B, Daytona, CreateOS, Box, and trusted local-computer support
-
-## Demo
-
-https://github.com/user-attachments/assets/dccdeddb-2134-4a56-8eed-b2e591736b1c
-
-## Stack
-
-- TypeScript
-- React 19, Vite, and Tailwind CSS
-- Electron and Expo
-- Hono and oRPC
-- PostgreSQL and Prisma
-- Better Auth
-- Graphile Worker
-- Pi
-- Docker, E2B, Daytona, CreateOS, and Box
-- Composio, Pipedream Connect, MCP, and OpenAPI integrations
+Milo works in the browser, as an Electron desktop app, and as an Expo mobile app. It is in beta.
 
 ## Quick start
 
-This runs the whole stack from source on your machine: web app, API, worker, sandbox supervisor,
-and Postgres.
-
 You need:
 
-- Node.js 22.22.2+ (22.x), 24.x, or 26+. Node 23 and 25 are not supported.
+- Node.js 22.22.2+, 24.x, or 26+ (not 23 or 25)
 - pnpm 9 (`corepack enable` picks up the pinned version)
 - Docker Desktop, OrbStack, or Docker Engine, running
-- The [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), signed in with
-  `claude auth login`. Bots run on it by default. You can skip it and sign in with ChatGPT or
+- Claude Code, signed in with `claude auth login`. You can skip this and sign in with ChatGPT or
   connect a model instead.
 
 ```bash
 git clone https://github.com/shubhook/rakazo.git milo
 cd milo
 pnpm install
-pnpm dev:setup      # writes .env with fresh secrets, starts Postgres, runs migrations
+pnpm dev:setup      # writes .env, starts Postgres, runs migrations
 pnpm sandbox:build  # once; builds the bot computer image
 pnpm dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173), create an account, and create your first bot.
+Open http://127.0.0.1:5173, create an account, and create a bot.
 
 | Service | Address |
 | --- | --- |
 | Web app | http://127.0.0.1:5173 |
-| API | http://127.0.0.1:3100 (`/health` returns `{"ok":true}`) |
+| API | http://127.0.0.1:3100 |
 | Sandbox supervisor | http://127.0.0.1:7091 |
 | Postgres | 127.0.0.1:5433 |
 
-To open the desktop app against this stack, run `pnpm --filter @milo/desktop dev` in a second
-terminal and choose **Existing instance** with `http://127.0.0.1:5173`.
-
-Stop the stack with Ctrl+C. Postgres keeps running in Docker; `pnpm compose:down` stops it, and
+Ctrl+C stops the app. Postgres keeps running in Docker: `pnpm compose:down` stops it and
 `pnpm compose:reset` deletes its data.
 
-### Troubleshooting
-
-- `P1000: Authentication failed` during migrations means `.env` doesn't match the password the
-  Postgres volume was created with. Every checkout on a machine, including git worktrees, shares
-  one volume (`compose_pgdata`), so copy the `.env` from the checkout that created it. If the data
-  is disposable, run `pnpm compose:reset` and then `pnpm dev:setup` again.
-- `Postgres data already exists but .env is missing` is the same problem from the other side.
-  Restore that `.env` before running setup.
-- If port 5433 is taken, change `POSTGRES_HOST_PORT` and the port in `DATABASE_URL` in `.env`.
-- `Docker is not running` means setup couldn't reach the Docker daemon. Start Docker and rerun.
-
-## Install from published images
-
-You need Docker Engine, the Compose plugin, curl, and OpenSSL. No clone or Node install.
-
-```bash
-mkdir -p rakazo && cd rakazo &&
-curl -fsSLO https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose/install-images.sh &&
-bash install-images.sh
-```
-
-The installer downloads the Compose files, creates `.env` with random secrets, and starts Milo.
-It preserves an existing `.env` when rerun.
-
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173), create an account, and connect a model.
-Local Docker computers are on by default. Optional remote providers: `e2b`, `daytona`, `createos`, or `box`
-with the matching API key.
-
-Default image tag is `edge` (main builds, `linux/amd64` + `linux/arm64`). Details and tags:
-[self-hosting guide](./docs/self-host.md#published-images-no-checkout).
-
-On restricted networks, override the installer download base (`RAKAZO_DOWNLOAD_BASE`), skip
-existing Compose files (`--local` / `RAKAZO_DOWNLOAD_SKIP_EXISTING`), or mirror the bootstrap
-script URL — see
-[Restricted networks / mirror downloads](./docs/self-host.md#restricted-networks--mirror-downloads).
-
-For an agent-assisted install, use [SETUP_PROMPT.md](./SETUP_PROMPT.md).
-
-## Run on a server
-
-Bots stay on when the backend runs on a server. Use the same installer on a VPS, then connect from
-the desktop app, the mobile app, or a browser.
-
-```bash
-bash install-images.sh --prepare-only
-# edit .env: SANDBOX_PROVIDER=box (or e2b / daytona / createos) with its API key, RAKAZO_HOST=your.domain
-bash install-images.sh
-```
-
-Put HTTPS in front of port 5173; [docs/self-host.md](./docs/self-host.md#public-single-vm-deployment)
-covers the Caddy setup and host hardening. In the desktop app choose **Existing instance** and enter
-the `https://` address.
-
-## Local development (source checkout)
-
-[Quick start](#quick-start) covers prerequisites and the one-command setup. To set up by hand
-instead, run `cp .env.example .env` and fill it in as below.
-
-Set `POSTGRES_PASSWORD` (for example `openssl rand -hex 16`), then put the same value in
-`DATABASE_URL`. Set `BETTER_AUTH_SECRET`, `ENCRYPTION_KEY`, and `SCREEN_PROXY_SECRET` to
-independent long random values. Docker sandboxes also need a dedicated
-`SANDBOX_SUPERVISOR_TOKEN`. You can also set `OPENROUTER_API_KEY`, or connect a supported
-model provider during onboarding.
-
-For host-side development with Docker Desktop, set `SANDBOX_CONTROL_VIA_LOOPBACK=true`
-in `.env`. The supervisor discovers Docker Desktop's user socket automatically;
-`DOCKER_HOST` or `DOCKER_SOCKET` can override it for another Docker runtime.
-
-Managed app catalogs are optional. Set `COMPOSIO_API_KEY` for Composio, or the
-`PIPEDREAM_CLIENT_ID`, `PIPEDREAM_CLIENT_SECRET`, and `PIPEDREAM_PROJECT_ID` trio for Pipedream
-Connect. Users can add an HTTPS MCP server, Treg endpoint, or OpenAPI JSON document from
-**Integrations** without enabling either managed catalog. Connector credentials are encrypted on the
-server and are never returned by the API.
-
-Treg is usage-metered. Self-hosters supply their own Treg token; operators embedding Treg in a
-hosted product should review [Treg's integration terms](https://treg.to/integrate.md), which require
-a written agreement for hosted resale.
-
-```bash
-docker compose --env-file .env \
-  -f infra/compose/docker-compose.yml \
-  -f infra/compose/docker-compose.postgres-host.yml \
-  up postgres -d
-pnpm install
-pnpm db:generate
-pnpm db:migrate
-pnpm sandbox:build
-pnpm dev
-```
-
-Postgres stays network-internal in the default Compose file (same as published images). The
-`postgres-host` overlay publishes loopback `127.0.0.1:5433` for host-side `pnpm` and DB tools.
-If that port is occupied, change `POSTGRES_HOST_PORT` and the port in `DATABASE_URL` in `.env`.
-Without the overlay, open a shell with
-`docker compose --env-file .env -f infra/compose/docker-compose.yml exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'`.
-Use a URI-safe `POSTGRES_PASSWORD` (`openssl rand -hex 16`). An existing `pgdata` volume keeps the
-user, password, and database from first init, so keep those values in `.env`, or change them in
-place with `ALTER ROLE` / rename. Recreate the volume only after a backup (or when the data is
-disposable); `docker compose down -v` deletes all Postgres state.
-
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173), create an account, connect a model, and create
-your first bot.
-
-For deployment, provider selection, backups, and upgrades, see the
-[self-hosting guide](./docs/self-host.md).
-
-To use CreateOS, set `SANDBOX_PROVIDER=createos` and `CREATEOS_SANDBOX_API_KEY`.
-Optional `CREATEOS_SANDBOX_BASE_URL`, `CREATEOS_SANDBOX_SHAPE`, and
-`CREATEOS_SANDBOX_ROOTFS` default to `https://api.sb.createos.sh`, `s-2vcpu-2gb`,
-and `desktop:1`.
+If migrations fail with `P1000: Authentication failed`, your `.env` doesn't match the Postgres
+volume. Every checkout on a machine, worktrees included, shares that volume, so copy `.env` from
+the checkout that created it, or run `pnpm compose:reset` and `pnpm dev:setup` if the data is
+disposable.
 
 ## Desktop and mobile
 
-The Electron and Expo apps are clients of the same Milo API used by the web app.
-
-With the development stack running, launch Electron with:
+Both apps talk to the same API as the web app. With `pnpm dev` running:
 
 ```bash
 pnpm --filter @milo/desktop dev
 ```
 
-On first run the desktop app asks whether to run Milo on this computer or connect to an existing
-server. **This computer** installs and starts the published images with Docker Compose (the same
-files as `infra/compose/install-images.sh`) under the app's data directory, so Docker Desktop,
-OrbStack, or Docker Engine must be installed; the app links to them when it is not. Installed
-builds pin the image tag to their own version; unpackaged builds pull `edge`. Developers running
-`pnpm dev` should pick **Existing instance** with `http://127.0.0.1:5173` instead. Public servers
-must use HTTPS; HTTP is accepted only for loopback and private LAN addresses (not link-local). The
-app verifies Milo's health endpoint before saving, and later launches go straight to that
-instance. The stack keeps running after the app quits; **Stop Local Stack** in the application
-menu turns it off.
+Choose **Existing instance** and enter `http://127.0.0.1:5173`.
 
-Use **Change Milo Server…** in the application menu to reconnect. Closing that window without
-saving returns to the previous instance. For development automation, set `RAKAZO_WEB_URL` to point
-the shell somewhere else without changing the saved instance, or `RAKAZO_FORCE_SETUP=1` to run
-setup again.
+For the mobile app, see [docs/mobile-release.md](./docs/mobile-release.md).
 
-Mobile build and release instructions live in [docs/mobile-release.md](./docs/mobile-release.md).
-
-## UI language
-
-The web (and Electron-hosted) UI supports English, Deutsch, 한국어, Türkçe, हिन्दी,
-Português (Brasil), 简体中文, Español, and Русский under **Settings → Language**. The Expo
-app ships English, 简体中文, Русский, and Deutsch catalogs; **Account → Language** offers
-English and 简体中文, and the other catalogs follow the device language or
-`EXPO_PUBLIC_DEFAULT_UI_LOCALE`. The marketing
-homepage (`apps/www`) is available in en/de/ko/zh via footer language links (`/`, `/de/`,
-`/ko/`, `/zh/`); other marketing pages stay English. The Russian marketing homepage and
-native Electron setup/menu remain separate follow-up work.
-
-## Development
+## Repository layout
 
 ```text
-apps/       web, api, worker, desktop, mobile, and public website
-packages/   domain, contracts, persistence, adapters, UI, and test tooling
-infra/      local services and computer images
-docs/       architecture, operations, and release guides
+apps/web        web app (also hosted by the desktop app)
+apps/desktop    Electron shell
+apps/mobile     Expo app
+apps/api        HTTP API
+apps/worker     background jobs and bot runs
+apps/www        public website
+packages/       shared contracts, core logic, adapters, database, and UI
+infra/          Docker Compose files and the bot computer image
+docs/           self-hosting, runtime, and release guides
 ```
 
-Common checks:
+## Development
 
 ```bash
 pnpm lint
 pnpm check
 pnpm test
-pnpm test:integration
-pnpm test:e2e
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow and test matrix.
+Integration and end-to-end suites, and when to run them, are in
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Documentation
 
 - [Self-hosting](./docs/self-host.md)
-- [Self-host secrets](./docs/self-host-secrets.md)
 - [Computer runtime and isolation](./docs/computer-runtime.md)
 - [Desktop releases](./docs/desktop-release.md)
 - [Mobile releases](./docs/mobile-release.md)
-- [Performance testing](./docs/performance.md)
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull
-request. For security vulnerabilities, follow [SECURITY.md](./SECURITY.md) instead of filing a public
-issue.
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Report security issues
+through [SECURITY.md](./SECURITY.md), not public issues.
 
-Milo is licensed under the [Apache License 2.0](./LICENSE).
+## License
 
-Questions and ideas are welcome in the [Milo Discord community](https://discord.gg/RWwKa2Sn7h).
+[Apache License 2.0](./LICENSE).
