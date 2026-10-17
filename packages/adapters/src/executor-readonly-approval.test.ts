@@ -547,12 +547,26 @@ describe("connector read-only metadata and approval enforcement", () => {
       expect(f.results.at(-1)).toEqual({ item: "item-1" });
     });
 
-    it("keeps an explicit allow rule ahead of automatic review", async () => {
+    it("sends a consequential always-allow match to automatic review", async () => {
+      reviewMock.mockResolvedValue({ decision: "ask", reason: "Unexpected", model: "mock" });
+      const rules: ActionApprovalRule[] = [
+        { effect: "always_allow", matchKind: "connector", matchValue: "demo" },
+      ];
+      const f = fixture({ catalog, name: "demo_send_message", autoReview: true, rules });
+      await f.run();
+      expect(reviewMock).toHaveBeenCalledWith(
+        expect.objectContaining({ matchingRules: rules }),
+        expect.anything(),
+      );
+      expect(f.execute).not.toHaveBeenCalled();
+      expect(f.pauseRunForInput).toHaveBeenCalledOnce();
+    });
+
+    it("runs an always-allow match without review when automatic review is off", async () => {
       const f = fixture({
         catalog,
         name: "demo_send_message",
-        autoReview: true,
-        rules: [{ effect: "always_allow", matchKind: "tool", matchValue: "demo_send_message" }],
+        rules: [{ effect: "always_allow", matchKind: "connector", matchValue: "demo" }],
       });
       await f.run();
       expect(f.execute).toHaveBeenCalledOnce();
