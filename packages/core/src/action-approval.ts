@@ -214,7 +214,8 @@ export type AutoReviewJudgeDecision = "pass" | "ask" | "error";
 
 /**
  * Pure combiner for Auto Review after rule resolution.
- * Rules win: require_approval asks, always_allow runs. Only the default path may call a judge.
+ * require_approval always asks. When Auto Review is ready, consequential calls are judged even
+ * under an always_allow rule, so a broad allow cannot wave every send through unreviewed.
  * The judge only escalates to ask; it never silent-denies.
  */
 export function planActionGate(input: {
@@ -224,15 +225,7 @@ export function planActionGate(input: {
   checkerConfigured: boolean;
 }): "ask" | "allow" | "judge" {
   if (input.resolved.decision === "ask") return "ask";
-  if (input.resolved.source === "always_allow") return "allow";
-  if (
-    input.consequential &&
-    input.autoReviewEnabled &&
-    input.checkerConfigured &&
-    input.resolved.source === "default"
-  ) {
-    return "judge";
-  }
+  if (input.consequential && input.autoReviewEnabled && input.checkerConfigured) return "judge";
   return "allow";
 }
 
