@@ -276,7 +276,6 @@ function fixture({
       },
       commit,
     },
-    memoryProviders: { resolve: async () => null },
     events: { append: vi.fn(async () => undefined), pauseRunForInput, finalizeRun },
     jobs: { enqueue: vi.fn(async () => undefined) },
     secrets,

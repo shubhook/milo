@@ -44,7 +44,6 @@ describe("createBackgroundJobHandlers", () => {
       workerId: "worker-1",
       runtime: {} as unknown as AgentRuntime,
       secretStore: {} as unknown as EncryptedSecretStore,
-      memoryProviders: { resolve: vi.fn(async () => null) },
       messaging: {} as unknown as MessagingSurface,
     });
 
@@ -70,7 +69,6 @@ describe("createBackgroundJobHandlers", () => {
     const runtime = {} as unknown as AgentRuntime;
     const jobs = {} as unknown as JobPublisher;
     const secretStore = {} as unknown as EncryptedSecretStore;
-    const memoryProviders = { resolve: vi.fn(async () => null) };
     const resolveModel = vi.fn();
     const handlers = createBackgroundJobHandlers({
       executor: { resolveModel } as unknown as ReturnType<typeof createRunExecutor>,
@@ -82,7 +80,6 @@ describe("createBackgroundJobHandlers", () => {
       workerId: "worker-1",
       runtime,
       secretStore,
-      memoryProviders,
       deploymentModelKey: "openrouter-key",
     });
 
@@ -93,7 +90,6 @@ describe("createBackgroundJobHandlers", () => {
         prisma,
         runtime,
         jobs,
-        memoryProviders,
         deploymentModelKey: "openrouter-key",
         resolveModel,
       },

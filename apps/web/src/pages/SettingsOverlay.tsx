@@ -1,5 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
-import type { AvatarStyle, SpaceMemoryConfig } from "@milo/contracts";
+import type { AvatarStyle } from "@milo/contracts";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
 import { Brain, CloudDownload, Gauge, Monitor, Settings, Volume2, XIcon } from "lucide-react";
 import { type ComponentType, useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ import {
   UsageSettingsPanel,
 } from "./AccountSettingsOverlay";
 import { AgentModelsPanel } from "./AgentModelsPanel";
-import { MemorySettingsOverlay } from "./MemorySettingsOverlay";
+import { SpaceMemorySection } from "./KnowledgeSection";
 import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
 
@@ -35,8 +35,6 @@ export function SettingsOverlay({
   sandboxProvider,
   messagingEnabled = false,
   onOpenMessaging,
-  memoryConfig,
-  onMemoryConfigChange,
   onClose,
   onVoiceStatusMaybeChanged,
 }: {
@@ -51,8 +49,6 @@ export function SettingsOverlay({
   sandboxProvider?: string | null;
   messagingEnabled?: boolean;
   onOpenMessaging?: () => void;
-  memoryConfig: SpaceMemoryConfig | null | undefined;
-  onMemoryConfigChange: (config: SpaceMemoryConfig | null) => void;
   onClose: () => void;
   onVoiceStatusMaybeChanged?: () => void | Promise<void>;
 }) {
@@ -60,10 +56,9 @@ export function SettingsOverlay({
   const panelRef = useRef<HTMLDivElement>(null);
   const usageRef = useRef<HTMLDivElement>(null);
   const [section, setSection] = useState<SettingsSection>(initialSection);
-  const [memoryBusy, setMemoryBusy] = useState(false);
   const [voiceBusy, setVoiceBusy] = useState(false);
   const showComputer = isDeploymentOwner && computersAreUnavailable(sandboxProvider);
-  const panelBusy = memoryBusy || voiceBusy;
+  const panelBusy = voiceBusy;
 
   useEffect(() => {
     setSection(initialSection);
@@ -185,7 +180,7 @@ export function SettingsOverlay({
 
             <div
               className={`min-h-0 flex-1 ${
-                showModels || section === "voice" || section === "memory"
+                showModels || section === "voice"
                   ? "flex flex-col overflow-hidden"
                   : "rk-scroll overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8"
               }`}
@@ -224,13 +219,9 @@ export function SettingsOverlay({
                 </>
               ) : null}
               {section === "memory" ? (
-                <MemorySettingsOverlay
-                  embedded
-                  onClose={requestClose}
-                  config={memoryConfig}
-                  onConfigChange={onMemoryConfigChange}
-                  onBusyChange={setMemoryBusy}
-                />
+                <div data-testid="memory-settings">
+                  <SpaceMemorySection />
+                </div>
               ) : null}
               {section === "voice" ? (
                 <VoiceSettingsOverlay embedded onClose={requestClose} onBusyChange={setVoiceBusy} />

@@ -113,8 +113,6 @@ function SettingsFixture() {
         name="Owner"
         avatarStyle="robot"
         onAvatarStyleChange={() => Promise.resolve()}
-        memoryConfig={null}
-        onMemoryConfigChange={() => {}}
         onClose={() => {}}
       />
     </main>

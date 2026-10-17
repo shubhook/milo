@@ -50,14 +50,10 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await settings.getByTestId("settings-nav-memory").click();
   await expect(settings).toHaveAttribute("data-settings-section", "memory");
   await expect(settings.getByRole("heading", { name: "Memory", exact: true })).toBeVisible();
-  await expect(settings.getByTestId("memory-settings")).toBeVisible();
   const memory = settings.getByTestId("memory-settings");
-  await expect(memory.getByLabel("Provider")).toBeVisible();
-  await memory.getByLabel("Provider").selectOption("serenity");
-  await expect(memory.getByLabel("MCP endpoint")).toBeVisible();
-  await expect(memory.getByLabel("Bearer token")).toBeVisible();
-  await expect(memory.getByRole("button", { name: "Recall only" })).toBeVisible();
-  await captureScreenshot(page, testInfo, "settings-shell-memory-serenity");
+  await expect(memory.getByTestId("space-memory-documents")).toBeVisible();
+  await expect(memory.getByLabel("Provider")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "settings-shell-memory");
 
   await settings.getByTestId("settings-nav-voice").click();
   await expect(settings).toHaveAttribute("data-settings-section", "voice");

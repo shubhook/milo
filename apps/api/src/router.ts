@@ -25,7 +25,6 @@ import type {
   ConnectorRegistry,
   EncryptedSecretStore,
   IntegrationProviderSettings,
-  MemoryProviderResolver,
   PiOAuthLogins,
   RemoteConnectorDependencies,
 } from "@milo/adapters";
@@ -174,7 +173,6 @@ import {
   findDefaultModelCredential,
   findDefaultVoiceCredential,
   findModelCredential,
-  findSpaceMemoryConfig,
   formatMessagingLinkCode,
   InvalidSpaceNameError,
   IsolationError,
@@ -225,12 +223,6 @@ import {
   revertConnectedMcpApprovals,
 } from "./mcp-approval.js";
 import { buildMcpUpdateMaterial } from "./mcp-material.js";
-import {
-  disconnectMemoryProvider,
-  persistMemoryProviderConfig,
-  serializeSpaceMemoryConfig,
-  updateMemoryProviderDefaultScope,
-} from "./memory-provider-config.js";
 import {
   chooseFocus,
   dismissFocus,
@@ -528,7 +520,6 @@ export interface RouterDeps {
   jobs: JobPublisher;
   sandbox: SandboxProvider;
   memory: MemoryStore;
-  memoryProviders: MemoryProviderResolver;
   home: AgentHomeStore;
   secrets: EncryptedSecretStore;
   oauthLogins: PiOAuthLogins;
@@ -1557,7 +1548,6 @@ export function createRouter(deps: RouterDeps) {
             notifyOnFinish: input.notifyOnFinish,
             color: input.color,
             pinned: input.pinned,
-            memoryScope: input.memoryScope,
             sectionId: input.sectionId,
             voiceId: input.voiceId,
             autoSpeak: input.autoSpeak,
@@ -1973,49 +1963,15 @@ export function createRouter(deps: RouterDeps) {
         const target = await resolveThreadTarget(deps.prisma, context.actor, input);
         const contextBotId = target.kind === "bot" ? target.botId : target.memberBotIds[0];
         if (!contextBotId) throw new IsolationError();
-        const { cancelledRunIds, historyCompactionGeneration } = await deps.events.clearThread({
+        const { cancelledRunIds } = await deps.events.clearThread({
           spaceId: context.actor.spaceId,
           threadId: target.threadId,
           botId: contextBotId,
           ...(target.kind === "group" ? { groupId: target.groupId } : {}),
         });
-        const [configuredMemory] = await Promise.all([
-          target.kind === "bot"
-            ? deps.memoryProviders.resolve(context.actor.spaceId).catch((error) => {
-                getLogger().error("semantic memory resolution after thread clear failed", error);
-                return null;
-              })
-            : Promise.resolve(null),
-          Promise.all(
-            cancelledRunIds.map((runId) =>
-              deps.jobs.cancel(runJobKey(runId)).catch(() => undefined),
-            ),
-          ),
-        ]);
-        // Durable memories remain in their Space-private containers. Clear only removes
-        // conversation-derived summaries from the previous generation; including the new
-        // generation also covers a compaction job that began just after the clear committed.
-        if (configuredMemory && target.kind === "bot") {
-          // Best effort: the conversation rows are already deleted, so failing the clear here
-          // would help nothing — a failed purge only leaves stale summaries recallable.
-          try {
-            const purged = await configuredMemory.provider.purgeHistory(
-              {
-                botId: target.botId,
-                generations: [
-                  Math.max(0, historyCompactionGeneration - 1),
-                  historyCompactionGeneration,
-                ],
-              },
-              computerContext(context.actor, target.botId, `thread-clear:${target.threadId}`),
-            );
-            if (!purged.ok) {
-              getLogger().error("semantic memory purge after thread clear failed", purged.error);
-            }
-          } catch (error) {
-            getLogger().error("semantic memory purge after thread clear failed", error);
-          }
-        }
+        await Promise.all(
+          cancelledRunIds.map((runId) => deps.jobs.cancel(runJobKey(runId)).catch(() => undefined)),
+        );
         return { ok: true as const };
       }),
       followUp: authed.threads.followUp.handler(async ({ context, input }) => {
@@ -3000,19 +2956,6 @@ export function createRouter(deps: RouterDeps) {
         });
         return docs.map((d) => `# ${d.path}\n\n${d.content}`).join("\n\n");
       }),
-      providerConfig: authed.memory.providerConfig.handler(async ({ context }) => {
-        const config = await findSpaceMemoryConfig(deps.prisma, context.actor.spaceId);
-        return config ? serializeSpaceMemoryConfig(config) : null;
-      }),
-      connectProvider: authed.memory.connectProvider.handler(async ({ context, input }) =>
-        persistMemoryProviderConfig(deps, context.actor, input),
-      ),
-      setDefaultScope: authed.memory.setDefaultScope.handler(async ({ context, input }) =>
-        updateMemoryProviderDefaultScope(deps, context.actor, input.defaultMemoryScope),
-      ),
-      disconnectProvider: authed.memory.disconnectProvider.handler(async ({ context }) =>
-        disconnectMemoryProvider(deps, context.actor),
-      ),
     },
     routines: {
       history: authed.routines.history.handler(async ({ context, input }) =>

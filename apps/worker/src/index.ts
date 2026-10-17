@@ -43,7 +43,6 @@ import {
   resolveDeploymentModel,
   resolvePiSessionRoot,
   resolveSandboxProvider,
-  SpaceMemoryProviderResolver,
 } from "@milo/adapters";
 import { resolveEncryptionKey, resolveSupervisorToken } from "@milo/core";
 import {
@@ -158,7 +157,6 @@ async function main() {
   const connector = stack.destination;
   await connector.start();
   integrationSettings.warmDirectories();
-  const memoryProviders = new SpaceMemoryProviderResolver(prisma, secrets);
   const home = new LocalAgentHomeStore(dataDir);
   const artifacts = new LocalArtifactStore(dataDir);
   const inMemoryJobs = process.env.WAKEUP_DRIVER === "memory" ? new InMemoryJobQueue() : undefined;
@@ -177,7 +175,6 @@ async function main() {
     codexCatalog: new CodexCatalogCache(),
     sandbox,
     memory: new MarkdownMemoryStore(prisma),
-    memoryProviders,
     home,
     artifacts,
     connector: stack.connector,
@@ -219,7 +216,6 @@ async function main() {
     workerId: process.pid.toString(),
     runtime,
     secretStore: secrets,
-    memoryProviders,
     deploymentModelKey,
     messaging,
   });

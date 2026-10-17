@@ -7,9 +7,6 @@ import { McpHeadersSchema, McpRemoteEndpointSchema, McpTransportSchema } from ".
 export const ComputerModeSchema = z.enum(["team", "dedicated"]);
 export type ComputerMode = z.infer<typeof ComputerModeSchema>;
 
-export const MemoryScopeSchema = z.enum(["isolated", "shared"]);
-export type MemoryScopeValue = z.infer<typeof MemoryScopeSchema>;
-
 export const AvatarStyleSchema = z.enum(["robot", "organic"]);
 export type AvatarStyle = z.infer<typeof AvatarStyleSchema>;
 
@@ -54,7 +51,6 @@ export const BotSchema = z.object({
   archivedAt: z.string().nullable(),
   unread: z.boolean(),
   parentBotId: Id.nullable(),
-  memoryScope: MemoryScopeSchema.nullable(),
   threadId: Id,
   preview: z.string(),
   status: z.string(),
@@ -323,7 +319,6 @@ export const UpdateBotInput = z
     notifyOnFinish: z.boolean().optional(),
     color: BotAvatarValueSchema.optional(),
     pinned: z.boolean().optional(),
-    memoryScope: MemoryScopeSchema.nullable().optional(),
     sectionId: Id.nullable().optional(),
     voiceId: z.string().max(120).nullable().optional(),
     autoSpeak: z.boolean().optional(),
@@ -1041,14 +1036,6 @@ export const ModelOAuthBeginSchema = z.discriminatedUnion("mode", [
   ModelOAuthBeginBaseSchema.extend({ mode: z.literal("auth-url") }),
 ]);
 export type ModelOAuthBegin = z.infer<typeof ModelOAuthBeginSchema>;
-
-export const SpaceMemoryConfigSchema = z.object({
-  provider: z.string(),
-  settings: z.record(z.string(), z.string()),
-  defaultMemoryScope: MemoryScopeSchema,
-  updatedAt: z.string(),
-});
-export type SpaceMemoryConfig = z.infer<typeof SpaceMemoryConfigSchema>;
 
 export const ModelCatalogEntrySchema = z.object({
   provider: z.string(),

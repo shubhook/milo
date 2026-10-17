@@ -318,65 +318,6 @@ export interface MemoryCapabilities {
   markdownPortable: boolean;
 }
 
-export type DurableMemoryScope = "isolated" | "shared";
-
-export interface SemanticMemoryCapabilities {
-  recall: true;
-  save: true;
-  purgeHistory: true;
-  sharedScope: true;
-}
-
-export interface SemanticMemoryResult {
-  memory: string;
-  score: number;
-  updatedAt?: string;
-  /** Stable provider id when the backend supports citation / forget. */
-  id?: string;
-  /** Attribution string preserved from the memory backend. */
-  provenance?: string;
-  /** Provider entity/namespace the fact was recalled from, when scoped. */
-  entity?: string;
-}
-
-export interface SemanticMemoryForgetRequest {
-  id: string;
-  reason?: string;
-  /** Entity/namespace from a prior recall citation, when the backend scopes deletes. */
-  entity?: string;
-}
-
-export type SemanticMemoryResponse<T = void> =
-  | { ok: true; value: T }
-  | { ok: false; error: string };
-
-export interface SemanticMemoryRecallRequest {
-  query: string;
-  scope: DurableMemoryScope;
-  botId: string;
-  /** Omit until a thread has compacted history; the provider can then skip that namespace. */
-  historyGeneration?: number;
-  limit: number;
-}
-
-export interface SemanticMemorySaveRequest {
-  content: string;
-  scope: DurableMemoryScope;
-  botId: string;
-  source: { kind: "durable" } | { kind: "history"; generation: number };
-}
-
-export interface SemanticMemoryPurgeHistoryRequest {
-  botId: string;
-  generations: number[];
-}
-
-export type SemanticMemoryForgetResponse = SemanticMemoryResponse<{
-  id: string;
-  expired: boolean;
-  reason: string | null;
-}>;
-
 export interface AgentInputImage {
   name: string;
   mimeType: "image/jpeg" | "image/png" | "image/webp" | "image/gif";

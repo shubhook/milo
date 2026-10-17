@@ -8,7 +8,6 @@ export * from "./events.js";
 export * from "./expire-stuck-run.js";
 export * from "./external-conversations.js";
 export * from "./groups.js";
-export * from "./memory-config.js";
 export * from "./messages.js";
 export * from "./messaging.js";
 export * from "./model-credentials.js";

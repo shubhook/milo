@@ -71,7 +71,6 @@ export interface ClearThreadInput {
 export interface ClearThreadResult {
   event: ProductEvent;
   cancelledRunIds: string[];
-  historyCompactionGeneration: number;
 }
 
 export interface FinalizeComputerControlReleaseInput {
@@ -267,7 +266,7 @@ export async function clearThread(
         ...(input.groupId ? { groupId: input.groupId } : { botId: input.botId }),
       },
       data: { unread: false },
-      select: { nextMessageSeq: true, historyCompactionGeneration: true },
+      select: { nextMessageSeq: true },
     });
     const activeRuns = await tx.run.findMany({
       where: {
@@ -330,14 +329,12 @@ export async function clearThread(
     return {
       event,
       cancelledRunIds: runIds,
-      historyCompactionGeneration: thread.historyCompactionGeneration,
     };
   });
   await notifyRealtime(realtime, committed.event.threadId, committed.event.seq);
   return {
     event: mapProductEvent(committed.event),
     cancelledRunIds: committed.cancelledRunIds,
-    historyCompactionGeneration: committed.historyCompactionGeneration,
   };
 }
 

@@ -60,7 +60,6 @@ import {
   reconcileComputerUpdates,
   removePiUserSessions,
   SmtpEmailProvider,
-  SpaceMemoryProviderResolver,
   toTeamChatInbound,
 } from "@milo/adapters";
 import { createAuth, isBlockedAuthPath, isLoopbackOrigin, loopbackTwinOrigins } from "@milo/auth";
@@ -262,7 +261,6 @@ export async function createApp(
     remoteConnectors,
     env.mcpAllowPrivateEndpoint,
   );
-  const memoryProviders = new SpaceMemoryProviderResolver(prisma, secrets);
   const oauthLogins = new PiOAuthLogins();
   const home = new LocalAgentHomeStore(env.dataDir);
   const artifacts = new LocalArtifactStore(env.dataDir);
@@ -401,7 +399,6 @@ export async function createApp(
     codexCatalog,
     sandbox,
     memory,
-    memoryProviders,
     home,
     artifacts,
     connector: stack.connector,
@@ -445,7 +442,6 @@ export async function createApp(
     workerId: "api",
     runtime,
     secretStore: secrets,
-    memoryProviders,
     deploymentModelKey: env.deploymentModelKey,
     messaging,
   });
@@ -471,7 +467,6 @@ export async function createApp(
     jobs,
     sandbox,
     memory,
-    memoryProviders,
     home,
     secrets,
     oauthLogins,
