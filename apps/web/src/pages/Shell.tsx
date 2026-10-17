@@ -2904,7 +2904,7 @@ export function ShellPage() {
           </div>
           <InputGroup
             data-testid="sidebar-search"
-            className="mx-3 mb-2 w-auto rounded-full border border-border bg-card text-muted-foreground focus-within:border-ring dark:bg-input"
+            className="mx-2.5 mb-2 w-auto rounded-full border border-border bg-card text-muted-foreground focus-within:border-ring dark:bg-input"
           >
             <InputGroupAddon>
               <Search size={16} strokeWidth={1.8} aria-hidden="true" />
