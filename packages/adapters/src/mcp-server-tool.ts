@@ -3,7 +3,6 @@
 
 import { McpRemoteEndpointSchema, type McpTransport, McpTransportSchema } from "@milo/contracts";
 import { deriveMcpSlug } from "@milo/core";
-import { toStringRecord } from "./memory-provider-factory.js";
 
 export { deriveMcpSlug } from "@milo/core";
 
@@ -107,4 +106,13 @@ export function needsOAuthProbe(parsed: {
   const env = parsed.env ?? {};
   const headers = parsed.headers ?? {};
   return !parsed.secret && Object.keys(env).length === 0 && Object.keys(headers).length === 0;
+}
+
+function toStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
 }

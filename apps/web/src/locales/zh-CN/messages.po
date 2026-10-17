@@ -409,10 +409,6 @@ msgstr "允许一次"
 msgid "Allow purchase actions without asking"
 msgstr "允许购买操作，无需询问"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Allow writing"
-msgstr ""
-
 #: src/components/AskCard.tsx
 msgid "Allowed once"
 msgstr "已允许一次"
@@ -615,10 +611,6 @@ msgstr "返回"
 msgid "Back to sign in"
 msgstr "返回登录"
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Base URL"
-msgstr "Base URL"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Basic auth"
 msgstr ""
@@ -627,7 +619,6 @@ msgstr ""
 msgid "Basic auth ({username})"
 msgstr ""
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
 msgid "Bearer token"
@@ -676,10 +667,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Bots are working"
 msgstr "Bot 正在工作"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Brain label"
-msgstr ""
 
 #: src/pages/PluginsOverlay.tsx
 msgid "Browse MCP servers"
@@ -866,7 +853,6 @@ msgstr "关闭集成"
 msgid "Close MCP servers"
 msgstr "关闭 MCP 服务器"
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "关闭记忆设置"
@@ -903,10 +889,6 @@ msgstr "关闭用户设置"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Close voice settings"
 msgstr "关闭语音设置"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Cloud"
-msgstr "云端"
 
 #: src/components/AskCard.tsx
 msgid "Code"
@@ -991,8 +973,6 @@ msgid "Confirm password"
 msgstr "确认密码"
 
 #: src/components/integrations/IntegrationSetup.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "连接"
@@ -1027,7 +1007,6 @@ msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
@@ -1056,8 +1035,6 @@ msgstr "已连接，下一条消息起即可使用其工具。"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -1150,11 +1127,6 @@ msgstr ""
 msgid "Could not connect"
 msgstr "无法连接"
 
-#. placeholder {0}: registration.name
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not connect {0}"
-msgstr "无法连接 {0}"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not connect this provider"
 msgstr "无法连接此提供方"
@@ -1219,10 +1191,6 @@ msgstr ""
 #: src/pages/Artifacts.tsx
 msgid "Could not delete this artifact."
 msgstr ""
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not disconnect memory provider"
-msgstr "无法断开记忆提供方"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not disconnect OAuth"
@@ -1497,10 +1465,6 @@ msgstr "无法更新电脑"
 msgid "Could not update reaction"
 msgstr "无法更新反应"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not update the default memory scope"
-msgstr "无法更新默认记忆范围"
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not upload file"
 msgstr ""
@@ -1648,10 +1612,6 @@ msgstr ""
 msgid "Default ({0})"
 msgstr "默认（{0}）"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Default scope"
-msgstr "默认范围"
-
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
 #: src/pages/KnowledgeSection.tsx
@@ -1736,7 +1696,6 @@ msgid "Direct MCP"
 msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
@@ -1751,7 +1710,6 @@ msgstr ""
 msgid "Disconnected {0}."
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
@@ -2157,10 +2115,6 @@ msgstr ""
 msgid "Inbox & email"
 msgstr "收件箱和邮件"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Inherit default"
-msgstr "沿用默认"
-
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
 msgstr "输入"
@@ -2168,10 +2122,6 @@ msgstr "输入"
 #: src/pages/OnboardingAgent.tsx
 msgid "Install"
 msgstr ""
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Instance API key"
-msgstr "实例 API 密钥"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Instruction"
@@ -2202,11 +2152,6 @@ msgstr "间隔数量"
 #: src/pages/RoutineSchedule.tsx
 msgid "Interval unit"
 msgstr "间隔单位"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Isolated"
-msgstr "隔离"
 
 #: src/pages/Artifacts.tsx
 msgid "Isolated preview — no access to your account"
@@ -2319,10 +2264,6 @@ msgstr "正在加载动态…"
 msgid "Loading integrations…"
 msgstr "正在加载集成…"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Loading memory settings…"
-msgstr "正在加载记忆设置…"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Loading model catalog…"
 msgstr "正在加载模型目录…"
@@ -2352,10 +2293,6 @@ msgstr "正在加载语音提供方…"
 #: src/pages/Shell.tsx
 msgid "Loading…"
 msgstr "加载中…"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Local"
-msgstr "本地"
 
 #: src/pages/HostComputerPrompt.tsx
 msgid "Local access lets bots run commands without asking. Avoid it on shared or public servers."
@@ -2394,10 +2331,6 @@ msgstr "管理 MCP 服务器"
 msgid "Manage messaging settings"
 msgstr "管理消息设置"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Manage the Space semantic memory provider."
-msgstr "管理工作区语义记忆提供方。"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr ""
@@ -2435,10 +2368,6 @@ msgstr "每次请求的最大图像数"
 msgid "Maximum output tokens"
 msgstr "最大输出 token 数"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "MCP endpoint"
-msgstr ""
-
 #: src/pages/McpServersOverlay.tsx
 msgid "MCP servers"
 msgstr "MCP 服务器"
@@ -2461,14 +2390,9 @@ msgid "Members (pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "成员（选择 {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX} 个）"
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Memory"
 msgstr "记忆"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Memory scope"
-msgstr "记忆范围"
 
 #: src/pages/Shell.tsx
 msgid "Mentions"
@@ -2932,10 +2856,6 @@ msgstr "或连接 API 密钥"
 msgid "Organic"
 msgstr "自然"
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Organization API key"
-msgstr "组织 API 密钥"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Other model…"
 msgstr "其他模型…"
@@ -3022,10 +2942,6 @@ msgstr ""
 msgid "Protected input"
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Provider"
-msgstr "提供方"
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
@@ -3062,14 +2978,6 @@ msgstr ""
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Reasoning effort"
 msgstr "推理强度"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall and write"
-msgstr ""
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall only"
-msgstr ""
 
 #: src/pages/ActivityList.tsx
 msgid "Recent"
@@ -3518,10 +3426,6 @@ msgstr "正在发送…"
 msgid "Sentry alert"
 msgstr "Sentry 告警"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Serenity endpoint is required."
-msgstr ""
-
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/LocalSettings.tsx
@@ -3561,11 +3465,6 @@ msgstr "设置帮助"
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape"
 msgstr "形状"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Shared"
-msgstr "共享"
 
 #: src/pages/shell/dialogs.tsx
 msgid "Shared chat with 2-6 bots. They all reply in the same thread."
@@ -3839,10 +3738,6 @@ msgstr "API 未恢复。请刷新此页面。"
 #: src/pages/OnboardingAgent.tsx
 msgid "The command stopped before it finished."
 msgstr ""
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "The selected memory provider is not available in this build."
-msgstr "所选记忆提供方在此构建中不可用。"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "These saved settings can't be read. Remove it and add it again."

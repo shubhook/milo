@@ -52,13 +52,11 @@ describe("history compaction with real Pi", () => {
         ]),
       },
     };
-    const memoryProviders = { resolve: vi.fn(async () => null) };
     const jobs = { enqueue: vi.fn(async () => undefined) };
     const deps = {
       prisma: prisma as unknown as PrismaClient,
       runtime: new PiAgentRuntime(),
       jobs,
-      memoryProviders,
       resolveModel: async () => server.model,
     };
 
@@ -66,7 +64,6 @@ describe("history compaction with real Pi", () => {
     expect(updateMany).not.toHaveBeenCalled();
     expect(thread.historyCompactedUpToSeq).toBe(49);
     expect(thread.historyCompactionSummary).toBe("Earlier decisions.");
-    expect(memoryProviders.resolve).not.toHaveBeenCalled();
     expect(jobs.enqueue).not.toHaveBeenCalled();
 
     await compactHistory(deps, thread.id);
@@ -79,7 +76,6 @@ describe("history compaction with real Pi", () => {
       },
       data: { historyCompactedUpToSeq: 50, historyCompactionSummary: summary },
     });
-    expect(memoryProviders.resolve).toHaveBeenCalledOnce();
     expect(jobs.enqueue).not.toHaveBeenCalled();
   });
 });

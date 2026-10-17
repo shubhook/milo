@@ -5,7 +5,6 @@ import {
   CLAUDE_CODE_PROVIDER,
   parseModelSecret,
   selectConfiguredModel,
-  toStringRecord,
 } from "@milo/adapters";
 import type { Actor, AiConsentQuery, AiConsentStatus, AiRecipient } from "@milo/contracts";
 import { AI_DISCLOSURE_VERSION, AI_PRIVACY_URL } from "@milo/contracts";
@@ -23,7 +22,7 @@ export async function aiConsentStatus(
   actor: Actor,
   query: AiConsentQuery = {},
 ): Promise<AiConsentStatus> {
-  const uses = query.uses ?? ["model", "memory", "voice"];
+  const uses = query.uses ?? ["model", "voice"];
   const modelsEnabled = uses.includes("model") && deps.env.agentRuntime !== "scripted";
   const target =
     query.botId || query.groupId ? await resolveThreadTarget(deps.prisma, actor, query) : null;
@@ -32,46 +31,40 @@ export async function aiConsentStatus(
       ? [target.botId]
       : target.memberBotIds
     : undefined;
-  const [preferences, defaultCredential, bots, voices, memory, settings, consents] =
-    await Promise.all([
-      modelsEnabled
-        ? deps.prisma.spaceModelPreference.findMany({
+  const [preferences, defaultCredential, bots, voices, settings, consents] = await Promise.all([
+    modelsEnabled
+      ? deps.prisma.spaceModelPreference.findMany({
+          where: { userId: actor.userId, spaceId: actor.spaceId },
+          include: { credential: true },
+        })
+      : [],
+    modelsEnabled ? findDefaultModelCredential(deps.prisma, actor) : null,
+    modelsEnabled
+      ? deps.prisma.bot.findMany({
+          where: {
+            userId: actor.userId,
+            spaceId: actor.spaceId,
+            archivedAt: null,
+            ...(botIds ? { id: { in: botIds } } : {}),
+          },
+          select: { modelProvider: true, modelId: true, thinkingLevel: true },
+        })
+      : [],
+    uses.includes("voice")
+      ? query.uses
+        ? findDefaultVoiceCredential(deps.prisma, actor).then((credential) =>
+            credential ? [{ credential }] : [],
+          )
+        : deps.prisma.spaceVoicePreference.findMany({
             where: { userId: actor.userId, spaceId: actor.spaceId },
             include: { credential: true },
           })
-        : [],
-      modelsEnabled ? findDefaultModelCredential(deps.prisma, actor) : null,
-      modelsEnabled
-        ? deps.prisma.bot.findMany({
-            where: {
-              userId: actor.userId,
-              spaceId: actor.spaceId,
-              archivedAt: null,
-              ...(botIds ? { id: { in: botIds } } : {}),
-            },
-            select: { modelProvider: true, modelId: true, thinkingLevel: true },
-          })
-        : [],
-      uses.includes("voice")
-        ? query.uses
-          ? findDefaultVoiceCredential(deps.prisma, actor).then((credential) =>
-              credential ? [{ credential }] : [],
-            )
-          : deps.prisma.spaceVoicePreference.findMany({
-              where: { userId: actor.userId, spaceId: actor.spaceId },
-              include: { credential: true },
-            })
-        : [],
-      uses.includes("memory")
-        ? deps.prisma.spaceMemoryConfig.findUnique({ where: { spaceId: actor.spaceId } })
-        : null,
-      modelsEnabled
-        ? deps.prisma.deploymentSettings.findUnique({ where: { id: "default" } })
-        : null,
-      deps.prisma.aiDataConsent.findMany({
-        where: { userId: actor.userId, spaceId: actor.spaceId, version: AI_DISCLOSURE_VERSION },
-      }),
-    ]);
+      : [],
+    modelsEnabled ? deps.prisma.deploymentSettings.findUnique({ where: { id: "default" } }) : null,
+    deps.prisma.aiDataConsent.findMany({
+      where: { userId: actor.userId, spaceId: actor.spaceId, version: AI_DISCLOSURE_VERSION },
+    }),
+  ]);
   const allowed = new Set(consents.map((row) => row.recipientKey));
   const recipients = new Map<string, AiRecipient>();
   const add = (recipient: ReturnType<typeof aiRecipient>) => {
@@ -170,14 +163,6 @@ export async function aiConsentStatus(
   }
   for (const voice of voices)
     add(aiRecipient({ provider: voice.credential.provider, use: "voice" }));
-  if (memory)
-    add(
-      aiRecipient({
-        provider: memory.provider,
-        use: "memory",
-        baseUrl: toStringRecord(memory.settings).baseUrl,
-      }),
-    );
   return {
     scope: createHash("sha256")
       .update(JSON.stringify([actor.userId, actor.spaceId]))

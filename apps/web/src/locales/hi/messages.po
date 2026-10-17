@@ -409,10 +409,6 @@ msgstr "एक बार अनुमति दें"
 msgid "Allow purchase actions without asking"
 msgstr "खरीद कार्रवाइयों को बिना पूछे अनुमति दें"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Allow writing"
-msgstr ""
-
 #: src/components/AskCard.tsx
 msgid "Allowed once"
 msgstr "एक बार अनुमति दी गई"
@@ -615,10 +611,6 @@ msgstr ""
 msgid "Back to sign in"
 msgstr "साइन इन पर वापस जाएँ"
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Base URL"
-msgstr "बेस URL"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Basic auth"
 msgstr ""
@@ -627,7 +619,6 @@ msgstr ""
 msgid "Basic auth ({username})"
 msgstr ""
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
 msgid "Bearer token"
@@ -676,10 +667,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Bots are working"
 msgstr "बॉट काम कर रहे हैं"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Brain label"
-msgstr ""
 
 #: src/pages/PluginsOverlay.tsx
 msgid "Browse MCP servers"
@@ -866,7 +853,6 @@ msgstr "इंटीग्रेशन बंद करें"
 msgid "Close MCP servers"
 msgstr "MCP सर्वर बंद करें"
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "मेमोरी सेटिंग्स बंद करें"
@@ -903,10 +889,6 @@ msgstr "उपयोगकर्ता सेटिंग्स बंद कर
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Close voice settings"
 msgstr "आवाज़ सेटिंग्स बंद करें"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Cloud"
-msgstr "क्लाउड"
 
 #: src/components/AskCard.tsx
 msgid "Code"
@@ -991,8 +973,6 @@ msgid "Confirm password"
 msgstr "पासवर्ड की पुष्टि करें"
 
 #: src/components/integrations/IntegrationSetup.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "कनेक्ट करें"
@@ -1027,7 +1007,6 @@ msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
@@ -1056,8 +1035,6 @@ msgstr "कनेक्टेड। इसके टूल आपके अग�
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -1150,11 +1127,6 @@ msgstr ""
 msgid "Could not connect"
 msgstr "कनेक्ट नहीं हो सका"
 
-#. placeholder {0}: registration.name
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not connect {0}"
-msgstr "{0} कनेक्ट नहीं हो सका"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not connect this provider"
 msgstr "यह प्रोवाइडर कनेक्ट नहीं हो सका"
@@ -1219,10 +1191,6 @@ msgstr ""
 #: src/pages/Artifacts.tsx
 msgid "Could not delete this artifact."
 msgstr ""
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not disconnect memory provider"
-msgstr "मेमोरी प्रोवाइडर डिस्कनेक्ट नहीं हो सका"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not disconnect OAuth"
@@ -1497,10 +1465,6 @@ msgstr "कंप्यूटर अपडेट नहीं हो सका"
 msgid "Could not update reaction"
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not update the default memory scope"
-msgstr "डिफ़ॉल्ट मेमोरी स्कोप अपडेट नहीं हो सका"
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not upload file"
 msgstr ""
@@ -1648,10 +1612,6 @@ msgstr ""
 msgid "Default ({0})"
 msgstr "डिफ़ॉल्ट ({0})"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Default scope"
-msgstr "डिफ़ॉल्ट स्कोप"
-
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
 #: src/pages/KnowledgeSection.tsx
@@ -1736,7 +1696,6 @@ msgid "Direct MCP"
 msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
@@ -1751,7 +1710,6 @@ msgstr ""
 msgid "Disconnected {0}."
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
@@ -2157,10 +2115,6 @@ msgstr ""
 msgid "Inbox & email"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Inherit default"
-msgstr "डिफ़ॉल्ट का पालन करें"
-
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
 msgstr "इनपुट"
@@ -2168,10 +2122,6 @@ msgstr "इनपुट"
 #: src/pages/OnboardingAgent.tsx
 msgid "Install"
 msgstr ""
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Instance API key"
-msgstr "इंस्टेंस API कुंजी"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Instruction"
@@ -2202,11 +2152,6 @@ msgstr "अंतराल मात्रा"
 #: src/pages/RoutineSchedule.tsx
 msgid "Interval unit"
 msgstr "अंतराल इकाई"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Isolated"
-msgstr "पृथक"
 
 #: src/pages/Artifacts.tsx
 msgid "Isolated preview — no access to your account"
@@ -2319,10 +2264,6 @@ msgstr "गतिविधि लोड हो रही है…"
 msgid "Loading integrations…"
 msgstr "इंटीग्रेशन लोड हो रहे हैं…"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Loading memory settings…"
-msgstr "मेमोरी सेटिंग्स लोड हो रही हैं…"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Loading model catalog…"
 msgstr "मॉडल कैटलॉग लोड हो रहा है…"
@@ -2352,10 +2293,6 @@ msgstr "आवाज़ प्रोवाइडर्स लोड हो र�
 #: src/pages/Shell.tsx
 msgid "Loading…"
 msgstr "लोड हो रहा है…"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Local"
-msgstr "लोकल"
 
 #: src/pages/HostComputerPrompt.tsx
 msgid "Local access lets bots run commands without asking. Avoid it on shared or public servers."
@@ -2394,10 +2331,6 @@ msgstr "MCP सर्वर प्रबंधित करें"
 msgid "Manage messaging settings"
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Manage the Space semantic memory provider."
-msgstr "वर्कस्पेस के सिमेंटिक मेमोरी प्रोवाइडर को प्रबंधित करें।"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr ""
@@ -2435,10 +2368,6 @@ msgstr "प्रति अनुरोध अधिकतम इमेज"
 msgid "Maximum output tokens"
 msgstr "अधिकतम आउटपुट टोकन"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "MCP endpoint"
-msgstr ""
-
 #: src/pages/McpServersOverlay.tsx
 msgid "MCP servers"
 msgstr "MCP सर्वर"
@@ -2461,14 +2390,9 @@ msgid "Members (pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "सदस्य ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX} चुनें)"
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Memory"
 msgstr "मेमोरी"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Memory scope"
-msgstr "मेमोरी स्कोप"
 
 #: src/pages/Shell.tsx
 msgid "Mentions"
@@ -2932,10 +2856,6 @@ msgstr "या एक API कुंजी कनेक्ट करें"
 msgid "Organic"
 msgstr ""
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Organization API key"
-msgstr "संगठन API कुंजी"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Other model…"
 msgstr "अन्य मॉडल…"
@@ -3022,10 +2942,6 @@ msgstr ""
 msgid "Protected input"
 msgstr ""
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Provider"
-msgstr "प्रोवाइडर"
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
@@ -3062,14 +2978,6 @@ msgstr ""
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Reasoning effort"
 msgstr "रीज़निंग प्रयास"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall and write"
-msgstr ""
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall only"
-msgstr ""
 
 #: src/pages/ActivityList.tsx
 msgid "Recent"
@@ -3518,10 +3426,6 @@ msgstr "भेजा जा रहा है…"
 msgid "Sentry alert"
 msgstr ""
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Serenity endpoint is required."
-msgstr ""
-
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/LocalSettings.tsx
@@ -3561,11 +3465,6 @@ msgstr "सेटअप सहायता"
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape"
 msgstr "आकार"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Shared"
-msgstr "साझा"
 
 #: src/pages/shell/dialogs.tsx
 msgid "Shared chat with 2-6 bots. They all reply in the same thread."
@@ -3839,10 +3738,6 @@ msgstr ""
 #: src/pages/OnboardingAgent.tsx
 msgid "The command stopped before it finished."
 msgstr ""
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "The selected memory provider is not available in this build."
-msgstr "चयनित मेमोरी प्रोवाइडर इस बिल्ड में उपलब्ध नहीं है।"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "These saved settings can't be read. Remove it and add it again."

@@ -409,10 +409,6 @@ msgstr "Allow once"
 msgid "Allow purchase actions without asking"
 msgstr "Allow purchase actions without asking"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Allow writing"
-msgstr "Allow writing"
-
 #: src/components/AskCard.tsx
 msgid "Allowed once"
 msgstr "Allowed once"
@@ -615,10 +611,6 @@ msgstr "Back"
 msgid "Back to sign in"
 msgstr "Back to sign in"
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Base URL"
-msgstr "Base URL"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Basic auth"
 msgstr "Basic auth"
@@ -627,7 +619,6 @@ msgstr "Basic auth"
 msgid "Basic auth ({username})"
 msgstr "Basic auth ({username})"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
 msgid "Bearer token"
@@ -676,10 +667,6 @@ msgstr "Bots"
 #: src/pages/Shell.tsx
 msgid "Bots are working"
 msgstr "Bots are working"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Brain label"
-msgstr "Brain label"
 
 #: src/pages/PluginsOverlay.tsx
 msgid "Browse MCP servers"
@@ -866,7 +853,6 @@ msgstr "Close integrations"
 msgid "Close MCP servers"
 msgstr "Close MCP servers"
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "Close memory settings"
@@ -903,10 +889,6 @@ msgstr "Close user settings"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Close voice settings"
 msgstr "Close voice settings"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Cloud"
-msgstr "Cloud"
 
 #: src/components/AskCard.tsx
 msgid "Code"
@@ -991,8 +973,6 @@ msgid "Confirm password"
 msgstr "Confirm password"
 
 #: src/components/integrations/IntegrationSetup.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "Connect"
@@ -1027,7 +1007,6 @@ msgstr "Connect your agent"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
@@ -1056,8 +1035,6 @@ msgstr "Connected. Its tools are available from your next message."
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -1150,11 +1127,6 @@ msgstr "Could not complete the update. Try again."
 msgid "Could not connect"
 msgstr "Could not connect"
 
-#. placeholder {0}: registration.name
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not connect {0}"
-msgstr "Could not connect {0}"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not connect this provider"
 msgstr "Could not connect this provider"
@@ -1219,10 +1191,6 @@ msgstr "Could not delete space"
 #: src/pages/Artifacts.tsx
 msgid "Could not delete this artifact."
 msgstr "Could not delete this artifact."
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not disconnect memory provider"
-msgstr "Could not disconnect memory provider"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not disconnect OAuth"
@@ -1497,10 +1465,6 @@ msgstr "Could not update computer"
 msgid "Could not update reaction"
 msgstr "Could not update reaction"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Could not update the default memory scope"
-msgstr "Could not update the default memory scope"
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not upload file"
 msgstr "Could not upload file"
@@ -1648,10 +1612,6 @@ msgstr "Default ({0})"
 msgid "Default ({0})"
 msgstr "Default ({0})"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Default scope"
-msgstr "Default scope"
-
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
 #: src/pages/KnowledgeSection.tsx
@@ -1736,7 +1696,6 @@ msgid "Direct MCP"
 msgstr "Direct MCP"
 
 #: src/pages/McpServersOverlay.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
@@ -1751,7 +1710,6 @@ msgstr "Disconnect {disconnectName}?"
 msgid "Disconnected {0}."
 msgstr "Disconnected {0}."
 
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
@@ -2157,10 +2115,6 @@ msgstr "In use"
 msgid "Inbox & email"
 msgstr "Inbox & email"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Inherit default"
-msgstr "Inherit default"
-
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
 msgstr "Inputs"
@@ -2168,10 +2122,6 @@ msgstr "Inputs"
 #: src/pages/OnboardingAgent.tsx
 msgid "Install"
 msgstr "Install"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Instance API key"
-msgstr "Instance API key"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Instruction"
@@ -2202,11 +2152,6 @@ msgstr "Interval amount"
 #: src/pages/RoutineSchedule.tsx
 msgid "Interval unit"
 msgstr "Interval unit"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Isolated"
-msgstr "Isolated"
 
 #: src/pages/Artifacts.tsx
 msgid "Isolated preview — no access to your account"
@@ -2319,10 +2264,6 @@ msgstr "Loading activity…"
 msgid "Loading integrations…"
 msgstr "Loading integrations…"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Loading memory settings…"
-msgstr "Loading memory settings…"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Loading model catalog…"
 msgstr "Loading model catalog…"
@@ -2352,10 +2293,6 @@ msgstr "Loading voice providers…"
 #: src/pages/Shell.tsx
 msgid "Loading…"
 msgstr "Loading…"
-
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Local"
-msgstr "Local"
 
 #: src/pages/HostComputerPrompt.tsx
 msgid "Local access lets bots run commands without asking. Avoid it on shared or public servers."
@@ -2394,10 +2331,6 @@ msgstr "Manage MCP servers"
 msgid "Manage messaging settings"
 msgstr "Manage messaging settings"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Manage the Space semantic memory provider."
-msgstr "Manage the Space semantic memory provider."
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr "Manual"
@@ -2435,10 +2368,6 @@ msgstr "Maximum images per request"
 msgid "Maximum output tokens"
 msgstr "Maximum output tokens"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "MCP endpoint"
-msgstr "MCP endpoint"
-
 #: src/pages/McpServersOverlay.tsx
 msgid "MCP servers"
 msgstr "MCP servers"
@@ -2461,14 +2390,9 @@ msgid "Members (pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "Members (pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MemorySettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 msgid "Memory"
 msgstr "Memory"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Memory scope"
-msgstr "Memory scope"
 
 #: src/pages/Shell.tsx
 msgid "Mentions"
@@ -2932,10 +2856,6 @@ msgstr "Or connect an API key"
 msgid "Organic"
 msgstr "Organic"
 
-#: src/pages/memory-providers/SupermemorySettingsForm.tsx
-msgid "Organization API key"
-msgstr "Organization API key"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Other model…"
 msgstr "Other model…"
@@ -3022,10 +2942,6 @@ msgstr "Project ID"
 msgid "Protected input"
 msgstr "Protected input"
 
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "Provider"
-msgstr "Provider"
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
@@ -3062,14 +2978,6 @@ msgstr "Ready"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Reasoning effort"
 msgstr "Reasoning effort"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall and write"
-msgstr "Recall and write"
-
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Recall only"
-msgstr "Recall only"
 
 #: src/pages/ActivityList.tsx
 msgid "Recent"
@@ -3518,10 +3426,6 @@ msgstr "Sending…"
 msgid "Sentry alert"
 msgstr "Sentry alert"
 
-#: src/pages/memory-providers/SerenitySettingsForm.tsx
-msgid "Serenity endpoint is required."
-msgstr "Serenity endpoint is required."
-
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/LocalSettings.tsx
@@ -3561,11 +3465,6 @@ msgstr "Setup help"
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape"
 msgstr "Shape"
-
-#: src/pages/MemorySettingsOverlay.tsx
-#: src/pages/shell/bot-panel.tsx
-msgid "Shared"
-msgstr "Shared"
 
 #: src/pages/shell/dialogs.tsx
 msgid "Shared chat with 2-6 bots. They all reply in the same thread."
@@ -3839,10 +3738,6 @@ msgstr "The API did not come back. Refresh this page."
 #: src/pages/OnboardingAgent.tsx
 msgid "The command stopped before it finished."
 msgstr "The command stopped before it finished."
-
-#: src/pages/MemorySettingsOverlay.tsx
-msgid "The selected memory provider is not available in this build."
-msgstr "The selected memory provider is not available in this build."
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "These saved settings can't be read. Remove it and add it again."

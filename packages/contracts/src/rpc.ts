@@ -46,7 +46,6 @@ import {
   McpServerConfigInput,
   McpServerSchema,
   MemoryDocumentSchema,
-  MemoryScopeSchema,
   MeSchema,
   MessagingAgentConnectionSchema,
   MessagingChannelMembershipSchema,
@@ -66,7 +65,6 @@ import {
   ServerUpdateRunSchema,
   ServerUpdateStatusSchema,
   SkillPlaybookSchema,
-  SpaceMemoryConfigSchema,
   SpaceNavigationSchema,
   SpaceSchema,
   TaughtSkillSchema,
@@ -441,21 +439,6 @@ export const appContract = {
       .input(z.object({ documentId: Id, content: z.string() }))
       .output(MemoryDocumentSchema),
     exportMarkdown: oc.input(z.object({ botId: Id.optional() })).output(z.string()),
-    providerConfig: oc.output(SpaceMemoryConfigSchema.nullable()),
-    connectProvider: oc
-      .input(
-        z.object({
-          provider: z.string().min(1),
-          settings: z.record(z.string(), z.string()),
-          credentials: z.record(z.string(), z.string()),
-          defaultMemoryScope: MemoryScopeSchema.default("isolated"),
-        }),
-      )
-      .output(SpaceMemoryConfigSchema),
-    setDefaultScope: oc
-      .input(z.object({ defaultMemoryScope: MemoryScopeSchema }))
-      .output(SpaceMemoryConfigSchema),
-    disconnectProvider: oc.output(z.object({ ok: z.literal(true) })),
   },
   routines: {
     list: oc.input(botId).output(z.array(RoutineSchema)),

@@ -553,49 +553,6 @@ export const builtinAgentTools: ConnectorTool[] = [
     },
     readOnly: true,
   },
-  // Semantic-memory tools: exposed by selectMemoryTools() only when a
-  // A Space memory provider is configured (which hides `remember`).
-  {
-    name: "save_memory",
-    description:
-      "Store a durable fact in this bot's semantic memory (preferences, decisions, recurring context). Use for anything worth recalling in future conversations.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        content: { type: "string" },
-      },
-      required: ["content"],
-    },
-  },
-  {
-    name: "recall_memory",
-    description: "Semantically search this bot's durable memory for facts relevant to a query.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        query: { type: "string" },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    name: "forget_memory",
-    description:
-      "Forget a durable semantic memory by id (from recall citations). Providers without forget support return an error.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "Memory id from a prior recall citation." },
-        entity: {
-          type: "string",
-          description:
-            "Optional entity/namespace from the recall citation when the provider scopes deletes.",
-        },
-        reason: { type: "string", description: "Optional reason recorded with the forget." },
-      },
-      required: ["id"],
-    },
-  },
   {
     name: "task_catalog",
     description:
