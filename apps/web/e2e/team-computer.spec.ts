@@ -21,8 +21,12 @@ test("Team Computer gives bots a home folder plus shared space while Private sta
   const chiefId = activeBotId(page);
 
   await openComputerPanel(page);
+  // The preview shows the label only until the live screen loads; the full window always names it.
+  await page.getByTestId("computer-preview").hover();
+  await page.getByTestId("computer-preview-open").click();
   await expect(page.getByText("Team Computer", { exact: true }).last()).toBeVisible();
   await captureScreenshot(page, testInfo, "41-team-computer");
+  await page.getByRole("button", { name: "Close computer" }).click();
 
   const writerId = await createBot(page, "Writer", "team");
   await sendAndWait(
