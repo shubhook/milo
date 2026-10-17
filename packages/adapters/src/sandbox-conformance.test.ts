@@ -2,8 +2,11 @@ import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { ComputerRef, ProcessEvent, SandboxProvider } from "@milo/adapter-kit";
+import { EgressUnsupportedError } from "@milo/adapter-kit";
+import { OPEN_COMPUTER_EGRESS } from "@milo/contracts";
 import { describe, expect, it } from "vitest";
 import { DesktopSandboxProvider } from "./desktop-sandbox.js";
+import { DockerSandboxProvider } from "./docker-sandbox.js";
 import { FakeSandboxProvider } from "./fake-sandbox.js";
 import { provisionPrepared } from "./sandbox-test-support.js";
 
@@ -247,5 +250,37 @@ describe("sandbox conformance", () => {
 
     await desktop.destroy(computer, ctx);
     rmSync(root, { recursive: true, force: true });
+  });
+  it("refuses a restricted egress policy unless the provider reports the capability", async () => {
+    const restricted = {
+      mode: "restricted" as const,
+      allowedDomains: ["pypi.org"],
+      allowedTcp: [],
+    };
+    const emulated: SandboxProvider[] = [new FakeSandboxProvider(), new DesktopSandboxProvider()];
+    for (const [index, provider] of emulated.entries()) {
+      expect(provider.describe().capabilities.egress).toBe(false);
+      await expect(
+        provider.provision(
+          { botId: `egress-${index}`, homePath: `/tmp/egress-${index}`, egress: restricted },
+          ctx,
+        ),
+      ).rejects.toBeInstanceOf(EgressUnsupportedError);
+    }
+    for (const [index, provider] of emulated.entries()) {
+      const computer = await provisionPrepared(
+        provider,
+        {
+          botId: `egress-open-${index}`,
+          homePath: `/tmp/egress-open-${index}`,
+          egress: OPEN_COMPUTER_EGRESS,
+        },
+        ctx,
+      );
+      await provider.destroy(computer, ctx);
+    }
+    expect(
+      new DockerSandboxProvider("http://supervisor.test", "token").describe().capabilities.egress,
+    ).toBe(true);
   });
 });
