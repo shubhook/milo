@@ -719,10 +719,6 @@ msgstr "Annuler le nouveau groupe"
 msgid "Cancel reply"
 msgstr "Annuler la réponse"
 
-#: src/components/CloudAgentCard.tsx
-msgid "cancelled"
-msgstr "annulé"
-
 #: src/components/AskCard.tsx
 #: src/pages/ActivityList.tsx
 msgid "Cancelled"
@@ -1945,10 +1941,6 @@ msgstr "Très élevé"
 msgid "Extra high"
 msgstr ""
 
-#: src/components/CloudAgentCard.tsx
-msgid "failed"
-msgstr "échoué"
-
 #: src/pages/ActivityList.tsx
 msgid "Failed"
 msgstr "Échoué"
@@ -1998,10 +1990,6 @@ msgstr "Recherche en cours…"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Finish signing in at <0>{0}</0>. The final page may not load; paste its URL or code here."
 msgstr "Terminez la connexion sur <0>{0}</0>. La page finale peut ne pas se charger ; collez son URL ou code ici."
-
-#: src/components/CloudAgentCard.tsx
-msgid "finished"
-msgstr "terminé"
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -3043,10 +3031,6 @@ msgstr "Fournisseur"
 msgid "Providers"
 msgstr "Fournisseurs"
 
-#: src/components/CloudAgentCard.tsx
-msgid "Pull request"
-msgstr "Demande de fusion"
-
 #: src/pages/ActivityList.tsx
 msgid "Queued"
 msgstr "En file d'attente"
@@ -3379,10 +3363,6 @@ msgstr "Historique des exécutions"
 #: src/pages/Shell.tsx
 msgid "Run time must be in the future."
 msgstr "L'horaire d'exécution doit être dans le futur."
-
-#: src/components/CloudAgentCard.tsx
-msgid "running"
-msgstr "en cours"
 
 #: src/pages/ActivityList.tsx
 msgid "Running"

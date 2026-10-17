@@ -7,7 +7,6 @@ import { listPiCatalog } from "./pi-models.js";
 import { voiceCatalogEntry } from "./voice-factory.js";
 
 const PRIVACY_URLS: Record<string, string> = {
-  cursor: "https://cursor.com/privacy",
   openrouter: "https://openrouter.ai/privacy",
   openai: "https://openai.com/policies/privacy-policy/",
   "openai-codex": "https://openai.com/policies/privacy-policy/",
@@ -56,7 +55,6 @@ export function aiRecipient(input: {
 function recipientName(provider: string, use: AiDataUse) {
   if (use === "voice") return voiceCatalogEntry(provider)?.name ?? provider;
   if (use === "memory") return provider === "supermemory" ? "Supermemory" : provider;
-  if (provider === "cursor") return "Cursor";
   if (provider === CLAUDE_CODE_PROVIDER) return "Claude Code";
   return listPiCatalog().find((entry) => entry.provider === provider)?.providerName ?? provider;
 }

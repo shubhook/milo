@@ -9,8 +9,6 @@ import type {
 import { messagingDeliverJob } from "@milo/adapter-kit";
 import type { PrismaClient, ThreadEvents } from "@milo/db";
 import { getLogger } from "@milo/logging";
-import type { CloudAgentConnection } from "./cloud-agent-factory.js";
-import { pollCloudAgent } from "./cloud-agent-poll.js";
 import { expireComputerControl } from "./computer-control.js";
 import { scheduleComputerSleep, sleepComputerIfIdle } from "./computer-idle.js";
 import { performComputerUpdate } from "./computer-update.js";
@@ -34,7 +32,6 @@ export function createBackgroundJobHandlers(deps: {
   memoryProviders: MemoryProviderResolver;
   deploymentModelKey?: string;
   messaging?: MessagingSurface;
-  cloudAgent?: CloudAgentConnection | null;
 }): BackgroundJobHandlers {
   const deliverMessaging = async (runId?: string) => {
     if (!deps.messaging) return;
@@ -86,17 +83,6 @@ export function createBackgroundJobHandlers(deps: {
     },
     "skill.teaching-expire": async (payload) => {
       await expireTaughtSkillTeaching(deps, payload.skillId);
-    },
-    "cloud_agent.poll": async (payload) => {
-      await pollCloudAgent(
-        {
-          prisma: deps.prisma,
-          jobs: deps.jobs,
-          events: deps.events,
-          cloudAgent: deps.cloudAgent,
-        },
-        payload,
-      );
     },
     "history.compact": async (payload) => {
       await compactHistory(

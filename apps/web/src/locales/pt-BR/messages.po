@@ -719,10 +719,6 @@ msgstr "Cancelar novo grupo"
 msgid "Cancel reply"
 msgstr "cancelar resposta"
 
-#: src/components/CloudAgentCard.tsx
-msgid "cancelled"
-msgstr "cancelado"
-
 #: src/components/AskCard.tsx
 #: src/pages/ActivityList.tsx
 msgid "Cancelled"
@@ -1945,10 +1941,6 @@ msgstr "Extra alta"
 msgid "Extra high"
 msgstr ""
 
-#: src/components/CloudAgentCard.tsx
-msgid "failed"
-msgstr "falhou"
-
 #: src/pages/ActivityList.tsx
 msgid "Failed"
 msgstr "Falha"
@@ -1998,10 +1990,6 @@ msgstr "Localizando…"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Finish signing in at <0>{0}</0>. The final page may not load; paste its URL or code here."
 msgstr "Conclua o login em <0>{0}</0>. A página final não pode ser carregada; cole seu URL ou código aqui."
-
-#: src/components/CloudAgentCard.tsx
-msgid "finished"
-msgstr "concluído"
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -3043,10 +3031,6 @@ msgstr "Provedor"
 msgid "Providers"
 msgstr "Provedores"
 
-#: src/components/CloudAgentCard.tsx
-msgid "Pull request"
-msgstr "Solicitação de pull"
-
 #: src/pages/ActivityList.tsx
 msgid "Queued"
 msgstr "Na fila"
@@ -3379,10 +3363,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Run time must be in the future."
 msgstr ""
-
-#: src/components/CloudAgentCard.tsx
-msgid "running"
-msgstr "em execução"
 
 #: src/pages/ActivityList.tsx
 msgid "Running"

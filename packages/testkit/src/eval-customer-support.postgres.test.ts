@@ -96,7 +96,6 @@ describe.skipIf(!databaseAvailable)("offline Slack customer-support eval", () =>
             composio,
             messaging,
             messagingOpenSignup: false,
-            cloudAgentProvider: "none",
             encryptionKey: "offline-customer-eval-encryption-key",
           });
         },

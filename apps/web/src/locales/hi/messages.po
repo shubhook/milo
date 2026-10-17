@@ -719,10 +719,6 @@ msgstr "नया समूह रद्द करें"
 msgid "Cancel reply"
 msgstr "उत्तर रद्द करें"
 
-#: src/components/CloudAgentCard.tsx
-msgid "cancelled"
-msgstr "रद्द"
-
 #: src/components/AskCard.tsx
 #: src/pages/ActivityList.tsx
 msgid "Cancelled"
@@ -1945,10 +1941,6 @@ msgstr "अतिरिक्त उच्च"
 msgid "Extra high"
 msgstr ""
 
-#: src/components/CloudAgentCard.tsx
-msgid "failed"
-msgstr "असफल"
-
 #: src/pages/ActivityList.tsx
 msgid "Failed"
 msgstr "विफल"
@@ -1998,10 +1990,6 @@ msgstr "खोजा जा रहा है…"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Finish signing in at <0>{0}</0>. The final page may not load; paste its URL or code here."
 msgstr "<0>{0}</0> पर साइन इन पूरा करें। अंतिम पेज शायद लोड न हो; उसका URL या कोड यहां पेस्ट करें।"
-
-#: src/components/CloudAgentCard.tsx
-msgid "finished"
-msgstr "पूर्ण"
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -3043,10 +3031,6 @@ msgstr "प्रोवाइडर"
 msgid "Providers"
 msgstr "प्रोवाइडर्स"
 
-#: src/components/CloudAgentCard.tsx
-msgid "Pull request"
-msgstr "पुल अनुरोध"
-
 #: src/pages/ActivityList.tsx
 msgid "Queued"
 msgstr "कतार में"
@@ -3379,10 +3363,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Run time must be in the future."
 msgstr ""
-
-#: src/components/CloudAgentCard.tsx
-msgid "running"
-msgstr "चल रहा है"
 
 #: src/pages/ActivityList.tsx
 msgid "Running"

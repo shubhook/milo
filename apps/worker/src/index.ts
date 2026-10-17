@@ -10,7 +10,6 @@ import {
   CodexCatalogCache,
   createAgentRuntime,
   createBackgroundJobHandlers,
-  createCloudAgentConnection,
   createConnectorStack,
   createJobReconciler,
   createMessagingContextLoader,
@@ -40,7 +39,6 @@ import {
   PostgresRealtimeFanout,
   pipedreamConfigFromEnv,
   probeClaudeCode,
-  reconcileCloudAgents,
   reconcileComputerUpdates,
   resolveDeploymentModel,
   resolvePiSessionRoot,
@@ -170,8 +168,6 @@ async function main() {
     new GraphileJobWorkerHost(pool, {
       concurrency: parsePositiveInteger(process.env.GRAPHILE_WORKER_CONCURRENCY, 4),
     });
-  // One provider instance so emulator launches and polls share the same Map.
-  const cloudAgent = createCloudAgentConnection();
   // Shared with the reconciler so a stuck wait uses the same push path as a finish notice.
   const notifications = new ExpoPushProvider(dataDir);
   const executor = createRunExecutor({
@@ -200,7 +196,6 @@ async function main() {
     secrets: [
       deploymentModelKey ?? "",
       process.env.COMPOSIO_API_KEY ?? "",
-      process.env.CURSOR_API_KEY ?? "",
       process.env.TYPESAFE_API_KEY ?? "",
     ].filter(Boolean),
     secretStore: secrets,
@@ -212,7 +207,6 @@ async function main() {
     events,
     messaging: messaging ? createMessagingContextLoader(prisma) : undefined,
     web: createWebProvider(),
-    cloudAgent,
   });
 
   const jobHandlers = createBackgroundJobHandlers({
@@ -228,7 +222,6 @@ async function main() {
     memoryProviders,
     deploymentModelKey,
     messaging,
-    cloudAgent,
   });
   // graphile-worker run() connects through the shared pool. createPool already
   // retries connect() on 53300 a finite number of times. Keep retrying start
@@ -255,7 +248,6 @@ async function main() {
     events,
     notifications,
     leadership: createPostgresReconciliationLeadership(pool),
-    reconcileCloudAgents: () => reconcileCloudAgents({ prisma, jobs, cloudAgent }),
     reconcileComputerUpdates: () => reconcileComputerUpdates({ prisma, jobs }),
   });
   reconciler.start();

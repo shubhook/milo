@@ -15,7 +15,7 @@ using their existing controls. This flow is not a global data-access or run-revo
 
 ## Release gates
 
-- Confirm the review account's actual model, voice, memory, and cloud-agent configuration.
+- Confirm the review account's actual model, voice, and memory configuration.
 - Verify the selected providers' agreements, retention, deletion, and security safeguards
   support the policy's equal-or-greater-protection commitment. A privacy link alone is not proof.
 - For OpenRouter or Vercel AI Gateway, verify actual downstream routing and provider agreements.

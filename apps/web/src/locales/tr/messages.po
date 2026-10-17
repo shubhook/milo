@@ -719,10 +719,6 @@ msgstr "Yeni grubu iptal et"
 msgid "Cancel reply"
 msgstr "Yanıtı iptal et"
 
-#: src/components/CloudAgentCard.tsx
-msgid "cancelled"
-msgstr "iptal edildi"
-
 #: src/components/AskCard.tsx
 #: src/pages/ActivityList.tsx
 msgid "Cancelled"
@@ -1945,10 +1941,6 @@ msgstr "Çok yüksek"
 msgid "Extra high"
 msgstr ""
 
-#: src/components/CloudAgentCard.tsx
-msgid "failed"
-msgstr "başarısız"
-
 #: src/pages/ActivityList.tsx
 msgid "Failed"
 msgstr "Başarısız"
@@ -1998,10 +1990,6 @@ msgstr "Aranıyor…"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Finish signing in at <0>{0}</0>. The final page may not load; paste its URL or code here."
 msgstr "<0>{0}</0> adresinde oturum açmayı tamamla. Son sayfa yüklenmeyebilir; URL'sini veya kodu buraya yapıştır."
-
-#: src/components/CloudAgentCard.tsx
-msgid "finished"
-msgstr "tamamlandı"
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -3043,10 +3031,6 @@ msgstr "Sağlayıcı"
 msgid "Providers"
 msgstr "Sağlayıcılar"
 
-#: src/components/CloudAgentCard.tsx
-msgid "Pull request"
-msgstr "Çekme isteği"
-
 #: src/pages/ActivityList.tsx
 msgid "Queued"
 msgstr "Kuyrukta"
@@ -3379,10 +3363,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Run time must be in the future."
 msgstr ""
-
-#: src/components/CloudAgentCard.tsx
-msgid "running"
-msgstr "çalışıyor"
 
 #: src/pages/ActivityList.tsx
 msgid "Running"

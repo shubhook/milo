@@ -17,7 +17,6 @@ import {
   runFailureError,
   subagentBlockFromPayload,
   takeLiveMessage,
-  updateCloudAgentMessages,
   upsertMessageById,
 } from "@milo/core";
 
@@ -33,7 +32,6 @@ const runTriggers = new Set<Run["trigger"]>([
   "bot_message",
   "webhook",
   "messaging",
-  "cloud_agent",
   "created",
 ]);
 
@@ -249,7 +247,6 @@ export function isThreadSnapshotEvent(event: ProductEvent): boolean {
     event.type === "thread.cleared" ||
     event.type === "thread.progress" ||
     event.type === "thread.subagent" ||
-    event.type === "thread.cloud_agent" ||
     event.type === "agent.tool.called" ||
     event.type === "agent.tool.completed" ||
     event.type === "thread.message.created" ||
@@ -470,13 +467,6 @@ export function reduceThreadSnapshot(
     return { ...prev, cursor: event.seq, messages: [...without, next, ...kept] };
   }
 
-  if (event.type === "thread.cloud_agent") {
-    return {
-      ...prev,
-      cursor: event.seq,
-      messages: updateCloudAgentMessages(prev.messages, event.payload ?? {}),
-    };
-  }
   if (event.type === "thread.message.created" || event.type === "thread.message.updated") {
     const role = (event.payload.role as ThreadMessage["role"]) ?? "bot";
     const blocks = (event.payload.blocks as ThreadMessage["blocks"]) ?? [];

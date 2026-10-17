@@ -126,8 +126,6 @@ async function main() {
       WHATSAPP_ACCESS_TOKEN: "",
       LARK_APP_ID: "",
       SENDBLUE_API_KEY_ID: "",
-      CURSOR_API_KEY: "",
-      CLOUD_AGENT_PROVIDER: "",
       MODEL_API_KEY: "",
     });
     execFileSync("pnpm", ["--filter", "@milo/db", "generate"], {
@@ -165,8 +163,6 @@ async function main() {
             defaultModel: connection.modelId!,
             deploymentModelKey: undefined,
             composioApiKey: undefined,
-            cursorApiKey: undefined,
-            cloudAgentProvider: "none",
             signupsEnabled: "true",
             signupAllowlist: "",
             emailEmulator: true,
