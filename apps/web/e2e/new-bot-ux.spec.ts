@@ -59,6 +59,8 @@ test("create opens form, then empty chat; picker lists bots; sidebar collapses",
 
   await page.getByTestId("minimize-bots-sidebar").click();
   await expect(page.getByTestId("bots-sidebar")).toHaveAttribute("data-collapsed", "true");
+  // The edge slides to the window edge; grab it only once it has settled there.
+  await expect.poll(async () => (await edge.boundingBox())?.x).toBe(0);
 
   const box = await edge.boundingBox();
   expect(box).toBeTruthy();
