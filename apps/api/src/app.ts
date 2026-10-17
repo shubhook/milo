@@ -26,7 +26,6 @@ import {
   chatGptHostId,
   createAgentRuntime,
   createBackgroundJobHandlers,
-  createCloudAgentConnection,
   createConnectorStack,
   createJobReconciler,
   createMessagingContextLoader,
@@ -58,7 +57,6 @@ import {
   pipedreamConfigFromEnv,
   piSessionsRoot,
   pushTokenPath,
-  reconcileCloudAgents,
   reconcileComputerUpdates,
   removePiUserSessions,
   SmtpEmailProvider,
@@ -393,12 +391,6 @@ export async function createApp(
       await rm(pushTokenPath(env.dataDir, userId), { force: true }).catch(() => undefined);
     },
   });
-  // One provider instance so emulator launches and polls share the same Map.
-  const cloudAgent = createCloudAgentConnection({
-    CLOUD_AGENT_PROVIDER: env.cloudAgentProvider,
-    CURSOR_API_KEY: env.cursorApiKey,
-    CLOUD_AGENT_SPACE_ID: env.cloudAgentSpaceId,
-  });
   const shutdown = new AbortController();
   // One cache serves models.list, selection validation, and run-time model
   // resolution alike, so a list call warms the run path in this process.
@@ -428,7 +420,6 @@ export async function createApp(
     secrets: [
       env.deploymentModelKey ?? "",
       env.composioApiKey ?? "",
-      env.cursorApiKey ?? "",
       process.env.TYPESAFE_API_KEY ?? "",
     ].filter(Boolean),
     secretStore: secrets,
@@ -441,7 +432,6 @@ export async function createApp(
     events,
     messaging: messaging ? createMessagingContextLoader(prisma) : undefined,
     web: createWebProvider(),
-    cloudAgent,
     shutdownSignal: shutdown.signal,
   });
 
@@ -458,7 +448,6 @@ export async function createApp(
     memoryProviders,
     deploymentModelKey: env.deploymentModelKey,
     messaging,
-    cloudAgent,
   });
   if (inMemoryJobs) {
     await inMemoryJobs.start(jobHandlers);
@@ -469,14 +458,12 @@ export async function createApp(
         jobs,
         events,
         notifications,
-        reconcileCloudAgents: () => reconcileCloudAgents({ prisma, jobs, cloudAgent }),
         reconcileComputerUpdates: () => reconcileComputerUpdates({ prisma, jobs }),
       })
     : undefined;
   reconciler?.start();
 
   const routerDeps: RouterDeps = {
-    cloudAgent,
     codexCatalog,
     prisma,
     events,

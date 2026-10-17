@@ -15,7 +15,6 @@ export const ProductEventType = z.enum([
   "thread.meta",
   "thread.computer",
   "thread.subagent",
-  "thread.cloud_agent",
   "thread.call.ended",
   "run.started",
   "run.checkpointed",
@@ -189,17 +188,6 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     name: z.string(),
     title: z.string().optional(),
     status: z.enum(["created", "archived", "deleted"]),
-  }),
-  z.object({
-    /** Compact card for a remote cloud coding agent (not the bot computer). */
-    kind: z.literal("cloud_agent"),
-    agentId: z.string(),
-    title: z.string(),
-    status: z.enum(["running", "finished", "failed", "cancelled"]),
-    url: z.string(),
-    branch: z.string().optional(),
-    prUrl: z.string().optional(),
-    latestRunId: z.string().optional(),
   }),
   z.object({
     kind: z.literal("skill_draft"),

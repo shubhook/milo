@@ -40,9 +40,6 @@ async function main() {
     process.env.WAKEUP_DRIVER = "memory";
     process.env.SANDBOX_PROVIDER = "fake";
     process.env.AGENT_RUNTIME = agentRuntime;
-    // Playwright/E2E force the offline cloud-agent emulator; clear Cursor keys so cards never hit a live VM.
-    process.env.CLOUD_AGENT_PROVIDER = "emulator";
-    delete process.env.CURSOR_API_KEY;
     process.env.COMPOSIO_API_KEY = "";
     process.env.BETTER_AUTH_SECRET = "test-secret-test-secret-32chars!";
     process.env.ENCRYPTION_KEY = "test-encryption-key-test-encryption-key";
@@ -87,7 +84,6 @@ async function main() {
         "packages/adapters/src/wakeup.postgres.test.ts",
         "packages/adapters/src/realtime.postgres.test.ts",
         "packages/adapters/src/job-reconciler.postgres.test.ts",
-        "packages/adapters/src/cloud-agent.postgres.test.ts",
       ];
       // Each app reconciles all durable work in its database, including intentionally
       // unfinished fixture runs. Clone the pristine migrated schema so one suite

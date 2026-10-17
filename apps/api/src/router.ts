@@ -19,7 +19,6 @@ import {
 import type {
   ChatGptPlanCredential,
   ClaudeCodeStatus,
-  CloudAgentConnection,
   CodexLiveCatalog,
   ComposioProvider,
   ComputerExecutionLease,
@@ -523,7 +522,6 @@ function mcpAssignmentDto(row: {
 }
 
 export interface RouterDeps {
-  cloudAgent?: CloudAgentConnection | null;
   prisma: PrismaClient;
   events: ThreadEvents;
   auth: Auth;

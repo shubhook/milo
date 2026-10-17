@@ -185,28 +185,6 @@ export function inferScript(
       },
     ];
   }
-  if (
-    lower.includes("launch a cloud agent") ||
-    lower.includes("start a cloud agent") ||
-    lower.includes("cloud coding agent")
-  ) {
-    return [
-      {
-        assistant: "launching a cloud agent for that.",
-        toolCalls: [
-          {
-            name: "cloud_agent_launch",
-            args: {
-              prompt: "Add a README with setup instructions",
-              repository: "https://github.com/example/demo",
-              openPr: true,
-            },
-          },
-        ],
-        complete: true,
-      },
-    ];
-  }
   if (lower.includes("show a login card")) {
     return [
       {

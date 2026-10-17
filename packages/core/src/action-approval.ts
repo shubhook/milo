@@ -29,15 +29,11 @@ const APPROVAL_REQUIRED_BUILTIN_TOOLS = new Set([
   "secret_request",
   "forget_secret",
   "forget_memory",
-  "cloud_agent_launch",
-  "cloud_agent_reply",
-  "cloud_agent_cancel",
 ]);
 const EXPLICIT_APPROVAL_BUILTIN_TOOLS = new Set(["create_space"]);
 
 const UNATTENDED_SAFE_BUILTIN_TOOLS = new Set([
   "browser_snapshot",
-  "cloud_agent_status",
   "computer_observe",
   "list_files",
   "list_secrets",

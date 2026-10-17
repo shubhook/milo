@@ -176,10 +176,6 @@ import {
 } from "./browser-tools.js";
 import { agentConnectionTools, builtinAgentTools, sharedMemorySaveError } from "./builtin-tools.js";
 import { archiveSpawnedBot, spawnBot } from "./child-bots.js";
-import { type CloudAgentConnection, cloudAgentsEnabled } from "./cloud-agent-factory.js";
-import { executeCloudAgentTool } from "./cloud-agent-service.js";
-import { validCloudAgentArgs } from "./cloud-agent-tools.js";
-import { selectCloudAgentTools } from "./cloud-agent-tools-select.js";
 import {
   collectLogIds,
   mergeConnectedPlugins,
@@ -374,7 +370,6 @@ const READ_ONLY_AGENT_TOOLS = new Set([
   "web_fetch",
   "browser_snapshot",
   "list_secrets",
-  "cloud_agent_status",
 ]);
 /** Added to the turn prompt when the user spoke this message on a live voice call. */
 export const VOICE_CALL_INSTRUCTION =
@@ -2652,8 +2647,6 @@ export interface ExecutorDeps {
   secretHttp?: RemoteTransportDependencies;
   /** Allow RFC1918 / Docker-network MCP URLs when the deployment owner enabled the escape. */
   mcpAllowPrivateEndpoint?: boolean;
-  /** Remote cloud coding agents. Null/omit means tools stay uninjected. */
-  cloudAgent?: CloudAgentConnection | null;
   /** Optional Auto Review verifier. When omitted, the factory selects from env (llm | jev | scripted). */
   autoReview?: AutoReviewProvider;
   /**
@@ -2927,7 +2920,6 @@ export function buildApprovalContinuation(
 export function createRunExecutor(deps: ExecutorDeps) {
   const web = deps.web ?? createWebProvider();
   const browser = deps.browser ?? createBrowserProvider(undefined, { sandbox: deps.sandbox });
-  const cloudAgent = deps.cloudAgent;
   const resolveConnectedModel = async (
     scope: { userId: string; spaceId: string },
     provider: string,
@@ -3695,7 +3687,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
             groupId: thread.groupId,
             trigger: run.trigger,
             semanticMemoryEnabled,
-            cloudAgentEnabled: cloudAgentsEnabled(cloudAgent, run.spaceId),
             messagingChannelRun,
             voiceCall,
           }),
@@ -3947,11 +3938,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
           if (approvedReplay.args) connectorCall.args = approvedReplay.args;
           let catalogRemapped = false;
           let resolvedTool: ConnectorTool | undefined;
-          if (name.startsWith("cloud_agent_") && !validCloudAgentArgs(name, args)) {
-            return {
-              error: "Invalid cloud agent arguments. Raw environment variables are not supported.",
-            };
-          }
           let effectRequest: unknown = args;
           if (connectorCall.route && deps.connector?.resolveCall) {
             try {
@@ -5060,17 +5046,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
             }, finish);
           }
 
-          if (name.startsWith("cloud_agent_")) {
-            return finish(
-              await executeCloudAgentTool(
-                { ...deps, cloudAgent },
-                { ...context, operationId: effectKey, botId: bot.id },
-                run,
-                name,
-                args,
-              ),
-            );
-          }
           if (name === "task_catalog") {
             return taskCatalogFromTool(deps, {
               spaceId: run.spaceId,
@@ -7050,26 +7025,22 @@ export function selectBuiltinToolsForRun(options: {
   groupId: string | null;
   trigger: string;
   semanticMemoryEnabled: boolean;
-  cloudAgentEnabled?: boolean;
   messagingChannelRun: boolean;
   /** Hanging up is only offered to a turn the caller spoke on a live call. */
   voiceCall?: boolean;
 }) {
-  return selectCloudAgentTools(
-    selectMemoryTools(
-      filterBuiltinToolsForRun(
-        filterBuiltinToolsForThread(
-          filterPageBrowserTools(
-            filterImageReturningComputerTools(builtinAgentTools, options.graphicalToolsAllowed),
-            options.pageBrowserAllowed ?? options.graphicalToolsAllowed,
-          ),
-          options.groupId,
+  return selectMemoryTools(
+    filterBuiltinToolsForRun(
+      filterBuiltinToolsForThread(
+        filterPageBrowserTools(
+          filterImageReturningComputerTools(builtinAgentTools, options.graphicalToolsAllowed),
+          options.pageBrowserAllowed ?? options.graphicalToolsAllowed,
         ),
-        options.trigger,
+        options.groupId,
       ),
-      options.semanticMemoryEnabled,
+      options.trigger,
     ),
-    Boolean(options.cloudAgentEnabled),
+    options.semanticMemoryEnabled,
   ).filter(
     (tool) =>
       (options.voiceCall || tool.name !== "end_call") &&
