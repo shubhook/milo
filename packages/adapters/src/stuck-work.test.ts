@@ -469,7 +469,6 @@ describe("reconcileStuckWork", () => {
       },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
     } as unknown as PrismaClient;
     const { jobs } = publisher();
 

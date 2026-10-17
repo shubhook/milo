@@ -509,7 +509,6 @@ export interface BackgroundJobPayloads {
   "computer.control-expire": { computerId: string; leaseId: string };
   "skill.teaching-expire": { skillId: string };
   "history.compact": { threadId: string };
-  "messaging.deliver": { runId?: string };
 }
 
 export type BackgroundJobName = keyof BackgroundJobPayloads;
@@ -557,107 +556,6 @@ export interface TransactionalEmail {
   text: string;
   html?: string;
 }
-
-export interface MessagingCapabilities {
-  direct: boolean;
-  groups: boolean;
-  typing: boolean;
-}
-
-/** One messaging platform behind the chat surface (sendblue, slack, …). */
-export interface MessagingPlatformDescriptor {
-  provider: string;
-  capabilities: MessagingCapabilities;
-}
-
-/** Send into an existing conversation, addressed by its opaque thread id. */
-export interface MessagingSendRequest {
-  threadId: string;
-  body: string;
-  /** Stable key so retries of the same logical send can be deduped upstream. */
-  idempotencyKey?: string;
-}
-
-export interface MessagingSendResult {
-  handle: string;
-}
-
-/** Provider-neutral inbound message after platform webhook parsing. */
-export type TeamChatMessageKind = "direct" | "mention" | "ambient";
-
-export interface MessagingInboundMessage {
-  type: "message";
-  provider: string;
-  /** Per-message transport when one provider spans multiple networks (for example SMS vs RCS). */
-  transport?: string;
-  /** Provider message id; drives replay-safe client nonces downstream. */
-  handle: string;
-  /** Opaque conversation id — pass back to sendToThread to reply. */
-  threadId: string;
-  /** True for a 1:1 conversation with the deployment's line/bot. */
-  isDirect: boolean;
-  /** Sender address within the provider (E.164, Slack user id, …). */
-  from: string;
-  /** Sender display name when the platform provides one. */
-  fromLabel: string | null;
-  /** Group/channel display name; null for DMs or when unknown. */
-  channelName: string | null;
-  /** Group roster addresses when the platform reports them; often empty. */
-  participants: string[];
-  content: string;
-  mediaUrl: string | null;
-  /** Team-room workspace/team id when the platform reports one (Slack team_id, …). */
-  workspaceId?: string;
-  /** Stable conversation key within the workspace (channel id, DM key, …). */
-  conversationKey?: string;
-  /** How this message should engage the team-chat bot. */
-  kind?: TeamChatMessageKind;
-  /** Provider thread id for in-channel replies (Slack thread_ts); null for channel root. */
-  replyThreadId?: string | null;
-  /** True when the sender is another bot/app. */
-  senderIsBot?: boolean;
-  /** Display names for room participants when the platform reports them. */
-  participantNames?: string[];
-}
-
-/** Provider-neutral inbound team/external room message for TeamChatBridge. */
-export interface TeamChatInboundMessage {
-  eventId: string;
-  workspaceId: string;
-  kind: TeamChatMessageKind;
-  conversationType?: "im" | "channel" | "group" | "mpim";
-  conversationKey: string;
-  /** Messaging threadId used with sendToThread. */
-  conversationId: string;
-  conversationName?: string;
-  participantNames?: string[];
-  replyThreadId: string | null;
-  senderId: string;
-  senderName: string;
-  senderIsBot?: boolean;
-  content: string;
-}
-
-export interface TeamChatSendRequest {
-  conversationId: string;
-  replyThreadId: string | null;
-  content: string;
-  idempotencyKey?: string;
-}
-
-export interface TeamChatSendResult {
-  handle: string;
-}
-
-/** Provider-neutral outbound delivery status after platform webhook parsing. */
-export interface MessagingOutboundStatus {
-  type: "status";
-  provider: string;
-  handle: string;
-  status: string;
-}
-
-export type MessagingInboundEvent = MessagingInboundMessage | MessagingOutboundStatus;
 
 export interface WebSearchCapabilities {
   search: boolean;

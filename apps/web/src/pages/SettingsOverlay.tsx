@@ -33,8 +33,6 @@ export function SettingsOverlay({
   isDeploymentOwner = false,
   modelManaged = false,
   sandboxProvider,
-  messagingEnabled = false,
-  onOpenMessaging,
   onClose,
   onVoiceStatusMaybeChanged,
 }: {
@@ -47,8 +45,6 @@ export function SettingsOverlay({
   isDeploymentOwner?: boolean;
   modelManaged?: boolean;
   sandboxProvider?: string | null;
-  messagingEnabled?: boolean;
-  onOpenMessaging?: () => void;
   onClose: () => void;
   onVoiceStatusMaybeChanged?: () => void | Promise<void>;
 }) {
@@ -191,10 +187,6 @@ export function SettingsOverlay({
                   name={name}
                   avatarStyle={avatarStyle}
                   onAvatarStyleChange={onAvatarStyleChange}
-                  messagingEnabled={messagingEnabled}
-                  onOpenMessaging={
-                    onOpenMessaging ? () => leaveSettings(onOpenMessaging) : undefined
-                  }
                   isDeploymentOwner={isDeploymentOwner}
                 />
               ) : null}

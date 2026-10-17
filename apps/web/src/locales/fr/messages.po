@@ -52,16 +52,6 @@ msgstr "{0} {unitLabel}"
 msgid "{0} connection"
 msgstr "Connexion {0}"
 
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} default"
-msgstr "Défaut de {0}"
-
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} handling"
-msgstr "Gestion de {0}"
-
 #. placeholder {0}: format(size / 1024)
 #: src/components/ArtifactFileCard.tsx
 msgid "{0} KB"
@@ -72,21 +62,11 @@ msgstr "{0} Ko"
 msgid "{0} MB"
 msgstr "{0} Mo"
 
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} rollup hours"
-msgstr "{0} heures de regroupement"
-
 #. placeholder {0}: usage.runs
 #. placeholder {1}: usage.inputTokens + usage.outputTokens
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "{0} runs · {1} tokens"
 msgstr "{0} exécutions · {1} jetons"
-
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} will still respond to direct mentions."
-msgstr "{0} répondra toujours aux mentions directes."
 
 #. placeholder {0}: active.name
 #: src/pages/Shell.tsx
@@ -260,12 +240,12 @@ msgid "Add a run time for this one-shot."
 msgstr "Ajoutez un horaire d'exécution pour cet exécution unique."
 
 #: src/pages/Shell.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger"
-msgstr "Ajoutez une planification, un webhook, GitHub ou un déclencheur de message"
+msgid "Add a schedule, webhook, or GitHub trigger"
+msgstr "Ajoutez une planification, un webhook ou un déclencheur GitHub"
 
 #: src/pages/RoutineEditor.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger to run this routine."
-msgstr "Ajoutez une planification, un webhook, GitHub ou un déclencheur de message pour exécuter cette routine."
+msgid "Add a schedule, webhook, or GitHub trigger to run this routine."
+msgstr "Ajoutez une planification, un webhook ou un déclencheur GitHub pour exécuter cette routine."
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Add a server name."
@@ -362,10 +342,6 @@ msgstr "Avancé..."
 msgid "Agent computer"
 msgstr "Ordinateur de l'agent"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Agent connections"
-msgstr "Connexions d'agent"
-
 #: src/pages/McpServersOverlay.tsx
 msgid "Agents:"
 msgstr "Agents :"
@@ -418,10 +394,6 @@ msgstr "Autorisé une fois"
 msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Always act"
-msgstr "Agir toujours"
-
 #: src/components/AskCard.tsx
 msgid "Always allow this tool"
 msgstr "Toujours autoriser cet outil"
@@ -471,7 +443,6 @@ msgstr "Apparence"
 msgid "Approval boundaries"
 msgstr "Limites d'approbation"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Approuver"
@@ -581,14 +552,6 @@ msgstr "Autoriser"
 msgid "Authorize this server so agents can use its tools. A popup opens."
 msgstr "Autorisez ce serveur pour que les agents puissent utiliser ses outils. Une fenêtre contextuelle s'ouvre."
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders"
-msgstr "Expéditeurs automatisés"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders will appear after they post here."
-msgstr "Les expéditeurs automatisés apparaîtront après avoir publié ici."
-
 #: src/pages/RoutineEditor.tsx
 msgid "Available after the routine is saved"
 msgstr "Disponible après l'enregistrement de la routine"
@@ -656,10 +619,6 @@ msgstr "Écran du bot"
 msgid "Bot screen preview"
 msgstr "Aperçu de l'écran du bot"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Bot to link"
-msgstr "Bot à connecter"
-
 #: src/pages/Artifacts.tsx
 msgid "Bots"
 msgstr "Bots"
@@ -723,21 +682,9 @@ msgstr "Changer le mot de passe"
 msgid "Changing…"
 msgstr "Modification en cours…"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Channels"
-msgstr "Canaux"
-
 #: src/pages/shell/message-cards.tsx
 msgid "Chart failed to render: {error}"
 msgstr "Le graphique n'a pas pu s'afficher : {error}"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Chat apps"
-msgstr "Applications de discussion"
-
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Chat apps, group channels, and agent connections."
-msgstr "Applications de discussion, canaux de groupe et connexions d'agent."
 
 #: src/pages/Shell.tsx
 msgid "Chat Settings"
@@ -778,10 +725,6 @@ msgstr "La copie de travail a des modifications locales. Nettoyez-la avant de me
 msgid "Choose a bot shape, color, or upload an image"
 msgstr "Choisissez une forme, une couleur de bot, ou téléchargez une image"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Choose a bot…"
-msgstr "Choisissez un bot…"
-
 #: src/pages/Auth.tsx
 msgid "Choose a new password"
 msgstr "Choisissez un nouveau mot de passe"
@@ -821,7 +764,6 @@ msgid "Client secret"
 msgstr "Secret client"
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/PeerMessagesOverlay.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
@@ -856,10 +798,6 @@ msgstr "Fermer les serveurs MCP"
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "Fermer les paramètres de mémoire"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Close messaging settings"
-msgstr "Fermer les paramètres de messagerie"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Close model settings"
@@ -1375,7 +1313,6 @@ msgstr "Impossible d'exécuter la routine"
 msgid "Could not run the command"
 msgstr ""
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Could not save"
@@ -1469,17 +1406,9 @@ msgstr "Impossible de mettre à jour la réaction"
 msgid "Could not upload file"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't load messaging settings"
-msgstr "Impossible de charger les paramètres de messagerie"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Couldn't update avatars"
 msgstr "Impossible de mettre à jour les avatars"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't update messaging settings"
-msgstr "Impossible de mettre à jour les paramètres de messagerie"
 
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -1592,10 +1521,6 @@ msgstr "Travail quotidien"
 #: src/pages/RoutineSchedule.tsx
 msgid "days"
 msgstr "jours"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Decline"
-msgstr "Refuser"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Default"
@@ -1810,10 +1735,6 @@ msgstr "Modifier le profil"
 msgid "Email"
 msgstr "E-mail"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Engage when... Ignore..."
-msgstr "Répondre quand... Ignorer..."
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Enter a username and password"
 msgstr ""
@@ -1830,7 +1751,6 @@ msgstr "Saisissez un nombre entier de 1 à {MAX_MODEL_MAX_TOKENS} pour le maximu
 msgid "Enter a whole number from 1 to 1000 for the image limit."
 msgstr "Saisissez un nombre entier de 1 à 1000 pour la limite d'images."
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "Every"
 msgstr "Chaque"
@@ -1884,11 +1804,6 @@ msgstr "Exporter"
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Export this week's list from the CRM and drop it in the shared folder"
 msgstr "Exportez la liste de cette semaine depuis le CRM et déposez-la dans le dossier partagé"
-
-#: src/pages/ExternalConversationSettings.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "External conversation"
-msgstr "Conversation externe"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Extra high"
@@ -1994,7 +1909,6 @@ msgstr "Préparation en cours"
 msgid "Git event"
 msgstr "Événement Git"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Group"
 msgstr "Groupe"
@@ -2002,10 +1916,6 @@ msgstr "Groupe"
 #: src/pages/GroupPanel.tsx
 msgid "Group settings"
 msgstr "Paramètres du groupe"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Group updates"
-msgstr "Mises à jour du groupe"
 
 #: src/pages/shell/dialogs.tsx
 msgid "Groups"
@@ -2074,7 +1984,6 @@ msgstr ""
 msgid "hour"
 msgstr "heure"
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "hours"
 msgstr "heures"
@@ -2094,10 +2003,6 @@ msgstr "J'ai terminé"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "Si vous avez entendu cela, la voix est prête."
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Ignore"
-msgstr "Ignorer"
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2212,10 +2117,6 @@ msgstr "Plus tard"
 msgid "Launched {app}"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Leave"
-msgstr "Quitter"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Light"
 msgstr "Clair"
@@ -2228,21 +2129,9 @@ msgstr ""
 msgid "Linear issue"
 msgstr "Incident Linear"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Link a chat app"
-msgstr "Connecter une application de discussion"
-
 #: src/pages/Artifacts.tsx
 msgid "List view"
 msgstr "Vue en liste"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listen"
-msgstr "Écouter"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listening"
-msgstr "Écoute"
 
 #: src/pages/Shell.tsx
 msgid "Load earlier messages"
@@ -2327,10 +2216,6 @@ msgstr "Assurez-vous qu'aucun processus ne tourne encore sur cet ordinateur."
 msgid "Manage MCP servers"
 msgstr "Gérer les serveurs MCP"
 
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Manage messaging settings"
-msgstr "Gérer les paramètres de messagerie"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr "Manuel"
@@ -2398,10 +2283,6 @@ msgstr "Mémoire"
 msgid "Mentions"
 msgstr "Mentions"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Mentions only"
-msgstr "Mentions uniquement"
-
 #: src/pages/Shell.tsx
 msgid "Message"
 msgstr "Message"
@@ -2419,10 +2300,6 @@ msgstr "Message à {activeName}"
 msgid "Message composer"
 msgstr "Zone de composition"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Message event"
-msgstr "Événement de message"
-
 #: src/pages/Shell.tsx
 msgid "Message from {peer}"
 msgstr "Message de {peer}"
@@ -2434,11 +2311,6 @@ msgstr "Message…"
 #: src/pages/Shell.tsx
 msgid "Messaged {peer}"
 msgstr "A contacté {peer}"
-
-#: src/pages/AccountSettingsOverlay.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Messaging"
-msgstr "Messagerie"
 
 #: src/lib/call-session.ts
 msgid "Microphone failed"
@@ -2599,10 +2471,6 @@ msgstr "Nouvelle compétence"
 msgid "New space"
 msgstr "Nouvel espace"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No agent connections yet."
-msgstr "Aucune connexion d'agent pour le moment."
-
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "Aucune application ne correspond à votre recherche."
@@ -2631,17 +2499,9 @@ msgstr "Aucun bot"
 msgid "No bots match"
 msgstr "Aucun bot ne correspond"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No chat apps linked yet."
-msgstr "Aucune application de discussion connectée pour le moment."
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "No credentials saved for this bot."
 msgstr ""
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No group chats yet."
-msgstr "Aucune conversation de groupe pour le moment."
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -2695,10 +2555,6 @@ msgstr "Aucune exécution pour le moment"
 #: src/pages/KnowledgeSection.tsx
 msgid "No skills yet"
 msgstr "Aucune compétence pour le moment"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No team conversations yet."
-msgstr "Aucune conversation d'équipe pour le moment."
 
 #: src/pages/PluginsOverlay.tsx
 msgid "No tools available."
@@ -3089,10 +2945,6 @@ msgid "Remove mention {0}"
 msgstr "Retirer la mention {0}"
 
 #: src/pages/RoutineEditor.tsx
-msgid "Remove message trigger"
-msgstr "Retirer le déclencheur de message"
-
-#: src/pages/RoutineEditor.tsx
 msgid "Remove schedule"
 msgstr "Retirer la planification"
 
@@ -3231,17 +3083,9 @@ msgstr "Retour à Milo"
 msgid "rev {0}"
 msgstr "rév. {0}"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Revoke"
-msgstr "Révoquer"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Robot"
 msgstr "Robot"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Room guidance"
-msgstr "Guide de la salle"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Rotate key"
@@ -3284,13 +3128,8 @@ msgstr "En cours · Arrêter"
 msgid "Running…"
 msgstr "Exécution en cours…"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Runs when this bot receives a verified message from this provider."
-msgstr "S'exécute lorsque ce bot reçoit un message vérifié de ce fournisseur."
-
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/GroupPanel.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/ModelSettingsOverlay.tsx
@@ -3314,7 +3153,6 @@ msgstr ""
 
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 msgid "Saved"
 msgstr "Enregistré"
 
@@ -3333,10 +3171,6 @@ msgstr "Enregistré. Tournez pour révéler."
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Saving your workspace"
 msgstr "Enregistrement de votre espace de travail"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Saving..."
-msgstr "Enregistrement..."
 
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
@@ -3402,10 +3236,6 @@ msgstr "Sélectionnez un bot"
 msgid "Send"
 msgstr "Envoyer"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Send <0>{linkCode}</0> to the line from your chat app within 10 minutes. You'll get a confirmation reply once linked."
-msgstr "Envoyez <0>{linkCode}</0> au numéro depuis votre application de discussion dans les 10 minutes. Vous recevrez une réponse de confirmation une fois connecté."
-
 #: src/components/AskCard.tsx
 msgid "Send answer"
 msgstr "Envoyer la réponse"
@@ -3443,7 +3273,6 @@ msgid "Server URL"
 msgstr "URL du serveur"
 
 #: src/components/call/CallCard.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Settings"
@@ -3575,14 +3404,6 @@ msgstr "Passer ou clé de déploiement"
 msgid "Skipped {0}"
 msgstr "Ignoré {0}"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Slack message"
-msgstr "Message Slack"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Slack not enabled"
-msgstr "Slack non activé"
-
 #: src/components/SoftwareUpdateSection.tsx
 msgid "Software update"
 msgstr "Mise à jour logicielle"
@@ -3706,18 +3527,6 @@ msgstr "Équipe"
 #: src/pages/Shell.tsx
 msgid "Team Computer"
 msgstr "Ordinateur d'équipe"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Team conversations"
-msgstr "Conversations d'équipe"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams message"
-msgstr "Message Teams"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams not enabled"
-msgstr "Teams non activé"
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Terminal"
@@ -3849,10 +3658,6 @@ msgstr "Outils"
 msgid "Transcript"
 msgstr "Transcription"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Treat like a person"
-msgstr "Traiter comme une personne"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Jeton Treg"
@@ -3884,10 +3689,6 @@ msgstr "Indisponible"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr "Désinstaller"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Unlink"
-msgstr "Déconnecter"
 
 #: src/components/call/CallCard.tsx
 msgid "Unmute"
@@ -3975,10 +3776,6 @@ msgstr "Utiliser {hostLabel}"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Use a found model"
 msgstr "Utiliser un modèle trouvé"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Use default guidance"
-msgstr "Utiliser les instructions par défaut"
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."

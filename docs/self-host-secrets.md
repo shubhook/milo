@@ -73,7 +73,6 @@ From `.env.images.example` (images installer). Leave blank if unused:
 | `TYPESAFE_API_KEY` | Optional TypeSafe Jev Auto Review verifier (`RAKAZO_AUTO_REVIEW_PROVIDER=jev`) |
 | `COMPOSIO_API_KEY` | Composio managed catalog |
 | `SMTP_URL` / `EMAIL_FROM` | Password-recovery email |
-| Messaging tokens (Slack, Telegram, …) | Only if you enable those surfaces |
 
 Blank optional keys are normal for a minimal published-images boot. Pipedream
 Connect keys appear only in source/Compose `.env.example`, not the images

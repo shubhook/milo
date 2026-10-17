@@ -184,7 +184,6 @@ import { desktopBridge } from "../lib/desktop";
 import { scheduleFocusPrompt } from "../lib/focus-prompt";
 import { localTimezone } from "../lib/local-timezone";
 import { copyableMessageText } from "../lib/message-text";
-import { messageProviderLabel } from "../lib/messaging";
 import {
   isFileDrag,
   isFilePaste,
@@ -274,11 +273,6 @@ import { WindowChrome } from "./WindowChrome";
 
 const BotContextMenu = lazy(() =>
   import("./BotContextMenu").then((module) => ({ default: module.BotContextMenu })),
-);
-const MessagingSettingsOverlay = lazy(() =>
-  import("./MessagingSettingsOverlay").then((module) => ({
-    default: module.MessagingSettingsOverlay,
-  })),
 );
 const SettingsOverlay = lazy(() =>
   import("./SettingsOverlay").then((module) => ({ default: module.SettingsOverlay })),
@@ -535,9 +529,6 @@ export function ShellPage() {
   const [mcpOpen, setMcpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
-  const [messagingSettingsOpen, setMessagingSettingsOpen] = useState(false);
-  const [messagingSurfaceEnabled, setMessagingSurfaceEnabled] = useState(false);
-  const [messagingProviders, setMessagingProviders] = useState<string[]>([]);
   const call = useCallSession();
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus | null>(null);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
@@ -667,22 +658,6 @@ export function ShellPage() {
       viewport.removeEventListener("scroll", sync);
     };
   }, [computerOpen]);
-  useEffect(() => {
-    if (!session.data?.user) return;
-    let cancelled = false;
-    void rpc.messaging
-      .status()
-      .then((status) => {
-        if (!cancelled) {
-          setMessagingSurfaceEnabled(status.enabled);
-          setMessagingProviders(status.providers);
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [session.data?.user]);
   const [usage, setUsage] = useState<{
     inputTokens: number;
     outputTokens: number;
@@ -3984,7 +3959,6 @@ export function ShellPage() {
                     ? `${window.location.origin}/api/v1/bots/${active.id}/github`
                     : `/api/v1/bots/${active.id}/github`
                 }
-                messageProviders={messagingProviders}
                 saving={savingRoutine}
                 running={runningRoutine}
                 error={routineError}
@@ -4001,10 +3975,9 @@ export function ShellPage() {
                   if (
                     !routineDraft.schedules.length &&
                     !routineDraft.webhookEnabled &&
-                    !routineDraft.githubEnabled &&
-                    !routineDraft.messageProvider
+                    !routineDraft.githubEnabled
                   ) {
-                    setRoutineError(t`Add a schedule, webhook, GitHub, or message trigger`);
+                    setRoutineError(t`Add a schedule, webhook, or GitHub trigger`);
                     return;
                   }
                   const saveRequest = ++routineSaveRequest.current;
@@ -4044,7 +4017,6 @@ export function ShellPage() {
                         active: armOneShot ? true : routineDraft.active,
                         webhookEnabled: routineDraft.webhookEnabled,
                         githubEnabled: routineDraft.githubEnabled,
-                        messageProvider: routineDraft.messageProvider,
                         ...(runAt ? { runAt } : {}),
                       });
                     } else {
@@ -4058,7 +4030,6 @@ export function ShellPage() {
                         notify: true,
                         webhookEnabled: routineDraft.webhookEnabled,
                         githubEnabled: routineDraft.githubEnabled,
-                        messageProvider: routineDraft.messageProvider,
                       });
                     }
                     if (
@@ -4488,9 +4459,6 @@ export function ShellPage() {
           />
         ) : null}
         {mcpOpen ? <McpServersOverlay onClose={() => setMcpOpen(false)} /> : null}
-        {messagingSettingsOpen ? (
-          <MessagingSettingsOverlay onClose={() => setMessagingSettingsOpen(false)} />
-        ) : null}
       </Suspense>
 
       <Suspense fallback={null}>
@@ -4504,11 +4472,6 @@ export function ShellPage() {
             isDeploymentOwner={bootstrapMe?.isDeploymentOwner === true}
             modelManaged={bootstrapMe?.modelManaged === true}
             sandboxProvider={bootstrapMe?.sandboxProvider}
-            messagingEnabled={messagingSurfaceEnabled}
-            onOpenMessaging={() => {
-              setSettingsOpen(false);
-              setMessagingSettingsOpen(true);
-            }}
             onAvatarStyleChange={async (avatarStyle) => {
               const nextMe = await rpc.preferences.update({ avatarStyle });
               setBootstrapMe(nextMe);
@@ -6039,7 +6002,6 @@ function MentionChipIcon({ mention }: { mention: ComposerMention }) {
 function previewMessageText(message: ThreadMessage): string {
   const text = message.blocks
     .map((block) => {
-      if (block.kind === "channel_message") return block.text;
       if (block.kind === "text") {
         // Bot text is Markdown; user text is already plain.
         return message.role === "bot" ? plainTextFromMarkdown(block.text) : block.text;
@@ -6454,19 +6416,6 @@ const MessageView = memo(function MessageView({
               label={label}
               onClick={() => onOpenPeerMessages({ peerBotId, peerBotName: peer })}
             />
-          );
-        }
-        if (block.kind === "channel_message") {
-          return (
-            <div
-              key={i}
-              className="flex items-center justify-center gap-2 py-1 text-[13.5px] text-muted-foreground"
-            >
-              <span>
-                {messageProviderLabel(block.provider, block.transport)} · {block.fromLabel}:{" "}
-                {block.text}
-              </span>
-            </div>
           );
         }
         if (block.kind === "meta") {

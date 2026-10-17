@@ -5,14 +5,12 @@ import { loadRootEnv } from "@milo/core/node/load-root-env";
 loadRootEnv();
 
 import {
-  ChatSdkMessagingSurface,
   CLAUDE_CODE_PROVIDER,
   CodexCatalogCache,
   createAgentRuntime,
   createBackgroundJobHandlers,
   createConnectorStack,
   createJobReconciler,
-  createMessagingContextLoader,
   createPostgresReconciliationLeadership,
   createRunExecutor,
   createRunSandbox,
@@ -27,14 +25,11 @@ import {
   InMemoryJobQueue,
   InstalledConnectorProvider,
   isComposioEnabled,
-  isMessagingSurfaceEnabled,
   isPipedreamEnabled,
   LocalAgentHomeStore,
   LocalArtifactStore,
   McpConnector,
   McpOAuthBroker,
-  messagingEnvFromProcess,
-  messagingPlatformsFromEnv,
   PipedreamConnector,
   PostgresRealtimeFanout,
   pipedreamConfigFromEnv,
@@ -127,17 +122,6 @@ async function main() {
   const pipedream = isPipedreamEnabled(pipedreamConfig)
     ? new PipedreamConnector(pipedreamConfig)
     : undefined;
-  // pollInboundMessages stays false (the default) here: this process
-  // only ever sends outbound (messaging.deliver jobs). It must never poll
-  // Telegram — that would steal the single getUpdates slot away from the
-  // API process, which is the one with the inbound sink actually wired up.
-  const messagingPlatforms = messagingPlatformsFromEnv(messagingEnvFromProcess(process.env));
-  const messaging = isMessagingSurfaceEnabled(messagingPlatforms, {
-    deploymentModelKey,
-    openSignup: process.env.MESSAGING_OPEN_SIGNUP === "true",
-  })
-    ? new ChatSdkMessagingSurface(messagingPlatforms)
-    : undefined;
   const integrationSettings = new IntegrationProviderSettings(
     prisma,
     secrets,
@@ -202,7 +186,6 @@ async function main() {
     notifications,
     jobs,
     events,
-    messaging: messaging ? createMessagingContextLoader(prisma) : undefined,
     web: createWebProvider(),
   });
 
@@ -217,7 +200,6 @@ async function main() {
     runtime,
     secretStore: secrets,
     deploymentModelKey,
-    messaging,
   });
   // graphile-worker run() connects through the shared pool. createPool already
   // retries connect() on 53300 a finite number of times. Keep retrying start

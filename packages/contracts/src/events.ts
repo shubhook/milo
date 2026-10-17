@@ -240,18 +240,6 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     hop: z.number().int().positive().optional(),
   }),
   z.object({
-    /** A group-chat message delivered into a member bot's own thread. */
-    kind: z.literal("channel_message"),
-    provider: z.string(),
-    /** Per-message network when a provider spans multiple transports. */
-    transport: z.string().optional(),
-    channelId: Id,
-    fromAddress: z.string(),
-    fromLabel: z.string(),
-    text: z.string(),
-    hop: z.number().int().nonnegative().optional(),
-  }),
-  z.object({
     /** Shown in the sending bot's own chat, so the user can see what it sent. */
     kind: z.literal("bot_message_sent"),
     toBotId: Id,
@@ -344,9 +332,5 @@ export const ThreadMessageSchema = z.object({
 export type ThreadMessage = z.infer<typeof ThreadMessageSchema>;
 
 export function canReactToThreadMessage(message: Pick<ThreadMessage, "id" | "blocks">): boolean {
-  return (
-    !message.id.startsWith("progress:") &&
-    !message.id.startsWith("subagent:") &&
-    !message.blocks.some((block) => block.kind === "channel_message")
-  );
+  return !message.id.startsWith("progress:") && !message.id.startsWith("subagent:");
 }

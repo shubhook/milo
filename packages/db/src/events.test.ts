@@ -127,165 +127,6 @@ describe("finalizeRun", () => {
     expect(createEvent).toHaveBeenCalledOnce();
     expect(publish).toHaveBeenCalledOnce();
   });
-
-  it("resumes a held messaging inbound as a messaging run", async () => {
-    const tx = {
-      $queryRaw: vi.fn(async () => []),
-      run: {
-        findUnique: vi.fn(async () => ({ status: "running", startedAt: null })),
-        findUniqueOrThrow: vi.fn(async () => ({ sourceMessage: null })),
-        findFirst: vi.fn(async () => null),
-        updateMany: vi.fn(async () => ({ count: 1 })),
-        create: vi.fn(async () => ({ id: "run-reply" })),
-      },
-      attempt: { updateMany: vi.fn(async () => ({ count: 1 })) },
-      task: {
-        updateMany: vi.fn(async () => ({ count: 1 })),
-        create: vi.fn(async () => ({ id: "task-reply" })),
-      },
-      thread: { update: vi.fn(async () => ({ nextEventSeq: 1 })) },
-      event: {
-        create: vi.fn(async () => ({ threadId: "thread-1", seq: 0 })),
-        deleteMany: vi.fn(async () => ({ count: 0 })),
-      },
-      steeringMessage: {
-        findMany: vi.fn(async () => [
-          {
-            id: "steer-1",
-            userId: "user-1",
-            originTrigger: "messaging",
-            message: {
-              id: "message-slack",
-              seq: 4,
-              blocks: [{ kind: "text", text: "Check the inbox" }],
-            },
-          },
-        ]),
-        updateMany: vi.fn(async () => ({ count: 1 })),
-      },
-      bot: { update: vi.fn(async () => ({})) },
-    };
-    const prisma = {
-      $transaction: vi.fn(async (callback: (client: typeof tx) => unknown) => callback(tx)),
-    } as unknown as PrismaClient;
-
-    await expect(
-      finalizeRun(prisma, {
-        spaceId: "space-1",
-        threadId: "thread-1",
-        botId: "bot-1",
-        runId: "intro-run",
-        taskId: "intro-task",
-        attemptId: "attempt-1",
-        leaseOwner: "worker-1",
-        leaseFence: 1,
-        outcome: "failed",
-        error: "intro failed",
-      }),
-    ).resolves.toEqual({ continuationRunId: "run-reply" });
-
-    expect(tx.run.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        trigger: "messaging",
-        sourceMessageId: "message-slack",
-        status: "queued",
-      }),
-    });
-  });
-
-  it("resumes a held group-channel message without taking a later direct message", async () => {
-    const channel = {
-      kind: "channel_message" as const,
-      provider: "slack",
-      channelId: "channel-1",
-      fromAddress: "U1",
-      fromLabel: "Pat",
-      text: "What is the status?",
-    };
-    const tx = {
-      $queryRaw: vi.fn(async () => []),
-      run: {
-        findUnique: vi.fn(async () => ({ status: "running", startedAt: null })),
-        findUniqueOrThrow: vi.fn(async () => ({ sourceMessage: null })),
-        findFirst: vi.fn(async () => null),
-        updateMany: vi.fn(async () => ({ count: 1 })),
-        create: vi.fn(async () => ({ id: "run-reply" })),
-      },
-      attempt: { updateMany: vi.fn(async () => ({ count: 1 })) },
-      task: {
-        updateMany: vi.fn(async () => ({ count: 1 })),
-        create: vi.fn(async () => ({ id: "task-reply" })),
-      },
-      thread: { update: vi.fn(async () => ({ nextEventSeq: 1 })) },
-      event: {
-        create: vi.fn(async () => ({ threadId: "thread-1", seq: 0 })),
-        deleteMany: vi.fn(async () => ({ count: 0 })),
-      },
-      steeringMessage: {
-        findMany: vi.fn(async () => [
-          {
-            id: "steer-channel",
-            userId: "user-1",
-            originTrigger: "messaging",
-            message: { id: "message-channel", seq: 4, blocks: [channel] },
-          },
-          {
-            id: "steer-dm",
-            userId: "user-1",
-            originTrigger: "messaging",
-            message: {
-              id: "message-dm",
-              seq: 5,
-              blocks: [{ kind: "text", text: "And privately?" }],
-            },
-          },
-          {
-            id: "steer-app",
-            userId: "user-2",
-            originTrigger: null,
-            message: {
-              id: "message-app",
-              seq: 6,
-              blocks: [{ kind: "text", text: "From the app" }],
-            },
-          },
-        ]),
-        updateMany: vi.fn(async () => ({ count: 1 })),
-      },
-      bot: { update: vi.fn(async () => ({})) },
-    };
-    const prisma = {
-      $transaction: vi.fn(async (callback: (client: typeof tx) => unknown) => callback(tx)),
-    } as unknown as PrismaClient;
-
-    await expect(
-      finalizeRun(prisma, {
-        spaceId: "space-1",
-        threadId: "thread-1",
-        botId: "bot-1",
-        runId: "routine-run",
-        taskId: "routine-task",
-        attemptId: "attempt-1",
-        leaseOwner: "worker-1",
-        leaseFence: 1,
-        outcome: "failed",
-        error: "routine failed",
-      }),
-    ).resolves.toEqual({ continuationRunId: "run-reply" });
-
-    expect(tx.run.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        trigger: "messaging",
-        sourceMessageId: "message-channel",
-        userId: "user-1",
-        status: "queued",
-      }),
-    });
-    expect(tx.steeringMessage.updateMany).toHaveBeenCalledWith({
-      where: { id: { in: ["steer-channel"] }, runId: null },
-      data: { runId: "run-reply", claimedAt: null },
-    });
-  });
 });
 
 describe("followThreadEvents", () => {
@@ -2128,7 +1969,7 @@ describe("sendUserMessage", () => {
     });
   });
 
-  it("keeps a messaging inbound's origin on the hold behind the creation intro", async () => {
+  it("holds a user message behind the creation intro", async () => {
     const tx = {
       thread: {
         update: vi
@@ -2169,8 +2010,8 @@ describe("sendUserMessage", () => {
         userId: "user-1",
         blocks: [{ kind: "text", text: "Check the inbox" }],
         prompt: "Check the inbox",
-        trigger: "messaging",
-        clientNonce: "messaging:slack:handle-1",
+        trigger: "user",
+        clientNonce: "client-1",
       }),
     ).resolves.toEqual({ messageId: "message-1", seq: 4, taskId: null, runId: "intro-run" });
 
@@ -2181,7 +2022,6 @@ describe("sendUserMessage", () => {
         botId: "bot-1",
         userId: "user-1",
         runId: null,
-        originTrigger: "messaging",
       },
     });
   });
@@ -2226,20 +2066,18 @@ describe("sendUserMessage", () => {
         userId: "user-1",
         blocks: [{ kind: "text", text: "hello" }],
         prompt: "hello",
-        trigger: "messaging",
+        trigger: "user",
       }),
     ).resolves.toEqual({ messageId: "message-1", seq: 4, taskId: null, runId: "run-routine" });
 
     expect(tx.run.create).not.toHaveBeenCalled();
     // No run on the steering row: the routine never claims it; its continuation does.
-    // The inbound stays messaging so that continuation is mirrored back to the app.
     expect(tx.steeringMessage.create).toHaveBeenCalledWith({
       data: {
         messageId: "message-1",
         botId: "bot-1",
         userId: "user-1",
         runId: null,
-        originTrigger: "messaging",
       },
     });
   });
@@ -2285,7 +2123,7 @@ describe("sendUserMessage", () => {
         userId: "user-1",
         blocks: [{ kind: "text", text: "hello" }],
         prompt: "hello",
-        trigger: "messaging",
+        trigger: "user",
       }),
     ).resolves.toEqual({ messageId: "message-1", seq: 4, taskId: null, runId: "run-user" });
 
@@ -2427,47 +2265,6 @@ describe("claimSteering", () => {
     expect(tx.steeringMessage.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ OR: [{ runId: "run-routine" }] }),
-      }),
-    );
-  });
-
-  it("leaves channel and in-app pending rows for a direct-message run", async () => {
-    const tx = {
-      $queryRaw: vi.fn(),
-      run: {
-        findFirst: vi.fn().mockResolvedValue({
-          id: "run-dm",
-          trigger: "messaging",
-          sourceMessage: { blocks: [{ kind: "text", text: "And privately?" }] },
-        }),
-      },
-      steeringMessage: {
-        findMany: vi.fn().mockResolvedValue([]),
-        updateMany: vi.fn(),
-      },
-    };
-    const prisma = {
-      $transaction: vi.fn(async (callback: (client: typeof tx) => unknown) => callback(tx)),
-    } as unknown as PrismaClient;
-
-    await claimSteering(prisma, {
-      threadId: "thread-1",
-      botId: "bot-1",
-      runId: "run-dm",
-      leaseOwner: "worker-1",
-      leaseFence: 1,
-      seenIds: [],
-    });
-
-    expect(tx.steeringMessage.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          OR: [{ runId: null, originTrigger: "messaging" }, { runId: "run-dm" }],
-          message: {
-            threadId: "thread-1",
-            NOT: { blocks: { array_contains: [{ kind: "channel_message" }] } },
-          },
-        }),
       }),
     );
   });

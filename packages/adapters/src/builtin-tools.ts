@@ -901,55 +901,6 @@ export const builtinAgentTools: ConnectorTool[] = [
   },
 ];
 
-/** Agent-connection tools, exposed only when the messaging surface is enabled. */
-export const agentConnectionTools: ConnectorTool[] = [
-  {
-    name: "connect_agent",
-    description:
-      "Request a standing connection to another person's agent by their owner's chat address. The other owner must approve before either agent can message the other. Only for agents whose owner messaged the deployment's chat line.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        address: {
-          type: "string",
-          description:
-            "The owner's address on the chat surface: an E.164 phone number (e.g. +15551234567) or platform user id.",
-        },
-      },
-      required: ["address"],
-    },
-  },
-  {
-    name: "respond_agent_connection",
-    description:
-      "Approve or decline the newest pending agent connection request addressed to you. Use only on your owner's explicit instruction.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        accept: { type: "boolean", description: "true to approve, false to decline." },
-      },
-      required: ["accept"],
-    },
-  },
-  {
-    name: "message_agent",
-    description:
-      "Send a useful update, question, or result to another person's agent over an approved connection. Delivery is async and does not end your turn. Continue independent work; do not poll or send ack-only messages.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        address: {
-          type: "string",
-          description:
-            "Chat address (phone number or platform user id) of the connected agent's owner.",
-        },
-        message: { type: "string", description: "What to send." },
-      },
-      required: ["address", "message"],
-    },
-  },
-];
-
 /** Shared documents are read by every bot, so a single save stays bounded. */
 export const MAX_SHARED_MEMORY_CHARS = 4_000;
 

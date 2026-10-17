@@ -38,10 +38,6 @@ import type {
   MemorySearchRequest,
   MemorySearchResult,
   MemorySnapshot,
-  MessagingInboundEvent,
-  MessagingPlatformDescriptor,
-  MessagingSendRequest,
-  MessagingSendResult,
   NotificationMessage,
   PageBrowserCommand,
   PageBrowserResult,
@@ -293,52 +289,6 @@ export interface VoiceProvider {
   listVoices(apiKey: string, context: AdapterContext): Promise<VoiceInfo[]>;
   synthesize(request: VoiceSynthesizeRequest, context: AdapterContext): Promise<SpeechClip>;
   transcribe?(request: VoiceTranscribeRequest, context: AdapterContext): Promise<{ text: string }>;
-}
-
-/**
- * Deployment-wide external chat surface: one bot presence across messaging
- * platforms (iMessage/SMS, Slack, WhatsApp, …). Conversations are addressed
- * by opaque provider-prefixed thread ids ("sendblue:…", "slack:C1:…"), so
- * orchestration never sees platform wire formats. Webhook verification and
- * payload translation live behind handleWebhook, per platform.
- */
-export interface MessagingSurface {
-  describe(): AdapterDescriptor<{ providers: string[] }>;
-  /** Enabled platforms and what each supports. */
-  platforms(): MessagingPlatformDescriptor[];
-  /**
-   * Verify and process one platform webhook request. Parsed events reach the
-   * sink registered via onInbound before the returned response resolves.
-   * Returns null for a provider this surface does not host.
-   */
-  handleWebhook(provider: string, request: Request): Promise<Response> | null;
-  /** Register the single downstream consumer of inbound events. */
-  onInbound(sink: (event: MessagingInboundEvent) => Promise<void>): void;
-  sendToThread(
-    request: MessagingSendRequest,
-    context: AdapterContext,
-  ): Promise<MessagingSendResult>;
-  /** Resolve (or create) the 1:1 thread for a provider address. */
-  openDirectThread(provider: string, address: string, context: AdapterContext): Promise<string>;
-  /**
-   * Best-effort "…" typing bubbles for 1:1 chats. Cosmetic: never gates
-   * message delivery, and silently no-ops on platforms without support.
-   */
-  sendTyping(threadId: string, context: AdapterContext): Promise<void>;
-  /**
-   * Start the surface eagerly instead of waiting for the first inbound
-   * webhook or outbound send to touch it. Needed for adapters that pull
-   * updates themselves (e.g. Telegram in "auto"/"polling" mode, used when
-   * no public webhook URL is reachable): without an explicit call here,
-   * nothing kicks off that pull loop until something else happens to
-   * initialize the adapter first.
-   */
-  initialize?(): Promise<void>;
-  /**
-   * Release long-lived inbound resources (Telegram getUpdates polling) so a
-   * replacement process can claim them. No-op when the surface never started.
-   */
-  shutdown?(): Promise<void>;
 }
 
 /**

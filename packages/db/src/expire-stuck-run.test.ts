@@ -67,7 +67,6 @@ function tx(options?: {
               {
                 id: "steer-1",
                 userId: "user-1",
-                originTrigger: null,
                 message: { id: "message-steer", blocks: [], seq: 1 },
               },
             ]

@@ -4,7 +4,6 @@ import {
   HISTORY_COMPACT_MAX_ATTEMPTS,
   historyCompactJob,
   historyCompactJobKey,
-  messagingDeliverJob,
   parseBackgroundJob,
 } from "./background-jobs.js";
 import type { BackgroundJobHandlers } from "./types.js";
@@ -18,27 +17,10 @@ function handlers(): BackgroundJobHandlers {
     "computer.control-expire": vi.fn(async () => undefined),
     "skill.teaching-expire": vi.fn(async () => undefined),
     "history.compact": vi.fn(async () => undefined),
-    "messaging.deliver": vi.fn(async () => undefined),
   };
 }
 
 describe("background job contracts", () => {
-  it("validates and dispatches messaging.deliver", async () => {
-    const target = handlers();
-    await dispatchBackgroundJob(target, "messaging.deliver", { runId: "run-1" });
-    expect(target["messaging.deliver"]).toHaveBeenCalledWith({ runId: "run-1" });
-    expect(messagingDeliverJob("run-1")).toEqual({
-      name: "messaging.deliver",
-      payload: { runId: "run-1" },
-      replaceKey: "messaging.deliver:run-1",
-    });
-    expect(messagingDeliverJob()).toEqual({
-      name: "messaging.deliver",
-      payload: {},
-      replaceKey: "messaging.deliver:drain",
-    });
-  });
-
   it("validates and dispatches a typed job", async () => {
     const target = handlers();
     await dispatchBackgroundJob(target, "routine.wakeup", {

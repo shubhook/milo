@@ -122,10 +122,10 @@ cover those fixes; the original report remains separate from the corrected run.
 The suite covers artifacts and calculations, inbox grounding and injected
 instructions, precise and read-only CRM operations, approval payloads, uncertain
 writes, durable preferences, workspace memory isolation, saved taught playbooks,
-GitHub release monitoring, and a Slack-to-Salesforce-and-Zendesk customer update.
+GitHub release monitoring, and a Salesforce-and-Zendesk customer update.
 The recorded baseline above covers the original 15 cases; the current 16-case
 suite also verifies that a real model selects matching records across two local
-service emulators and posts a grounded reply to the originating Slack-like DM.
+service emulators and gives a grounded reply.
 It does not evaluate visual teaching or native mobile recording.
 
 Keep compact scenario seeds, generators and grading criteria in this repository

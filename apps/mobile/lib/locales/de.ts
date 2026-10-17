@@ -232,13 +232,10 @@ export const DE_MESSAGES: Record<string, string> = {
   Active: "Aktiv",
   "Could not load routine": "Routine konnte nicht geladen werden",
   "Git event": "Git-Ereignis",
-  "Message event": "Nachrichtenereignis",
   "Open conversation": "Unterhaltung öffnen",
   Paused: "Pausiert",
   Prompt: "Prompt",
   "Routine link is incomplete": "Der Routine-Link ist unvollständig",
-  "Slack message": "Slack-Nachricht",
-  "Teams message": "Teams-Nachricht",
   "This routine no longer exists": "Diese Routine gibt es nicht mehr",
   Webhook: "Webhook",
   // app/computer.tsx

@@ -11,10 +11,6 @@
     "test": "vitest run --root ../.. packages/adapters/src"
   },
   "dependencies": {
-    "@chat-adapter/slack": "4.40.0",
-    "@chat-adapter/state-memory": "4.40.0",
-    "@chat-adapter/telegram": "4.40.0",
-    "@chat-adapter/whatsapp": "4.40.0",
     "@composio/core": "0.18.1",
     "@earendil-works/pi-agent-core": "0.87.1",
     "@earendil-works/pi-ai": "0.87.1",
@@ -26,9 +22,6 @@
     "@milo/core": "workspace:*",
     "@milo/db": "workspace:*",
     "@milo/logging": "workspace:*",
-    "chat": "4.40.0",
-    "chat-adapter-lark": "0.3.1",
-    "chat-adapter-sendblue": "0.2.0",
     "d3-dsv": "3.0.1",
     "graphile-worker": "0.17.3",
     "jose": "6.2.8",
@@ -36,14 +29,12 @@
     "koffi": "3.2.1",
     "nodemailer": "10.0.3",
     "pg": "8.23.0",
-    "sendblue": "3.16.1",
     "sharp": "0.35.4",
     "shell-quote": "1.10.0",
     "undici": "8.10.2",
     "zod": "4.6.2"
   },
   "devDependencies": {
-    "@chat-adapter/tests": "4.40.0",
     "@types/d3-dsv": "3.0.7",
     "@types/jsdom": "30.0.0",
     "@types/nodemailer": "8.0.1",

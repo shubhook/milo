@@ -11,7 +11,6 @@ describe("run state machine", () => {
   it("withholds user steering from routine, webhook, and creation intro turns", () => {
     expect(isConversationalRun("user")).toBe(true);
     expect(isConversationalRun("follow_up")).toBe(true);
-    expect(isConversationalRun("messaging")).toBe(true);
     expect(isConversationalRun("routine")).toBe(false);
     expect(isConversationalRun("webhook")).toBe(false);
     expect(isConversationalRun("created")).toBe(false);

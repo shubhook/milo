@@ -52,16 +52,6 @@ msgstr "{0} {unitLabel}"
 msgid "{0} connection"
 msgstr "{0} 연결"
 
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} default"
-msgstr ""
-
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} handling"
-msgstr ""
-
 #. placeholder {0}: format(size / 1024)
 #: src/components/ArtifactFileCard.tsx
 msgid "{0} KB"
@@ -72,21 +62,11 @@ msgstr "{0} KB"
 msgid "{0} MB"
 msgstr "{0} MB"
 
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} rollup hours"
-msgstr ""
-
 #. placeholder {0}: usage.runs
 #. placeholder {1}: usage.inputTokens + usage.outputTokens
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "{0} runs · {1} tokens"
 msgstr "{0}회 실행 · 토큰 {1}개"
-
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} will still respond to direct mentions."
-msgstr ""
 
 #. placeholder {0}: active.name
 #: src/pages/Shell.tsx
@@ -260,11 +240,11 @@ msgid "Add a run time for this one-shot."
 msgstr "이 일회성 실행의 시간을 추가하세요."
 
 #: src/pages/Shell.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger"
+msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr ""
 
 #: src/pages/RoutineEditor.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger to run this routine."
+msgid "Add a schedule, webhook, or GitHub trigger to run this routine."
 msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
@@ -362,10 +342,6 @@ msgstr "고급..."
 msgid "Agent computer"
 msgstr "Agent 컴퓨터"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Agent connections"
-msgstr "Agent 연결"
-
 #: src/pages/McpServersOverlay.tsx
 msgid "Agents:"
 msgstr "사용 Bot:"
@@ -418,10 +394,6 @@ msgstr "한 번 허용됨"
 msgid "Already have an account?"
 msgstr "이미 계정이 있나요?"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Always act"
-msgstr ""
-
 #: src/components/AskCard.tsx
 msgid "Always allow this tool"
 msgstr "이 도구 항상 허용"
@@ -471,7 +443,6 @@ msgstr "모양"
 msgid "Approval boundaries"
 msgstr "승인이 필요한 범위"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "승인"
@@ -581,14 +552,6 @@ msgstr "인증하기"
 msgid "Authorize this server so agents can use its tools. A popup opens."
 msgstr "에이전트가 도구를 사용할 수 있도록 이 서버에 권한을 부여하세요. 팝업이 열립니다."
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders will appear after they post here."
-msgstr ""
-
 #: src/pages/RoutineEditor.tsx
 msgid "Available after the routine is saved"
 msgstr "루틴을 저장한 후 사용할 수 있습니다"
@@ -656,10 +619,6 @@ msgstr "Bot 화면"
 msgid "Bot screen preview"
 msgstr "Bot 화면 미리보기"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Bot to link"
-msgstr "연결할 Bot"
-
 #: src/pages/Artifacts.tsx
 msgid "Bots"
 msgstr ""
@@ -723,21 +682,9 @@ msgstr "비밀번호 변경"
 msgid "Changing…"
 msgstr "변경 중…"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Channels"
-msgstr "채널"
-
 #: src/pages/shell/message-cards.tsx
 msgid "Chart failed to render: {error}"
 msgstr "차트를 표시하지 못했습니다: {error}"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Chat apps"
-msgstr "채팅 앱"
-
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Chat apps, group channels, and agent connections."
-msgstr "채팅 앱, 그룹 채널 및 Agent 연결을 관리합니다."
 
 #: src/pages/Shell.tsx
 msgid "Chat Settings"
@@ -778,10 +725,6 @@ msgstr "체크아웃에 로컬 변경 사항이 있습니다. 업데이트하기
 msgid "Choose a bot shape, color, or upload an image"
 msgstr "봇 모양과 색을 고르거나 이미지를 업로드하세요"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Choose a bot…"
-msgstr "Bot 선택…"
-
 #: src/pages/Auth.tsx
 msgid "Choose a new password"
 msgstr "새 비밀번호 선택"
@@ -821,7 +764,6 @@ msgid "Client secret"
 msgstr ""
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/PeerMessagesOverlay.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
@@ -856,10 +798,6 @@ msgstr "MCP 서버 설정 닫기"
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "기억 설정 닫기"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Close messaging settings"
-msgstr "메시징 설정 닫기"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Close model settings"
@@ -1375,7 +1313,6 @@ msgstr "루틴을 실행할 수 없습니다"
 msgid "Could not run the command"
 msgstr ""
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Could not save"
@@ -1469,17 +1406,9 @@ msgstr "반응을 업데이트할 수 없습니다"
 msgid "Could not upload file"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't load messaging settings"
-msgstr "메시징 설정을 불러올 수 없습니다"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Couldn't update avatars"
 msgstr "아바타를 업데이트할 수 없습니다"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't update messaging settings"
-msgstr "메시징 설정을 업데이트할 수 없습니다"
 
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -1592,10 +1521,6 @@ msgstr ""
 #: src/pages/RoutineSchedule.tsx
 msgid "days"
 msgstr "일"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Decline"
-msgstr "거절"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Default"
@@ -1810,10 +1735,6 @@ msgstr "Bot 정보 수정"
 msgid "Email"
 msgstr "이메일"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Engage when... Ignore..."
-msgstr ""
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Enter a username and password"
 msgstr ""
@@ -1830,7 +1751,6 @@ msgstr "최대 출력 토큰 수는 1에서 {MAX_MODEL_MAX_TOKENS} 사이의 정
 msgid "Enter a whole number from 1 to 1000 for the image limit."
 msgstr "이미지 한도는 1에서 1000 사이의 정수로 입력하세요."
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "Every"
 msgstr "매"
@@ -1884,11 +1804,6 @@ msgstr "내보내기"
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Export this week's list from the CRM and drop it in the shared folder"
 msgstr "CRM에서 이번 주 목록을 내려받아 공유 폴더에 넣기"
-
-#: src/pages/ExternalConversationSettings.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "External conversation"
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Extra high"
@@ -1994,7 +1909,6 @@ msgstr ""
 msgid "Git event"
 msgstr "Git 이벤트"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Group"
 msgstr "그룹"
@@ -2002,10 +1916,6 @@ msgstr "그룹"
 #: src/pages/GroupPanel.tsx
 msgid "Group settings"
 msgstr "그룹 설정"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Group updates"
-msgstr ""
 
 #: src/pages/shell/dialogs.tsx
 msgid "Groups"
@@ -2074,7 +1984,6 @@ msgstr ""
 msgid "hour"
 msgstr "시간"
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "hours"
 msgstr "시간"
@@ -2094,10 +2003,6 @@ msgstr "조작 끝내기"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "샘플이 들렸다면 음성 설정이 완료되었습니다."
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Ignore"
-msgstr ""
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2212,10 +2117,6 @@ msgstr ""
 msgid "Launched {app}"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Leave"
-msgstr "나가기"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Light"
 msgstr "라이트"
@@ -2228,20 +2129,8 @@ msgstr ""
 msgid "Linear issue"
 msgstr "Linear 이슈"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Link a chat app"
-msgstr "채팅 앱 연결"
-
 #: src/pages/Artifacts.tsx
 msgid "List view"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listen"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listening"
 msgstr ""
 
 #: src/pages/Shell.tsx
@@ -2327,10 +2216,6 @@ msgstr "이 컴퓨터에서 실행 중인 작업이 없는지 확인하세요."
 msgid "Manage MCP servers"
 msgstr "MCP 서버 관리"
 
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Manage messaging settings"
-msgstr "메시징 설정 관리"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr ""
@@ -2398,10 +2283,6 @@ msgstr "기억"
 msgid "Mentions"
 msgstr "멘션"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Mentions only"
-msgstr ""
-
 #: src/pages/Shell.tsx
 msgid "Message"
 msgstr "메시지"
@@ -2419,10 +2300,6 @@ msgstr "{activeName}에게 메시지 보내기"
 msgid "Message composer"
 msgstr "메시지 작성기"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Message event"
-msgstr ""
-
 #: src/pages/Shell.tsx
 msgid "Message from {peer}"
 msgstr "{peer}의 메시지"
@@ -2434,11 +2311,6 @@ msgstr "메시지를 입력하세요"
 #: src/pages/Shell.tsx
 msgid "Messaged {peer}"
 msgstr "{peer}에게 메시지 보냄"
-
-#: src/pages/AccountSettingsOverlay.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Messaging"
-msgstr "메시징"
 
 #: src/lib/call-session.ts
 msgid "Microphone failed"
@@ -2599,10 +2471,6 @@ msgstr "새 스킬"
 msgid "New space"
 msgstr "새 스페이스"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No agent connections yet."
-msgstr "아직 Agent 연결이 없습니다."
-
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "검색 결과가 없습니다."
@@ -2631,17 +2499,9 @@ msgstr ""
 msgid "No bots match"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No chat apps linked yet."
-msgstr "아직 연결된 채팅 앱이 없습니다."
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "No credentials saved for this bot."
 msgstr ""
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No group chats yet."
-msgstr "아직 그룹 채팅이 없습니다."
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -2695,10 +2555,6 @@ msgstr "아직 실행 기록이 없습니다"
 #: src/pages/KnowledgeSection.tsx
 msgid "No skills yet"
 msgstr "아직 스킬이 없습니다"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No team conversations yet."
-msgstr ""
 
 #: src/pages/PluginsOverlay.tsx
 msgid "No tools available."
@@ -3089,10 +2945,6 @@ msgid "Remove mention {0}"
 msgstr "{0} 멘션 삭제"
 
 #: src/pages/RoutineEditor.tsx
-msgid "Remove message trigger"
-msgstr ""
-
-#: src/pages/RoutineEditor.tsx
 msgid "Remove schedule"
 msgstr "일정 제거"
 
@@ -3231,17 +3083,9 @@ msgstr "Milo로 돌아가기"
 msgid "rev {0}"
 msgstr "리비전 {0}"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Revoke"
-msgstr "연결 해제"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Robot"
 msgstr "로봇"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Room guidance"
-msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Rotate key"
@@ -3284,13 +3128,8 @@ msgstr "실행 중 · 중지"
 msgid "Running…"
 msgstr "실행 중…"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Runs when this bot receives a verified message from this provider."
-msgstr ""
-
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/GroupPanel.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/ModelSettingsOverlay.tsx
@@ -3314,7 +3153,6 @@ msgstr ""
 
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 msgid "Saved"
 msgstr "저장됨"
 
@@ -3332,10 +3170,6 @@ msgstr "저장되었습니다. key를 교체하면 표시됩니다."
 
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Saving your workspace"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Saving..."
 msgstr ""
 
 #: src/components/AskCard.tsx
@@ -3402,10 +3236,6 @@ msgstr "대화할 Bot을 선택하세요"
 msgid "Send"
 msgstr "보내기"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Send <0>{linkCode}</0> to the line from your chat app within 10 minutes. You'll get a confirmation reply once linked."
-msgstr "10분 안에 채팅 앱에서 연결할 회선으로 <0>{linkCode}</0>를 보내세요. 연결되면 확인 답장을 받습니다."
-
 #: src/components/AskCard.tsx
 msgid "Send answer"
 msgstr "답변 보내기"
@@ -3443,7 +3273,6 @@ msgid "Server URL"
 msgstr "서버 URL"
 
 #: src/components/call/CallCard.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Settings"
@@ -3575,14 +3404,6 @@ msgstr "건너뛰거나 배포 키"
 msgid "Skipped {0}"
 msgstr "{0} 건너뜀"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Slack message"
-msgstr "Slack 메시지"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Slack not enabled"
-msgstr ""
-
 #: src/components/SoftwareUpdateSection.tsx
 msgid "Software update"
 msgstr "소프트웨어 업데이트"
@@ -3706,18 +3527,6 @@ msgstr "팀 공용"
 #: src/pages/Shell.tsx
 msgid "Team Computer"
 msgstr "팀 컴퓨터"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Team conversations"
-msgstr ""
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams message"
-msgstr "Teams 메시지"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams not enabled"
-msgstr ""
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Terminal"
@@ -3849,10 +3658,6 @@ msgstr ""
 msgid "Transcript"
 msgstr "대화 기록"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Treat like a person"
-msgstr ""
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg 토큰"
@@ -3884,10 +3689,6 @@ msgstr "사용할 수 없음"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr ""
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Unlink"
-msgstr "연결 해제"
 
 #: src/components/call/CallCard.tsx
 msgid "Unmute"
@@ -3975,10 +3776,6 @@ msgstr "{hostLabel} 사용"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Use a found model"
 msgstr "찾은 모델 중에서 선택"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Use default guidance"
-msgstr ""
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."

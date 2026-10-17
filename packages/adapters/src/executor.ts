@@ -63,12 +63,8 @@ import {
   humanizeToolName,
   inferAttachmentMimeType,
   isCallClientNonce,
-  isMessagingChannelRun,
   isOneShotRoutineCrons,
   isTerminal,
-  messagingChannelId,
-  messagingChannelPrivacyBlock,
-  messagingDmSurfaceNote,
   nextCronDateAcross,
   nextFence,
   planActionGate,
@@ -110,11 +106,6 @@ import {
 } from "@milo/db";
 import { getLogger } from "@milo/logging";
 import { parse as parseShellCommand } from "shell-quote";
-import {
-  connectAgent,
-  messageConnectedAgent,
-  respondAgentConnection,
-} from "./agent-connections.js";
 import { decryptAgentEnvironment, formatAgentEnvironmentInstruction } from "./agent-environment.js";
 import { buildApprovalAskBlock } from "./approval-ask.js";
 import {
@@ -172,7 +163,7 @@ import {
   browserNavigateFromTool,
   browserSnapshotFromTool,
 } from "./browser-tools.js";
-import { agentConnectionTools, builtinAgentTools, sharedMemorySaveError } from "./builtin-tools.js";
+import { builtinAgentTools, sharedMemorySaveError } from "./builtin-tools.js";
 import { archiveSpawnedBot, spawnBot } from "./child-bots.js";
 import {
   collectLogIds,
@@ -2628,8 +2619,6 @@ export interface ExecutorDeps {
   dataDir?: string;
   notifications?: NotificationProvider;
   jobs: JobPublisher;
-  /** Messaging surface; absent means zero identity queries and no chat prompts. */
-  messaging?: { hasIdentity(botId: string): Promise<boolean> };
   listConnectedPluginSlugs?: (userId: string) => Promise<string[]>;
   /** Builtin web_search / web_fetch. Defaults to keyless HTTP when omitted. */
   web?: WebProvider;
@@ -3263,17 +3252,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
 
       const runSecrets = [...deps.secrets];
       try {
-        const sourceBlocks =
-          run.trigger === "messaging" && run.sourceMessageId
-            ? ((
-                await deps.prisma.message.findUnique({
-                  where: { id: run.sourceMessageId },
-                  select: { blocks: true },
-                })
-              )?.blocks as MessageBlock[] | undefined)
-            : undefined;
-        const channelId = messagingChannelId(sourceBlocks);
-        const messagingChannelRun = isMessagingChannelRun(run.trigger, sourceBlocks);
         const [
           bot,
           thread,
@@ -3292,7 +3270,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             include: { computer: true },
           }),
           deps.prisma.thread.findUniqueOrThrow({ where: { id: run.threadId } }),
-          loadRunHistoryMessages(deps.prisma, run, LEGACY_HISTORY_WINDOW_SIZE, channelId),
+          loadRunHistoryMessages(deps.prisma, run, LEGACY_HISTORY_WINDOW_SIZE),
           run.trigger === "bot_message"
             ? loadBotMessageContext(deps.prisma, run.sourceMessageId)
             : Promise.resolve(undefined),
@@ -3388,23 +3366,19 @@ export function createRunExecutor(deps: ExecutorDeps) {
         const discoveredPromise = deps.connector
           ? deps.connector.discoverTools(context)
           : Promise.resolve([]);
-        const threadContext = threadContextForRun(
-          run.trigger,
-          {
-            messages: [...messages].reverse().map((m) => ({
-              id: m.id,
-              seq: m.seq,
-              role: (m.role === "user" ? "user" : m.role === "system" ? "system" : "assistant") as
-                | "user"
-                | "assistant"
-                | "system",
-              content: messageToAgentHistoryText(m),
-            })),
-            summary: thread.historyCompactionSummary,
-            historyCompactedUpToSeq: thread.historyCompactedUpToSeq,
-          },
-          messagingChannelRun,
-        );
+        const threadContext = threadContextForRun(run.trigger, {
+          messages: [...messages].reverse().map((m) => ({
+            id: m.id,
+            seq: m.seq,
+            role: (m.role === "user" ? "user" : m.role === "system" ? "system" : "assistant") as
+              | "user"
+              | "assistant"
+              | "system",
+            content: messageToAgentHistoryText(m),
+          })),
+          summary: thread.historyCompactionSummary,
+          historyCompactedUpToSeq: thread.historyCompactedUpToSeq,
+        });
         const compactedHistory = selectCompactedHistory({
           messages: threadContext.messages,
           summary: threadContext.summary,
@@ -3432,8 +3406,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
           peerMessage?.intent,
           peerMessage?.repliesToRequest,
         );
-        const allowSilentEmptyRun =
-          allowSilentPeerMessage || messagingChannelRun || runAllowsSilentEmpty(run.trigger);
+        const allowSilentEmptyRun = allowSilentPeerMessage || runAllowsSilentEmpty(run.trigger);
         const emptyResponseText = peerMessage
           ? peerMessage.intent === "result" ||
             peerMessage.intent === "status" ||
@@ -3446,15 +3419,11 @@ export function createRunExecutor(deps: ExecutorDeps) {
           [
             discoveredPromise,
             loadCurrentTurnImages(deps, turnBlocks, context),
-            messagingChannelRun
-              ? Promise.resolve("")
-              : loadAgentMemoryContext(deps.memory, bot.id, context),
-            messagingChannelRun
-              ? Promise.resolve("")
-              : loadAgentScratchpadContext(deps, {
-                  spaceId: run.spaceId,
-                  botId: bot.id,
-                }),
+            loadAgentMemoryContext(deps.memory, bot.id, context),
+            loadAgentScratchpadContext(deps, {
+              spaceId: run.spaceId,
+              botId: bot.id,
+            }),
           ],
         );
         if (!compactedHistory.usedLocalSummary) {
@@ -3594,14 +3563,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
         const groupContext = thread.groupId
           ? await loadGroupContext(deps.prisma, thread.groupId, { id: bot.id, name: bot.name })
           : undefined;
-        const hasMessagingIdentity = deps.messaging
-          ? await deps.messaging.hasIdentity(bot.id)
-          : false;
-        const messagingContext = hasMessagingIdentity
-          ? [messagingDmSurfaceNote(), messagingChannelRun ? messagingChannelPrivacyBlock() : null]
-              .filter(Boolean)
-              .join("\n\n")
-          : undefined;
         if (heldForTakeover) {
           const held = await deps.prisma.run.findUnique({
             where: { id: runId },
@@ -3632,18 +3593,13 @@ export function createRunExecutor(deps: ExecutorDeps) {
         const graphicalToolsAllowed = graphical && acceptsImages && !heldForTakeover;
         const pageBrowserAllowed =
           graphical && browser.describe().capabilities.page && !heldForTakeover;
-        const builtins = [
-          ...selectBuiltinToolsForRun({
-            graphicalToolsAllowed,
-            pageBrowserAllowed,
-            groupId: thread.groupId,
-            trigger: run.trigger,
-            messagingChannelRun,
-            voiceCall,
-          }),
-          // Cross-owner agent connections only exist for chat-linked bots.
-          ...(hasMessagingIdentity ? agentConnectionTools : []),
-        ];
+        const builtins = selectBuiltinToolsForRun({
+          graphicalToolsAllowed,
+          pageBrowserAllowed,
+          groupId: thread.groupId,
+          trigger: run.trigger,
+          voiceCall,
+        });
         const exposedConnectorTools = discovered.filter(
           (tool) => !builtinAgentTools.some((builtin) => builtin.name === tool.name),
         );
@@ -5793,40 +5749,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
             if (!sent.ok) return finish({ error: sent.error });
             return finish({ ok: true, botId: sent.botId, name: sent.name, note: sent.note });
           }
-          if (name === "connect_agent") {
-            const result = await connectAgent(
-              deps,
-              { ...run, sourceMessageId: run.sourceMessageId },
-              { id: bot.id, name: bot.name },
-              { address: args.address ? String(args.address) : undefined },
-            );
-            if (!result.ok) return finish({ error: result.error });
-            return finish(result);
-          }
-          if (name === "respond_agent_connection") {
-            const result = await respondAgentConnection(
-              deps,
-              { ...run, sourceMessageId: run.sourceMessageId },
-              { id: bot.id, name: bot.name },
-              { accept: Boolean(args.accept) },
-            );
-            if (!result.ok) return finish({ error: result.error });
-            return finish(result);
-          }
-          if (name === "message_agent") {
-            const result = await messageConnectedAgent(
-              deps,
-              { ...run, sourceMessageId: run.sourceMessageId },
-              { id: bot.id, name: bot.name },
-              {
-                address: args.address ? String(args.address) : undefined,
-                message: redactSecrets(String(args.message ?? ""), runSecrets),
-                deliveryKey: effectKey,
-              },
-            );
-            if (!result.ok) return finish({ error: result.error });
-            return finish(result);
-          }
           if (name === "handoff_to_bot") {
             if (!thread.groupId) return finish({ error: "handoff_to_bot is only for group chats" });
             const result = await handoffToGroupBot(deps, run, thread.groupId, {
@@ -6049,7 +5971,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
               instructions: userTurnInstructions({
                 botInstructions: runIdentityInstruction(bot, run.trigger),
                 groupContext,
-                messagingContext,
                 redactedMemoryContext: memoryContext
                   ? redactSecrets(memoryContext, runSecrets)
                   : undefined,
@@ -6551,7 +6472,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
 
           flushPendingTools();
           // Only routine runs are instructed to emit NO_RESPONSE. Other
-          // allowSilentEmpty wakes (FYI, messaging) may finish truly empty.
+          // allowSilentEmpty wakes (FYI) may finish truly empty.
           const silentReply = runAllowsSilentEmpty(run.trigger)
             ? stripNoResponseReply(assembled, messageSegments)
             : { assembled, blocks: messageSegments };
@@ -6921,7 +6842,6 @@ export function selectBuiltinToolsForRun(options: {
   pageBrowserAllowed?: boolean;
   groupId: string | null;
   trigger: string;
-  messagingChannelRun: boolean;
   /** Hanging up is only offered to a turn the caller spoke on a live call. */
   voiceCall?: boolean;
 }) {
@@ -6934,13 +6854,7 @@ export function selectBuiltinToolsForRun(options: {
       options.groupId,
     ),
     options.trigger,
-  ).filter(
-    (tool) =>
-      (options.voiceCall || tool.name !== "end_call") &&
-      (!options.messagingChannelRun ||
-        (!["remember", "save_shared_memory", "task_catalog"].includes(tool.name) &&
-          !tool.name.startsWith("scratchpad_"))),
-  );
+  ).filter((tool) => options.voiceCall || tool.name !== "end_call");
 }
 
 export const PAGE_BROWSER_TOOL_NAMES = new Set([
@@ -6966,7 +6880,6 @@ export function dockerComputerToolInstruction(computerKind: string): string | un
 export function userTurnInstructions(parts: {
   botInstructions: string;
   groupContext: string | undefined;
-  messagingContext: string | undefined;
   redactedMemoryContext: string | undefined;
   redactedScratchpadContext: string | undefined;
   hasHistoricalContext: boolean;
@@ -6984,7 +6897,6 @@ export function userTurnInstructions(parts: {
   return [
     parts.botInstructions,
     parts.groupContext,
-    parts.messagingContext,
     parts.redactedMemoryContext,
     parts.redactedScratchpadContext,
     parts.hasHistoricalContext
@@ -7019,7 +6931,6 @@ export function threadContextForRun<T>(
     summary: string | null;
     historyCompactedUpToSeq: number | null;
   },
-  messagingChannelRun: boolean,
 ) {
   // Routine runs stay isolated from thread history. The creation intro does
   // too: a message that arrives during it waits and is answered afterward.
@@ -7030,9 +6941,7 @@ export function threadContextForRun<T>(
       historyCompactedUpToSeq: null,
     };
   }
-  return messagingChannelRun
-    ? { ...context, summary: null, historyCompactedUpToSeq: null }
-    : context;
+  return context;
 }
 
 /** Profile fields the creation intro is asked to explain. Other runs keep the prior identity line. */
