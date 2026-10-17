@@ -1,6 +1,3 @@
-import type { MessageBlock } from "@milo/contracts";
-import { cloudAgentBlockFromPayload } from "./cloud-agent.js";
-
 /** Remove this run's live message and obsolete unscoped progress without reordering history. */
 export function takeLiveMessage<Message extends { id: string; runId?: string | null }>(
   messages: readonly Message[],
@@ -13,29 +10,4 @@ export function takeLiveMessage<Message extends { id: string; runId?: string | n
     else if (!message.id.startsWith("progress:") || message.runId) remaining.push(message);
   }
   return { previous, remaining };
-}
-
-export function updateCloudAgentMessages<Message extends { id: string; blocks: MessageBlock[] }>(
-  messages: readonly Message[],
-  payload: Record<string, unknown>,
-): Message[] {
-  const agentId = String(payload.agentId ?? "");
-  const messageId = String(payload.messageId ?? "");
-  const block = cloudAgentBlockFromPayload(payload);
-  return messages.map((message) => {
-    if (
-      (messageId && message.id === messageId) ||
-      message.blocks.some(
-        (existing) => existing.kind === "cloud_agent" && existing.agentId === agentId,
-      )
-    ) {
-      return {
-        ...message,
-        blocks: message.blocks.map((existing) =>
-          existing.kind === "cloud_agent" && existing.agentId === agentId ? block : existing,
-        ),
-      };
-    }
-    return message;
-  });
 }

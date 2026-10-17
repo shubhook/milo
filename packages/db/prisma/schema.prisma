@@ -208,14 +208,11 @@ model Space {
   mcpServers                  McpServer[]
   mcpOAuthSessions            McpOAuthSession[]
   botMcpServers               BotMcpServer[]
-  messagingIdentities         MessagingIdentity[]
   actionApprovalRules         ActionApprovalRule[]
   actionAutoReviewPreferences ActionAutoReviewPreference[]
-  memoryConfig                SpaceMemoryConfig?
   secrets                     Secret[]
   chatGroups                  ChatGroup[]
   botSecrets BotSecret[]
-  externalConversations       ExternalConversation[]
   agentSecrets                AgentSecret[]
 
   @@unique([id, organizationId])
@@ -368,7 +365,6 @@ model Bot {
   archivedAt        DateTime?
   parentBotId       String?
   spawnKey          String?
-  memoryScope       String?
   parent            Bot?              @relation("BotChildren", fields: [parentBotId], references: [id], onDelete: SetNull)
   children          Bot[]             @relation("BotChildren")
   createdAt         DateTime          @default(now())
@@ -383,8 +379,6 @@ model Bot {
   modelId           String?
   thinkingLevel     String?
   webhookSecretId   String?
-  teamChatAmbientEnabled Boolean @default(false)
-  teamChatRules          String  @default("")
   routines          Routine[]
   scratchpadItems   ScratchpadItem[]
   taughtSkills      TaughtSkill[]
@@ -398,8 +392,6 @@ model Bot {
   mcpServers        BotMcpServer[]
   groupMembers      ChatGroupMember[]
   botSecrets BotSecret[]
-
-  externalConversations ExternalConversation[]
 
   @@unique([spaceId, spawnKey])
   @@index([spaceId, userId, archivedAt, pinned, updatedAt])
@@ -482,8 +474,6 @@ model Thread {
   bot                         Bot?       @relation(fields: [botId], references: [id], onDelete: Cascade)
   groupId                     String?    @unique
   group                       ChatGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  externalConversationId      String?    @unique
-  externalConversation        ExternalConversation? @relation(fields: [externalConversationId], references: [id], onDelete: Cascade)
   userId                      String
   createdAt                   DateTime   @default(now())
   nextEventSeq                Int        @default(0)
@@ -517,7 +507,6 @@ model Message {
   runId            String?
   clientNonce      String?
   sourceRuns            Run[]             @relation("RunSourceMessage")
-  externalTranscriptFor  ExternalMessage?
   steeringMessages SteeringMessage[]
   createdAt        DateTime  @default(now())
 
@@ -595,22 +584,17 @@ model Run {
   startedAt            DateTime?
   completedAt          DateTime?
   botOutcomeReturnedAt DateTime?
-  messagingMirroredAt  DateTime?
-  teamChatMirroredAt   DateTime?
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   attempts             Attempt[]
   effects              ExternalEffect[]
   usageRecords         UsageRecord[]
   steeringMessages     SteeringMessage[]
-  externalMessage      ExternalMessage?
 
   @@unique([spaceId, clientNonce])
   @@index([status, leaseExpiresAt])
   @@index([status, updatedAt, id])
   @@index([botOutcomeReturnedAt, status])
-  @@index([trigger, status, messagingMirroredAt, updatedAt])
-  @@index([trigger, status, teamChatMirroredAt, updatedAt])
   @@index([spaceId, botId])
   @@index([sourceMessageId])
   @@index([threadId, status, createdAt])
@@ -627,8 +611,6 @@ model SteeringMessage {
   userId    String
   runId     String?
   run       Run?     @relation(fields: [runId], references: [id], onDelete: SetNull)
-  /// Set when a pending row must resume as this trigger so its reply can be delivered.
-  originTrigger String?
   claimedAt DateTime?
   createdAt DateTime @default(now())
 
@@ -650,43 +632,6 @@ model Attempt {
 
   @@index([runId])
   @@map("attempts")
-}
-
-// Deliberately independent of chat/user cascades: the worker must still be able
-// to cancel remote work after its originating chat or account is deleted.
-model CloudAgent {
-  id                  String   @id @default(uuid())
-  operationKey        String   @unique
-  providerKey         String
-  spaceId             String
-  userId              String
-  botId               String
-  threadId            String
-  messageId           String?
-  remoteId            String?
-  latestRunId         String?
-  title               String
-  status              String   @default("running")
-  url                 String   @default("")
-  branch              String?
-  prUrl               String?
-  launchRequest       Json
-  launchDispatched    Boolean  @default(false)
-  followup            Json?
-  followupDispatching Boolean  @default(false)
-  cancelRequested     Boolean  @default(false)
-  generation          Int      @default(0)
-  wakeGeneration      Int      @default(-1)
-  version             Int      @default(0)
-  leaseToken          String?
-  leaseExpiresAt      DateTime?
-  nextPollAt          DateTime? @default(now())
-  errorCount          Int      @default(0)
-  createdAt           DateTime @default(now())
-
-  @@index([providerKey, nextPollAt])
-  @@index([spaceId, userId, id])
-  @@map("cloud_agents")
 }
 
 model ExternalEffect {
@@ -728,7 +673,6 @@ model Routine {
   notify         Boolean   @default(true)
   webhookEnabled Boolean   @default(false)
   githubEnabled  Boolean   @default(false)
-  messageProvider String?
   lastRunAt      DateTime?
   nextRunAt      DateTime?
   createdAt      DateTime  @default(now())
@@ -1059,22 +1003,6 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
-model SpaceMemoryConfig {
-  id                 String   @id @default(cuid())
-  spaceId            String   @unique
-  space              Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  userId             String
-  provider           String
-  settings           Json
-  secretId           String   @unique
-  secret             Secret   @relation(fields: [secretId], references: [id], onDelete: Cascade)
-  defaultMemoryScope String   @default("isolated")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  @@map("space_memory_configs")
-}
-
 model Secret {
   id                String             @id @default(cuid())
   userId            String
@@ -1085,7 +1013,6 @@ model Secret {
   ciphertext        String
   createdAt         DateTime           @default(now())
   mcpServers        McpServer[]
-  spaceMemoryConfig SpaceMemoryConfig?
   agentSecret       AgentSecret?
 
   @@index([userId, spaceId])
@@ -1156,105 +1083,6 @@ model BotMcpServer {
   @@map("bot_mcp_servers")
 }
 
-model MessagingIdentity {
-  id                   String    @id @default(cuid())
-  provider             String
-  /// Sender address within the provider: E.164 number, Slack user id, ….
-  address              String
-  /// Opaque provider thread id for the 1:1 conversation; learned on inbound.
-  dmThreadId           String?
-  userId               String
-  spaceId              String
-  space                Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  botId                String    @unique
-  verifiedAt           DateTime?
-  lastInboundAt        DateTime?
-  outboundSinceInbound Int       @default(0)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-
-  @@unique([provider, address])
-  @@index([userId])
-  @@map("messaging_identities")
-}
-
-model MessagingChannel {
-  id            String              @id @default(cuid())
-  provider      String
-  /// Opaque provider thread id of the group conversation.
-  threadId      String              @unique
-  name          String?
-  introPostedAt DateTime?
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  members       MessagingChannelMember[]
-
-  @@map("messaging_channels")
-}
-
-model MessagingChannelMember {
-  id         String      @id @default(cuid())
-  channelId  String
-  channel    MessagingChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  address    String
-  identityId String?
-  status     String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  @@unique([channelId, address])
-  @@index([identityId])
-  @@map("messaging_channel_members")
-}
-
-/// Short-lived web-issued code binding a chat address to an existing user+bot.
-model MessagingLinkCode {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  userId    String
-  spaceId   String
-  botId     String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@map("messaging_link_codes")
-}
-
-model MessagingOutbound {
-  id              String    @id @default(cuid())
-  idempotencyKey  String    @unique
-  kind            String
-  /// DM rows resolve their thread through the identity at drain time.
-  identityId      String?
-  /// Group/intro rows post straight to this provider thread id.
-  threadId        String?
-  body            String
-  status          String    @default("pending")
-  attempts        Int       @default(0)
-  nextAttemptAt   DateTime?
-  providerHandle  String?
-  sourceMessageId String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  @@index([status, nextAttemptAt])
-  @@map("messaging_outbound")
-}
-
-model AgentConnection {
-  id             String   @id @default(cuid())
-  requesterBotId String
-  targetBotId    String
-  status         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@unique([requesterBotId, targetBotId])
-  @@index([targetBotId, status])
-  @@map("agent_connections")
-}
-
 model BotSecret {
   id         String   @id
   userId     String
@@ -1276,64 +1104,6 @@ model BotSecret {
   @@map("bot_secrets")
 }
 
-
-model ExternalConversation {
-  id                       String            @id @default(cuid())
-  provider                 String
-  workspaceId              String
-  externalKey              String
-  conversationId           String
-  displayName              String?
-  participantNames         String[]          @default([])
-  teamChatAmbientEnabled   Boolean?
-  teamChatRules            String?
-  automatedSenderPolicies  Json              @default("{}")
-  spaceId                  String
-  space                    Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  botId                    String
-  bot                      Bot               @relation(fields: [botId], references: [id], onDelete: Cascade)
-  userId                   String
-  thread                   Thread?
-  messages                 ExternalMessage[]
-  createdAt                DateTime          @default(now())
-  updatedAt                DateTime          @updatedAt
-
-  @@unique([provider, workspaceId, externalKey])
-  @@index([spaceId, botId])
-  @@map("external_conversations")
-}
-
-model ExternalMessage {
-  id                     String                @id @default(cuid())
-  externalConversationId String
-  externalConversation   ExternalConversation  @relation(fields: [externalConversationId], references: [id], onDelete: Cascade)
-  providerEventId        String
-  kind                   String                @default("direct")
-  senderId               String
-  senderName             String
-  senderIsBot            Boolean               @default(false)
-  content                String
-  replyThreadId          String?
-  batchContext           String?
-  engagementReason       String?
-  judgedAt               DateTime?
-  status                 String                @default("received")
-  runId                  String?               @unique
-  run                    Run?                  @relation(fields: [runId], references: [id], onDelete: SetNull)
-  threadMessageId        String?               @unique
-  threadMessage          Message?              @relation(fields: [threadMessageId], references: [id], onDelete: SetNull)
-  attempts               Int                   @default(0)
-  nextAttemptAt          DateTime?
-  lastError              String?
-  providerReplyHandle    String?
-  deliveredAt            DateTime?
-  createdAt              DateTime              @default(now())
-  updatedAt              DateTime              @updatedAt
-
-  @@unique([externalConversationId, providerEventId])
-  @@index([status, nextAttemptAt])
-  @@map("external_messages")
-}
 
 model AgentSecret {
   id              String   @id @default(cuid())

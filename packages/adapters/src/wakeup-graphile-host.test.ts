@@ -1,9 +1,5 @@
 import type { BackgroundJobHandlers } from "@milo/adapter-kit";
-import {
-  HISTORY_COMPACT_MAX_ATTEMPTS,
-  historyCompactJob,
-  messagingDeliverJob,
-} from "@milo/adapter-kit";
+import { HISTORY_COMPACT_MAX_ATTEMPTS, historyCompactJob, runContinueJob } from "@milo/adapter-kit";
 import { createLogger, createTestSink, installLogger, wrapJobPayload } from "@milo/logging";
 import type { Runner } from "graphile-worker";
 import { makeWorkerUtils } from "graphile-worker";
@@ -32,8 +28,6 @@ function handlers(): BackgroundJobHandlers {
     "computer.control-expire": vi.fn(async () => undefined),
     "skill.teaching-expire": vi.fn(async () => undefined),
     "history.compact": vi.fn(async () => undefined),
-    "messaging.deliver": vi.fn(async () => undefined),
-    "cloud_agent.poll": vi.fn(async () => undefined),
   };
 }
 
@@ -102,7 +96,7 @@ describe("GraphileJobPublisher.enqueue", () => {
   it("leaves the queue default when the job sets no cap", async () => {
     const addJob = vi.fn(async (..._args: unknown[]) => undefined);
     const publisher = publisherWith(addJob);
-    await publisher.enqueue(messagingDeliverJob("run-1"));
+    await publisher.enqueue(runContinueJob("run-1"));
     const options = addJob.mock.calls[0]?.[2] as { maxAttempts?: number } | undefined;
     expect(options?.maxAttempts).toBeUndefined();
     await publisher.close();

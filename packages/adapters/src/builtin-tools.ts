@@ -295,7 +295,7 @@ export const builtinAgentTools: ConnectorTool[] = [
   {
     name: "shell",
     description:
-      "Run a command inside this bot's computer. cwd defaults to the bot's folder on a Team Computer and the workspace root on a Private Computer. Output can arrive while the command is still running; tell the user any one-time code or sign-in URL in that output.",
+      "Run a command inside this bot's computer. cwd defaults to the bot's folder on a Team Computer and the workspace root on a Private Computer. Output can arrive while the command is still running; tell the user any one-time code or sign-in URL in that output. Long output is saved to a file and its path returned.",
     inputSchema: {
       type: "object",
       properties: {
@@ -539,127 +539,19 @@ export const builtinAgentTools: ConnectorTool[] = [
   {
     name: "web_fetch",
     description:
-      "Fetch a public http(s) page and return readable text (title + content). Read-only; no JavaScript. Use after web_search when you need the page itself.",
+      "Fetch a public http(s) page and return readable text (title + content). Read-only; no JavaScript. Use after web_search when you need the page itself. A longer page is saved whole to a workspace file; read the rest from the returned path.",
     inputSchema: {
       type: "object",
       properties: {
         url: { type: "string", description: "Page URL (http or https)." },
         maxChars: {
           type: "number",
-          description: "Max characters of body text (default 8000).",
+          description: "Max characters returned inline (default 8000).",
         },
       },
       required: ["url"],
     },
     readOnly: true,
-  },
-  {
-    name: "cloud_agent_launch",
-    description:
-      "Launch a remote cloud coding agent on a connected repository. Returns immediately with a tracking id and status; the agent link appears when launched. Opens a PR when openPr is true. Not the bot computer.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        prompt: { type: "string", description: "Task for the remote agent." },
-        repository: {
-          type: "string",
-          description: "Git repository URL (optional for no-repo agents).",
-        },
-        openPr: {
-          type: "boolean",
-          description: "Open a pull request when the run finishes.",
-        },
-        images: {
-          type: "array",
-          description: "Optional images (data+mimeType or url).",
-          items: { type: "object" },
-        },
-      },
-      required: ["prompt"],
-    },
-  },
-  {
-    name: "cloud_agent_status",
-    description: "Get status, branch, and PR url for a cloud coding agent.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "Cloud agent id from launch." },
-      },
-      required: ["id"],
-    },
-    readOnly: true,
-  },
-  {
-    name: "cloud_agent_reply",
-    description: "Send a follow-up prompt to an existing cloud coding agent.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "Cloud agent id." },
-        prompt: { type: "string", description: "Follow-up instruction." },
-        images: {
-          type: "array",
-          description: "Optional images (data+mimeType or url).",
-          items: { type: "object" },
-        },
-      },
-      required: ["id", "prompt"],
-    },
-  },
-  {
-    name: "cloud_agent_cancel",
-    description: "Cancel the active run on a cloud coding agent.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "Cloud agent id." },
-      },
-      required: ["id"],
-    },
-  },
-  // Semantic-memory tools: exposed by selectMemoryTools() only when a
-  // A Space memory provider is configured (which hides `remember`).
-  {
-    name: "save_memory",
-    description:
-      "Store a durable fact in this bot's semantic memory (preferences, decisions, recurring context). Use for anything worth recalling in future conversations.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        content: { type: "string" },
-      },
-      required: ["content"],
-    },
-  },
-  {
-    name: "recall_memory",
-    description: "Semantically search this bot's durable memory for facts relevant to a query.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        query: { type: "string" },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    name: "forget_memory",
-    description:
-      "Forget a durable semantic memory by id (from recall citations). Providers without forget support return an error.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "Memory id from a prior recall citation." },
-        entity: {
-          type: "string",
-          description:
-            "Optional entity/namespace from the recall citation when the provider scopes deletes.",
-        },
-        reason: { type: "string", description: "Optional reason recorded with the forget." },
-      },
-      required: ["id"],
-    },
   },
   {
     name: "task_catalog",
@@ -1005,55 +897,6 @@ export const builtinAgentTools: ConnectorTool[] = [
         message: { type: "string", description: "What the receiving bot should do next." },
       },
       required: ["message"],
-    },
-  },
-];
-
-/** Agent-connection tools, exposed only when the messaging surface is enabled. */
-export const agentConnectionTools: ConnectorTool[] = [
-  {
-    name: "connect_agent",
-    description:
-      "Request a standing connection to another person's agent by their owner's chat address. The other owner must approve before either agent can message the other. Only for agents whose owner messaged the deployment's chat line.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        address: {
-          type: "string",
-          description:
-            "The owner's address on the chat surface: an E.164 phone number (e.g. +15551234567) or platform user id.",
-        },
-      },
-      required: ["address"],
-    },
-  },
-  {
-    name: "respond_agent_connection",
-    description:
-      "Approve or decline the newest pending agent connection request addressed to you. Use only on your owner's explicit instruction.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        accept: { type: "boolean", description: "true to approve, false to decline." },
-      },
-      required: ["accept"],
-    },
-  },
-  {
-    name: "message_agent",
-    description:
-      "Send a useful update, question, or result to another person's agent over an approved connection. Delivery is async and does not end your turn. Continue independent work; do not poll or send ack-only messages.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        address: {
-          type: "string",
-          description:
-            "Chat address (phone number or platform user id) of the connected agent's owner.",
-        },
-        message: { type: "string", description: "What to send." },
-      },
-      required: ["address", "message"],
     },
   },
 ];

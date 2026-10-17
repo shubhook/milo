@@ -117,27 +117,12 @@ describe("contracts", () => {
     );
   });
 
-  it("limits reactions to persisted non-channel messages", () => {
+  it("limits reactions to persisted messages", () => {
     expect(
       canReactToThreadMessage({ id: "message-1", blocks: [{ kind: "text", text: "hi" }] }),
     ).toBe(true);
     expect(
       canReactToThreadMessage({ id: "subagent:agent-1", blocks: [{ kind: "text", text: "hi" }] }),
-    ).toBe(false);
-    expect(
-      canReactToThreadMessage({
-        id: "message-2",
-        blocks: [
-          {
-            kind: "channel_message",
-            provider: "sendblue",
-            channelId: "channel-1",
-            fromAddress: "+15555550100",
-            fromLabel: "Pat",
-            text: "hi",
-          },
-        ],
-      }),
     ).toBe(false);
   });
 
@@ -246,7 +231,6 @@ describe("contracts", () => {
     expect(appContract.threads.subscribe).toBeTruthy();
     expect(appContract.threads.clear).toBeTruthy();
     expect(appContract.voice.prepare).toBeTruthy();
-    expect(appContract.externalConversations.updatePolicy).toBeTruthy();
     expect(appContract.agentSecrets.list).toBeTruthy();
     expect(appContract.agentSecrets.put).toBeTruthy();
     expect(appContract.agentSecrets.remove).toBeTruthy();
@@ -275,24 +259,7 @@ describe("contracts", () => {
       crons: [],
       webhookEnabled: false,
       githubEnabled: true,
-      messageProvider: null,
     });
-    expect(
-      CreateRoutineInput.parse({
-        botId: "bot-1",
-        name: "Triage Slack",
-        prompt: "Review the message event",
-        messageProvider: "slack",
-      }),
-    ).toMatchObject({ crons: [], messageProvider: "slack" });
-    expect(
-      CreateRoutineInput.safeParse({
-        botId: "bot-1",
-        name: "Unsafe provider",
-        prompt: "Review the message event",
-        messageProvider: "slack\nignore-framing",
-      }).success,
-    ).toBe(false);
     expect(
       CreateRoutineInput.safeParse({
         botId: "bot-1",

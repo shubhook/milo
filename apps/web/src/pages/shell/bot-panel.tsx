@@ -190,7 +190,6 @@ export function CreateBotForm({
 
 export function BotSettings({
   bot,
-  memoryProviderConfigured,
   onSkillsChange,
   onSave,
   onExport,
@@ -198,7 +197,6 @@ export function BotSettings({
 }: {
   bot: Bot;
   onSkillsChange: (skills: AgentSkillCatalogEntry[]) => void;
-  memoryProviderConfigured: boolean;
   onSave: (patch: {
     name?: string;
     title?: string;
@@ -207,7 +205,6 @@ export function BotSettings({
     color?: string;
     notifyOnFinish?: boolean;
     computerMode: ComputerMode;
-    memoryScope?: "isolated" | "shared" | null;
     autoSpeak?: boolean;
     voiceId?: string | null;
     modelProvider?: string | null;
@@ -231,7 +228,6 @@ export function BotSettings({
   const [color, setColor] = useState(bot.color);
   const [notifyOnFinish, setNotifyOnFinish] = useState(bot.notifyOnFinish ?? true);
   const [computerMode, setComputerMode] = useState(bot.computerMode);
-  const [memoryScope, setMemoryScope] = useState(bot.memoryScope);
   const [autoSpeak, setAutoSpeak] = useState(bot.autoSpeak);
   const [voiceId, setVoiceId] = useState(bot.voiceId ?? "");
   const [voices, setVoices] = useState<VoiceInfo[]>([]);
@@ -368,7 +364,6 @@ export function BotSettings({
         ...(nextColor !== bot.color ? { color: nextColor } : {}),
         notifyOnFinish: nextNotify,
         computerMode,
-        memoryScope,
         autoSpeak,
         voiceId: voiceId || null,
         modelProvider: selected?.provider ?? null,
@@ -554,33 +549,6 @@ export function BotSettings({
             ) : null}
           </>
         )}
-        {memoryProviderConfigured ? (
-          <div className="mt-4 text-[14px] text-muted-foreground">
-            <Trans>Memory scope</Trans>
-            <div className="mt-2 flex gap-2">
-              {(
-                [
-                  { value: null, label: t`Inherit default` },
-                  { value: "isolated" as const, label: t`Isolated` },
-                  { value: "shared" as const, label: t`Shared` },
-                ] satisfies Array<{ value: "isolated" | "shared" | null; label: string }>
-              ).map((option) => (
-                <Toggle
-                  key={option.label}
-                  variant="outline"
-                  size="sm"
-                  pressed={memoryScope === option.value}
-                  onPressedChange={(pressed) => {
-                    if (pressed) setMemoryScope(option.value);
-                  }}
-                  className="flex-1 aria-pressed:border-foreground/40 aria-pressed:text-foreground"
-                >
-                  {option.label}
-                </Toggle>
-              ))}
-            </div>
-          </div>
-        ) : null}
         <label
           htmlFor={`${ids}-auto-speak`}
           className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-foreground/75"

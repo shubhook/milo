@@ -83,7 +83,6 @@ function bot(description = "Billing"): Bot {
     archivedAt: null,
     unread: false,
     parentBotId: null,
-    memoryScope: null,
     threadId: "thread-1",
     preview: "",
     status: "idle",
@@ -95,8 +94,6 @@ function bot(description = "Billing"): Bot {
     modelProvider: null,
     modelId: null,
     thinkingLevel: null,
-    teamChatAmbientEnabled: false,
-    teamChatRules: "",
     webhookConfigured: false,
     spawnKey: null,
   };
@@ -113,7 +110,6 @@ async function render(description = "Billing") {
     root.render(
       <BotSettings
         bot={bot(description)}
-        memoryProviderConfigured={false}
         onSkillsChange={() => undefined}
         onSave={onSave}
         onExport={async () => undefined}

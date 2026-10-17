@@ -1,11 +1,9 @@
-import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import type {
   AgentRuntime,
   JobPublisher,
   ManagedConnectorProvider,
-  MessagingSurface,
   RealtimeFanout,
   SandboxProvider,
   TransactionalEmailProvider,
@@ -18,19 +16,14 @@ import type {
   RemoteConnectorDependencies,
 } from "@milo/adapters";
 import {
-  applyMessagingOutboundStatus,
   ChatGptSignIn,
-  ChatSdkMessagingSurface,
   CodexCatalogCache,
   ComposioConnector,
   chatGptHostId,
   createAgentRuntime,
   createBackgroundJobHandlers,
-  createCloudAgentConnection,
   createConnectorStack,
   createJobReconciler,
-  createMessagingContextLoader,
-  createMessagingTeamChatSender,
   createRunExecutor,
   createRunSandbox,
   createRunSecretWriter,
@@ -45,26 +38,20 @@ import {
   InstalledConnectorProvider,
   IntegrationProviderSettings,
   isComposioEnabled,
-  isMessagingSurfaceEnabled,
   isPipedreamEnabled,
   LocalAgentHomeStore,
   LocalArtifactStore,
   McpConnector,
   McpOAuthBroker,
-  messagingPlatformsFromEnv,
   PiOAuthLogins,
   PipedreamConnector,
   PostgresRealtimeFanout,
   pipedreamConfigFromEnv,
   piSessionsRoot,
   pushTokenPath,
-  reconcileCloudAgents,
   reconcileComputerUpdates,
   removePiUserSessions,
   SmtpEmailProvider,
-  SpaceMemoryProviderResolver,
-  sandboxProviderOptionsFromEnv,
-  toTeamChatInbound,
 } from "@milo/adapters";
 import { createAuth, isBlockedAuthPath, isLoopbackOrigin, loopbackTwinOrigins } from "@milo/auth";
 import { signupAllowlistBootUpdate, signupPolicyFromEnv } from "@milo/core";
@@ -74,7 +61,6 @@ import {
   createPool,
   createThreadEvents,
   parsePositiveInteger,
-  provisionMessagingIdentity,
   requireMembership,
 } from "@milo/db";
 import type { Logger } from "@milo/logging";
@@ -95,24 +81,10 @@ import type { AppEnv } from "./env.js";
 import { loadEnv } from "./env.js";
 import { healthRoutes } from "./health.js";
 import { mountLocalSettings } from "./local-settings.js";
-import {
-  createMessagingInboundHandler,
-  teamChatSenderCanWakeMessageRoutines,
-  wakeMessageRoutines,
-} from "./messaging-inbound.js";
-import { mountMessagingWebhookRoutes } from "./messaging-webhook.js";
 import { mountApiRequestBodyLimits } from "./request-body-limit.js";
 import type { RouterDeps } from "./router.js";
 import { createRouter, saveChatGptPlan } from "./router.js";
 import { mountScreenTarget } from "./screen-proxy.js";
-import { isDeferredReservationLost, TeamChatBridge } from "./team-chat-bridge.js";
-import { ModelTeamChatEngagementJudge } from "./team-chat-judge.js";
-import {
-  PendingTeamChatInbound,
-  prefersTeamChatSurface,
-  settleWithTimeout,
-  TEAM_CHAT_STARTUP_SHUTDOWN_MS,
-} from "./team-chat-startup.js";
 import { mountVoiceHttpRoutes } from "./voice.js";
 import { mountWebhookHttpRoutes } from "./webhook.js";
 
@@ -137,7 +109,6 @@ export interface AppHandles {
   connector: DestinationEmulator;
   composio?: ComposioProvider;
   connectors: ConnectorRegistry;
-  messaging?: MessagingSurface;
   email?: TransactionalEmailProvider;
   executor: ReturnType<typeof createRunExecutor>;
   runtime: AgentRuntime;
@@ -151,7 +122,6 @@ export async function createApp(
     sandbox?: SandboxProvider;
     composio?: ComposioProvider;
     pipedream?: ManagedConnectorProvider;
-    messaging?: MessagingSurface;
     email?: TransactionalEmailProvider;
     remoteConnectors?: RemoteConnectorDependencies;
     logger?: Logger;
@@ -163,7 +133,6 @@ export async function createApp(
     sandbox: sandboxOverride,
     composio: composioOverride,
     pipedream: pipedreamOverride,
-    messaging: messagingOverride,
     email: emailOverride,
     remoteConnectors,
     logger: loggerOverride,
@@ -254,15 +223,8 @@ export async function createApp(
   const sandbox: SandboxProvider =
     sandboxOverride ??
     createRunSandbox(env.sandboxProvider, {
-      ...sandboxProviderOptionsFromEnv(),
       supervisorUrl: env.sandboxSupervisorUrl,
       supervisorToken: env.sandboxSupervisorToken,
-      e2bApiKey: env.e2bApiKey,
-      daytonaApiKey: env.daytonaApiKey,
-      daytonaApiUrl: env.daytonaApiUrl,
-      daytonaTarget: env.daytonaTarget,
-      boxApiKey: env.boxApiKey,
-      boxApiUrl: env.boxApiUrl,
       dataDir: env.dataDir,
       prisma,
     });
@@ -272,7 +234,6 @@ export async function createApp(
     remoteConnectors,
     env.mcpAllowPrivateEndpoint,
   );
-  const memoryProviders = new SpaceMemoryProviderResolver(prisma, secrets);
   const oauthLogins = new PiOAuthLogins();
   const home = new LocalAgentHomeStore(env.dataDir);
   const artifacts = new LocalArtifactStore(env.dataDir);
@@ -293,19 +254,6 @@ export async function createApp(
   const pipedream =
     pipedreamOverride ??
     (isPipedreamEnabled(pipedreamConfig) ? new PipedreamConnector(pipedreamConfig) : undefined);
-  // This process registers the inbound sink (messaging.onInbound below),
-  // so it's the one that must hold Telegram's live getUpdates connection —
-  // see messagingPlatformsFromEnv's docstring for why a second poller
-  // elsewhere (e.g. the worker) would actively break this.
-  const messagingPlatforms = messagingPlatformsFromEnv(env, { pollInboundMessages: true });
-  const messaging =
-    messagingOverride ??
-    (isMessagingSurfaceEnabled(messagingPlatforms, {
-      deploymentModelKey: env.deploymentModelKey,
-      openSignup: env.messagingOpenSignup,
-    })
-      ? new ChatSdkMessagingSurface(messagingPlatforms)
-      : undefined);
   const localEmailEmulator =
     !emailOverride && !env.smtpUrl && env.emailEmulator
       ? new EmailEmulator((message) => {
@@ -401,12 +349,6 @@ export async function createApp(
       await rm(pushTokenPath(env.dataDir, userId), { force: true }).catch(() => undefined);
     },
   });
-  // One provider instance so emulator launches and polls share the same Map.
-  const cloudAgent = createCloudAgentConnection({
-    CLOUD_AGENT_PROVIDER: env.cloudAgentProvider,
-    CURSOR_API_KEY: env.cursorApiKey,
-    CLOUD_AGENT_SPACE_ID: env.cloudAgentSpaceId,
-  });
   const shutdown = new AbortController();
   // One cache serves models.list, selection validation, and run-time model
   // resolution alike, so a list call warms the run path in this process.
@@ -417,7 +359,6 @@ export async function createApp(
     codexCatalog,
     sandbox,
     memory,
-    memoryProviders,
     home,
     artifacts,
     connector: stack.connector,
@@ -436,7 +377,6 @@ export async function createApp(
     secrets: [
       env.deploymentModelKey ?? "",
       env.composioApiKey ?? "",
-      env.cursorApiKey ?? "",
       process.env.TYPESAFE_API_KEY ?? "",
     ].filter(Boolean),
     secretStore: secrets,
@@ -447,9 +387,7 @@ export async function createApp(
     notifications,
     jobs,
     events,
-    messaging: messaging ? createMessagingContextLoader(prisma) : undefined,
     web: createWebProvider(),
-    cloudAgent,
     shutdownSignal: shutdown.signal,
   });
 
@@ -463,10 +401,7 @@ export async function createApp(
     workerId: "api",
     runtime,
     secretStore: secrets,
-    memoryProviders,
     deploymentModelKey: env.deploymentModelKey,
-    messaging,
-    cloudAgent,
   });
   if (inMemoryJobs) {
     await inMemoryJobs.start(jobHandlers);
@@ -477,14 +412,12 @@ export async function createApp(
         jobs,
         events,
         notifications,
-        reconcileCloudAgents: () => reconcileCloudAgents({ prisma, jobs, cloudAgent }),
         reconcileComputerUpdates: () => reconcileComputerUpdates({ prisma, jobs }),
       })
     : undefined;
   reconciler?.start();
 
   const routerDeps: RouterDeps = {
-    cloudAgent,
     codexCatalog,
     prisma,
     events,
@@ -492,7 +425,6 @@ export async function createApp(
     jobs,
     sandbox,
     memory,
-    memoryProviders,
     home,
     secrets,
     oauthLogins,
@@ -503,17 +435,10 @@ export async function createApp(
     remoteConnectors,
     artifacts,
     dataDir: env.dataDir,
-    messaging: {
-      enabled: Boolean(messaging),
-      providers: messaging?.platforms().map((platform) => platform.provider) ?? [],
-      openSignup: env.messagingOpenSignup,
-    },
     env: {
       agentRuntime: env.agentRuntime,
       defaultProvider: env.defaultProvider,
       defaultModel: env.defaultModel,
-      teamChatJudgeProvider: env.teamChatJudgeProvider,
-      teamChatJudgeModel: env.teamChatJudgeModel,
       deploymentModelKey: env.deploymentModelKey,
       webOrigin: env.webOrigin,
       privacyPolicyUrl: env.privacyPolicyUrl,
@@ -597,273 +522,6 @@ export async function createApp(
     return actor;
   });
   mountWebhookHttpRoutes(app, { prisma, secrets, events, jobs });
-  // Shared with stop so a shutdown during retry delays does not restart polling.
-  let messagingStopped = false;
-  let clearMessagingRetryDelay: (() => void) | undefined;
-  let messagingInitTask: Promise<void> | undefined;
-  let clearTeamChatRetryDelay: (() => void) | undefined;
-  let teamChatInitTask: Promise<void> | undefined;
-  // Messaging webhooks only exist when the surface is enabled.
-  let teamChatBridge: TeamChatBridge | undefined;
-  /** Constructed even before start() succeeds so stop() can cancel in-flight startup. */
-  let teamChatBridgeInstance: TeamChatBridge | undefined;
-  const pendingTeamChatInbound = new PendingTeamChatInbound();
-  if (messaging) {
-    const inboundDeps = {
-      prisma,
-      events,
-      jobs,
-      provision: (request, policyEnv) => provisionMessagingIdentity(prisma, request, policyEnv),
-      openSignup: env.messagingOpenSignup,
-      signupPolicy: {
-        signupsEnabled: env.signupsEnabled,
-        signupAllowlist: env.signupAllowlist,
-      },
-      typing: (threadId) => {
-        // Keep conversation addresses out of trace ids — those reach logs
-        // and telemetry, a different trust boundary than the database.
-        const operationId = `messaging.typing:${randomUUID()}`;
-        return messaging.sendTyping(threadId, {
-          operationId,
-          traceId: operationId,
-          spaceId: "",
-          userId: "",
-          // Cosmetic side call: the wait is bounded so a stalled vendor
-          // response never holds our callback chain (the Chat SDK adapter
-          // API cannot cancel the underlying request itself).
-          signal: AbortSignal.timeout(2000),
-        });
-      },
-    } satisfies Parameters<typeof createMessagingInboundHandler>[0];
-    const inbound = createMessagingInboundHandler(inboundDeps);
-    const handleTeamChatInbound = async (
-      bridge: TeamChatBridge,
-      event: Parameters<typeof wakeMessageRoutines>[2],
-    ) => {
-      const mapped = toTeamChatInbound(event);
-      if (!mapped) {
-        await inbound(event);
-        return;
-      }
-      const canWake = await teamChatSenderCanWakeMessageRoutines(inboundDeps, event);
-      if (!canWake) {
-        await bridge.receive(mapped);
-        return;
-      }
-
-      // Persist a non-reconcilable row until routine routing owns or releases
-      // the message, so the timer cannot start a second TeamChat run.
-      const target = await bridge.receive(mapped, { queueAgent: false });
-      if (!target.deferred) return;
-      const leaseHeartbeat = await bridge.startDeferredReservationHeartbeat(
-        target.externalMessageId,
-      );
-      let woken = false;
-      bridge.markRoutineWakeInFlight(target.externalMessageId);
-      try {
-        const wakePromise = wakeMessageRoutines(inboundDeps, target, event, {
-          // Must match TeamChatBridge ExternalConversation / recovery provider.
-          deliveryProvider: bridge.providerId,
-          externalMessageId: target.externalMessageId,
-        });
-        try {
-          woken = await Promise.race([wakePromise, leaseHeartbeat.lost]);
-        } catch (error) {
-          if (isDeferredReservationLost(error)) {
-            // Lease loss must not start a fallback agent beside an in-flight
-            // wake: re-hold exclusive ownership while awaiting that wake, then
-            // resolve from its settled result.
-            let hold: { stop: () => void } | undefined;
-            try {
-              hold = await bridge.startDeferredReservationHeartbeat(target.externalMessageId);
-            } catch {
-              // Row already left deferred; wake CAS / resolve decide the winner.
-            }
-            try {
-              try {
-                woken = await wakePromise;
-              } catch (wakeError) {
-                const released = await bridge.resolveDeferredMessage(
-                  target.externalMessageId,
-                  "agent",
-                  mapped.kind,
-                );
-                if (!released) {
-                  throw new Error("Team chat deferred message ownership conflict", {
-                    cause: wakeError,
-                  });
-                }
-                await bridge.reconcileOnce();
-                getLogger().error(
-                  "team chat routine wake failed after deferred lease loss",
-                  wakeError,
-                );
-                return;
-              }
-            } finally {
-              hold?.stop();
-            }
-          } else {
-            await bridge.resolveDeferredMessage(target.externalMessageId, "agent", mapped.kind);
-            await bridge.reconcileOnce();
-            throw error;
-          }
-        }
-        const resolved = await bridge.resolveDeferredMessage(
-          target.externalMessageId,
-          woken ? "routine" : "agent",
-          mapped.kind,
-        );
-        if (!resolved) {
-          throw new Error("Team chat deferred message ownership conflict");
-        }
-        if (!woken) await bridge.reconcileOnce();
-      } finally {
-        bridge.clearRoutineWakeInFlight(target.externalMessageId);
-        leaseHeartbeat.stop();
-      }
-    };
-    const flushPendingTeamChatInbound = (bridge: TeamChatBridge) => {
-      pendingTeamChatInbound.flush((event) => handleTeamChatInbound(bridge, event));
-    };
-    if (env.teamChatBotId) {
-      const judge =
-        env.teamChatJudgeProvider && env.teamChatJudgeModel
-          ? new ModelTeamChatEngagementJudge({
-              prisma,
-              runtime,
-              secrets,
-              deploymentProvider: env.defaultProvider,
-              deploymentModel: env.defaultModel,
-              deploymentModelKey: env.deploymentModelKey,
-              providerOverride: env.teamChatJudgeProvider,
-              modelOverride: env.teamChatJudgeModel,
-            })
-          : new ModelTeamChatEngagementJudge({
-              prisma,
-              runtime,
-              secrets,
-              deploymentProvider: env.defaultProvider,
-              deploymentModel: env.defaultModel,
-              deploymentModelKey: env.deploymentModelKey,
-            });
-      const bridge = new TeamChatBridge({
-        prisma,
-        events,
-        jobs,
-        send: createMessagingTeamChatSender(messaging),
-        providerId: "slack",
-        botId: env.teamChatBotId,
-        judge,
-      });
-      teamChatBridgeInstance = bridge;
-      try {
-        await bridge.start();
-        teamChatBridge = bridge;
-      } catch (error) {
-        getLogger().error("team chat bridge failed to start; retrying", error);
-        teamChatInitTask = (async () => {
-          let delayMs = 2_000;
-          while (!messagingStopped) {
-            await new Promise<void>((resolve) => {
-              const timer = setTimeout(resolve, delayMs);
-              clearTeamChatRetryDelay = () => {
-                clearTimeout(timer);
-                clearTeamChatRetryDelay = undefined;
-                resolve();
-              };
-            });
-            clearTeamChatRetryDelay = undefined;
-            if (messagingStopped) return;
-            try {
-              await bridge.start();
-              if (messagingStopped) {
-                await bridge.stop();
-                return;
-              }
-              teamChatBridge = bridge;
-              flushPendingTeamChatInbound(bridge);
-              return;
-            } catch (retryError) {
-              if (
-                retryError instanceof Error &&
-                retryError.message === "Team chat bridge start cancelled"
-              ) {
-                return;
-              }
-              getLogger().error("team chat bridge failed to start; retrying", retryError);
-              delayMs = Math.min(delayMs * 5, 30_000);
-            }
-          }
-        })();
-      }
-    }
-    messaging.onInbound(async (event) => {
-      if (event.type !== "message") {
-        await applyMessagingOutboundStatus(prisma, event);
-        return;
-      }
-      if (prefersTeamChatSurface(event, env.teamChatBotId)) {
-        const bridge = teamChatBridge;
-        if (bridge) {
-          await handleTeamChatInbound(bridge, event);
-          return;
-        }
-        // Bridge is still starting (or retrying). Do not fall through to the
-        // personal-line inbound path — that bypasses externalMessage ownership
-        // and can wake routines for unlinked TeamChat senders.
-        if (teamChatInitTask) {
-          const pending = pendingTeamChatInbound.enqueue(event);
-          if (!pending) {
-            throw new Error("Team chat inbound buffer is full");
-          }
-          await pending;
-          return;
-        }
-        throw new Error("Team chat bridge is unavailable");
-      }
-      await inbound(event);
-    });
-    mountMessagingWebhookRoutes(app, { messaging });
-    // Start polling-mode adapters (e.g. Telegram with no public webhook URL
-    // registered) immediately rather than waiting for the first webhook
-    // POST or outbound send to lazily trigger it. This is the process that
-    // owns the inbound sink registered just above, so it must be the one
-    // holding the live connection — a second poller elsewhere (e.g. the
-    // worker) would only fight this one for Telegram's single getUpdates
-    // slot without ever seeing the messages itself.
-    // Bounded retries cover transient Telegram startup failures; polling-only
-    // bots otherwise stay dark until an unrelated outbound send re-inits.
-    messagingInitTask = (async () => {
-      const delayMs = [0, 2_000, 10_000];
-      for (let attempt = 0; attempt < delayMs.length; attempt += 1) {
-        if (messagingStopped) return;
-        if (delayMs[attempt]! > 0) {
-          await new Promise<void>((resolve) => {
-            const timer = setTimeout(resolve, delayMs[attempt]);
-            clearMessagingRetryDelay = () => {
-              clearTimeout(timer);
-              clearMessagingRetryDelay = undefined;
-              resolve();
-            };
-          });
-          clearMessagingRetryDelay = undefined;
-        }
-        if (messagingStopped) return;
-        try {
-          await messaging.initialize?.();
-          return;
-        } catch (error) {
-          getLogger().error(
-            attempt === delayMs.length - 1
-              ? "messaging surface initialize failed"
-              : "messaging surface initialize failed; retrying",
-            error,
-          );
-        }
-      }
-    })();
-  }
 
   app.route(
     "/",
@@ -872,7 +530,6 @@ export async function createApp(
       sandbox: env.sandboxProvider,
       composio: Boolean(stack.composio),
       pipedream: Boolean(pipedream),
-      messaging: Boolean(messaging),
       email: email?.describe().id ?? null,
       jobs: jobKind,
       realtime: realtime.describe().id,
@@ -888,7 +545,6 @@ export async function createApp(
     connector,
     composio: stack.composio,
     connectors: stack.connector,
-    messaging,
     email,
     executor,
     runtime,
@@ -898,20 +554,6 @@ export async function createApp(
       shutdown.abort();
       oauthLogins.abortAll();
       chatgpt?.cancelAll();
-      messagingStopped = true;
-      clearMessagingRetryDelay?.();
-      clearTeamChatRetryDelay?.();
-      pendingTeamChatInbound.reject(new Error("Team chat bridge stopped before startup"));
-      // Cancel in-flight start() before awaiting the retry task so stop() cannot
-      // sit on DB/reconcile work that bridge.start() is still running.
-      await settleWithTimeout(
-        teamChatBridgeInstance ? teamChatBridgeInstance.stop().catch(() => undefined) : undefined,
-        TEAM_CHAT_STARTUP_SHUTDOWN_MS,
-      );
-      await messagingInitTask?.catch(() => undefined);
-      await settleWithTimeout(teamChatInitTask, TEAM_CHAT_STARTUP_SHUTDOWN_MS);
-      await messaging?.shutdown?.();
-      await teamChatBridge?.stop();
       await email?.drain?.();
       await reconciler?.stop();
       await jobs.close();

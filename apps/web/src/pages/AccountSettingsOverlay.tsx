@@ -38,8 +38,6 @@ export type SettingsGeneralProps = {
   name: string;
   avatarStyle: AvatarStyle;
   onAvatarStyleChange: (style: AvatarStyle) => Promise<void>;
-  messagingEnabled?: boolean;
-  onOpenMessaging?: () => void;
   isDeploymentOwner?: boolean;
 };
 
@@ -48,8 +46,6 @@ export function GeneralSettingsPanels({
   name,
   avatarStyle,
   onAvatarStyleChange,
-  messagingEnabled = false,
-  onOpenMessaging,
   isDeploymentOwner = false,
 }: SettingsGeneralProps) {
   const { t } = useLingui();
@@ -103,20 +99,6 @@ export function GeneralSettingsPanels({
       </section>
 
       <ChangePasswordSection email={email} />
-
-      {messagingEnabled && onOpenMessaging ? (
-        <section className="rounded-xl border border-border px-4 py-4">
-          <h3 className="text-[15px] font-medium text-foreground">
-            <Trans>Messaging</Trans>
-          </h3>
-          <p className="mt-3 text-[13px] text-muted-foreground/70">
-            <Trans>Chat apps, group channels, and agent connections.</Trans>
-          </p>
-          <Button variant="secondary" className="mt-3 rounded-full" onClick={onOpenMessaging}>
-            <Trans>Manage messaging settings</Trans>
-          </Button>
-        </section>
-      ) : null}
 
       <section className="rounded-xl border border-border px-4 py-4">
         <h3 className="text-[15px] font-medium text-foreground">

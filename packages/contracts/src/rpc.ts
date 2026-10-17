@@ -39,19 +39,13 @@ import {
   CreateScratchpadItemInput,
   DeploymentSettingsSchema,
   ExportManifestSchema,
-  ExternalConversationPolicySchema,
   GroupDetailSchema,
   GroupSchema,
   IntegrationCatalogResultSchema,
   McpServerConfigInput,
   McpServerSchema,
   MemoryDocumentSchema,
-  MemoryScopeSchema,
   MeSchema,
-  MessagingAgentConnectionSchema,
-  MessagingChannelMembershipSchema,
-  MessagingLinkedIdentitySchema,
-  MessagingStatusSchema,
   ModelCatalogEntrySchema,
   ModelConnectInputSchema,
   ModelCredentialSchema,
@@ -66,7 +60,6 @@ import {
   ServerUpdateRunSchema,
   ServerUpdateStatusSchema,
   SkillPlaybookSchema,
-  SpaceMemoryConfigSchema,
   SpaceNavigationSchema,
   SpaceSchema,
   TaughtSkillSchema,
@@ -76,7 +69,6 @@ import {
   ThreadSnapshotSchema,
   UpdateAgentSkillInput,
   UpdateBotInput,
-  UpdateExternalConversationPolicyInput,
   UpdateGroupInput,
   UsageRecordSchema,
   VoiceCatalogEntrySchema,
@@ -448,21 +440,6 @@ export const appContract = {
       .input(z.object({ documentId: Id, content: z.string() }))
       .output(MemoryDocumentSchema),
     exportMarkdown: oc.input(z.object({ botId: Id.optional() })).output(z.string()),
-    providerConfig: oc.output(SpaceMemoryConfigSchema.nullable()),
-    connectProvider: oc
-      .input(
-        z.object({
-          provider: z.string().min(1),
-          settings: z.record(z.string(), z.string()),
-          credentials: z.record(z.string(), z.string()),
-          defaultMemoryScope: MemoryScopeSchema.default("isolated"),
-        }),
-      )
-      .output(SpaceMemoryConfigSchema),
-    setDefaultScope: oc
-      .input(z.object({ defaultMemoryScope: MemoryScopeSchema }))
-      .output(SpaceMemoryConfigSchema),
-    disconnectProvider: oc.output(z.object({ ok: z.literal(true) })),
   },
   routines: {
     list: oc.input(botId).output(z.array(RoutineSchema)),
@@ -483,13 +460,6 @@ export const appContract = {
             notify: z.boolean().optional(),
             webhookEnabled: z.boolean().optional(),
             githubEnabled: z.boolean().optional(),
-            messageProvider: z
-              .string()
-              .min(1)
-              .max(50)
-              .regex(/^[a-z0-9._-]+$/i)
-              .nullable()
-              .optional(),
             /** ISO datetime to arm a never-run one-shot. */
             runAt: IsoDate.optional(),
           })
@@ -498,12 +468,11 @@ export const appContract = {
               value.crons &&
               value.crons.length === 0 &&
               value.webhookEnabled === false &&
-              value.githubEnabled === false &&
-              value.messageProvider === null
+              value.githubEnabled === false
             ) {
               ctx.addIssue({
                 code: "custom",
-                message: "Add a schedule, webhook, GitHub, or message trigger",
+                message: "Add a schedule, webhook, or GitHub trigger",
                 path: ["crons"],
               });
             }
@@ -737,38 +706,6 @@ export const appContract = {
       ),
     ),
   },
-  /** External messaging surface: link state, group channels, agent connections. */
-  messaging: {
-    status: oc.output(MessagingStatusSchema),
-    link: {
-      /** Issue a short-lived code the user sends to the line from a chat app. */
-      start: oc
-        .input(z.object({ botId: Id }))
-        .output(z.object({ code: z.string(), expiresAt: z.string() })),
-    },
-    identities: {
-      setBot: oc
-        .input(z.object({ identityId: Id, botId: Id }))
-        .output(MessagingLinkedIdentitySchema),
-      unlink: oc.input(z.object({ identityId: Id })).output(z.object({ ok: z.literal(true) })),
-    },
-    channels: {
-      list: oc.output(z.array(MessagingChannelMembershipSchema)),
-      // Addressed by membership, not channel: one user can have two linked
-      // chat apps in the same group, and each answers for its own agent.
-      respond: oc
-        .input(z.object({ membershipId: Id, accept: z.boolean() }))
-        .output(MessagingChannelMembershipSchema),
-      leave: oc.input(z.object({ membershipId: Id })).output(z.object({ ok: z.literal(true) })),
-    },
-    connections: {
-      list: oc.output(z.array(MessagingAgentConnectionSchema)),
-      respond: oc
-        .input(z.object({ connectionId: Id, accept: z.boolean() }))
-        .output(MessagingAgentConnectionSchema),
-      revoke: oc.input(z.object({ connectionId: Id })).output(z.object({ ok: z.literal(true) })),
-    },
-  },
   approvalRules: {
     list: oc.output(z.array(ActionApprovalRuleSchema)),
     set: oc
@@ -879,11 +816,6 @@ export const appContract = {
         }),
       )
       .output(z.object({ ready: z.boolean(), utterances: z.array(z.string()) })),
-  },
-  externalConversations: {
-    updatePolicy: oc
-      .input(UpdateExternalConversationPolicyInput)
-      .output(ExternalConversationPolicySchema),
   },
   agentSecrets: {
     list: oc.output(z.array(AgentSecretSchema)),

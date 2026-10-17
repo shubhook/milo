@@ -1,5 +1,5 @@
 import type { JobPublisher, NotificationProvider } from "@milo/adapter-kit";
-import { messagingDeliverJob, routineWakeupJob, runContinueJob } from "@milo/adapter-kit";
+import { routineWakeupJob, runContinueJob } from "@milo/adapter-kit";
 import type { MessageBlock } from "@milo/contracts";
 import { stuckWorkStatusMessages } from "@milo/core";
 import type { Pool, PrismaClient, ThreadEvents } from "@milo/db";
@@ -104,7 +104,6 @@ export function createJobReconciler(
     notifications?: NotificationProvider;
     leadership?: ReconciliationLeadership;
     reconcileComputerUpdates?: () => Promise<void>;
-    reconcileCloudAgents?: () => Promise<void>;
   },
   options: { intervalMs?: number; batchSize?: number } = {},
 ) {
@@ -123,14 +122,10 @@ export function createJobReconciler(
     reconciling = (async () => {
       if (deps.leadership && !(await deps.leadership.tryAcquire())) return;
 
-      const auxiliary = await Promise.allSettled(
-        [deps.reconcileCloudAgents, deps.reconcileComputerUpdates].map(async (reconcile) =>
-          reconcile?.(),
-        ),
-      );
-      for (const result of auxiliary) {
-        if (result.status === "rejected")
-          getLogger().error("auxiliary reconciliation", result.reason);
+      try {
+        await deps.reconcileComputerUpdates?.();
+      } catch (error) {
+        getLogger().error("auxiliary reconciliation", error);
       }
 
       const now = new Date();
@@ -178,7 +173,7 @@ export function createJobReconciler(
             }
           : { controlLeaseExpiresAt: null, id: { gt: controlCursor.id } }
         : undefined;
-      const [runs, routines, controls, dueOutbound, unmirroredMessagingRuns] = await Promise.all([
+      const [runs, routines, controls] = await Promise.all([
         deps.prisma.run.findMany({
           where: {
             AND: [
@@ -237,19 +232,6 @@ export function createJobReconciler(
             controlLeaseId: true,
             controlLeaseExpiresAt: true,
           },
-        }),
-        deps.prisma.messagingOutbound.findFirst({
-          where: {
-            status: "pending",
-            OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }],
-          },
-          select: { id: true },
-        }),
-        deps.prisma.run.findMany({
-          where: { trigger: "messaging", status: "completed", messagingMirroredAt: null },
-          orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
-          take: batchSize,
-          select: { id: true },
         }),
       ]);
 
@@ -340,8 +322,6 @@ export function createJobReconciler(
               ]
             : [],
         ),
-        ...(dueOutbound ? [deps.jobs.enqueue(messagingDeliverJob())] : []),
-        ...unmirroredMessagingRuns.map((run) => deps.jobs.enqueue(messagingDeliverJob(run.id))),
       ]);
 
       const lastRun = runs.at(-1);

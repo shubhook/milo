@@ -15,7 +15,6 @@ export const ProductEventType = z.enum([
   "thread.meta",
   "thread.computer",
   "thread.subagent",
-  "thread.cloud_agent",
   "thread.call.ended",
   "run.started",
   "run.checkpointed",
@@ -191,17 +190,6 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     status: z.enum(["created", "archived", "deleted"]),
   }),
   z.object({
-    /** Compact card for a remote cloud coding agent (not the bot computer). */
-    kind: z.literal("cloud_agent"),
-    agentId: z.string(),
-    title: z.string(),
-    status: z.enum(["running", "finished", "failed", "cancelled"]),
-    url: z.string(),
-    branch: z.string().optional(),
-    prUrl: z.string().optional(),
-    latestRunId: z.string().optional(),
-  }),
-  z.object({
     kind: z.literal("skill_draft"),
     skillId: Id,
     name: z.string(),
@@ -250,18 +238,6 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     text: z.string(),
     /** Links ownership transfers in one user-started group turn. */
     hop: z.number().int().positive().optional(),
-  }),
-  z.object({
-    /** A group-chat message delivered into a member bot's own thread. */
-    kind: z.literal("channel_message"),
-    provider: z.string(),
-    /** Per-message network when a provider spans multiple transports. */
-    transport: z.string().optional(),
-    channelId: Id,
-    fromAddress: z.string(),
-    fromLabel: z.string(),
-    text: z.string(),
-    hop: z.number().int().nonnegative().optional(),
   }),
   z.object({
     /** Shown in the sending bot's own chat, so the user can see what it sent. */
@@ -356,9 +332,5 @@ export const ThreadMessageSchema = z.object({
 export type ThreadMessage = z.infer<typeof ThreadMessageSchema>;
 
 export function canReactToThreadMessage(message: Pick<ThreadMessage, "id" | "blocks">): boolean {
-  return (
-    !message.id.startsWith("progress:") &&
-    !message.id.startsWith("subagent:") &&
-    !message.blocks.some((block) => block.kind === "channel_message")
-  );
+  return !message.id.startsWith("progress:") && !message.id.startsWith("subagent:");
 }

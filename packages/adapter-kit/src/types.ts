@@ -320,65 +320,6 @@ export interface MemoryCapabilities {
   markdownPortable: boolean;
 }
 
-export type DurableMemoryScope = "isolated" | "shared";
-
-export interface SemanticMemoryCapabilities {
-  recall: true;
-  save: true;
-  purgeHistory: true;
-  sharedScope: true;
-}
-
-export interface SemanticMemoryResult {
-  memory: string;
-  score: number;
-  updatedAt?: string;
-  /** Stable provider id when the backend supports citation / forget. */
-  id?: string;
-  /** Attribution string preserved from the memory backend. */
-  provenance?: string;
-  /** Provider entity/namespace the fact was recalled from, when scoped. */
-  entity?: string;
-}
-
-export interface SemanticMemoryForgetRequest {
-  id: string;
-  reason?: string;
-  /** Entity/namespace from a prior recall citation, when the backend scopes deletes. */
-  entity?: string;
-}
-
-export type SemanticMemoryResponse<T = void> =
-  | { ok: true; value: T }
-  | { ok: false; error: string };
-
-export interface SemanticMemoryRecallRequest {
-  query: string;
-  scope: DurableMemoryScope;
-  botId: string;
-  /** Omit until a thread has compacted history; the provider can then skip that namespace. */
-  historyGeneration?: number;
-  limit: number;
-}
-
-export interface SemanticMemorySaveRequest {
-  content: string;
-  scope: DurableMemoryScope;
-  botId: string;
-  source: { kind: "durable" } | { kind: "history"; generation: number };
-}
-
-export interface SemanticMemoryPurgeHistoryRequest {
-  botId: string;
-  generations: number[];
-}
-
-export type SemanticMemoryForgetResponse = SemanticMemoryResponse<{
-  id: string;
-  expired: boolean;
-  reason: string | null;
-}>;
-
 export interface AgentInputImage {
   name: string;
   mimeType: "image/jpeg" | "image/png" | "image/webp" | "image/gif";
@@ -570,9 +511,6 @@ export interface BackgroundJobPayloads {
   "computer.control-expire": { computerId: string; leaseId: string };
   "skill.teaching-expire": { skillId: string };
   "history.compact": { threadId: string };
-  "messaging.deliver": { runId?: string };
-  /** Reconcile durable remote-agent intent; scope is loaded from the database. */
-  "cloud_agent.poll": { agentId: string };
 }
 
 export type BackgroundJobName = keyof BackgroundJobPayloads;
@@ -620,107 +558,6 @@ export interface TransactionalEmail {
   text: string;
   html?: string;
 }
-
-export interface MessagingCapabilities {
-  direct: boolean;
-  groups: boolean;
-  typing: boolean;
-}
-
-/** One messaging platform behind the chat surface (sendblue, slack, …). */
-export interface MessagingPlatformDescriptor {
-  provider: string;
-  capabilities: MessagingCapabilities;
-}
-
-/** Send into an existing conversation, addressed by its opaque thread id. */
-export interface MessagingSendRequest {
-  threadId: string;
-  body: string;
-  /** Stable key so retries of the same logical send can be deduped upstream. */
-  idempotencyKey?: string;
-}
-
-export interface MessagingSendResult {
-  handle: string;
-}
-
-/** Provider-neutral inbound message after platform webhook parsing. */
-export type TeamChatMessageKind = "direct" | "mention" | "ambient";
-
-export interface MessagingInboundMessage {
-  type: "message";
-  provider: string;
-  /** Per-message transport when one provider spans multiple networks (for example SMS vs RCS). */
-  transport?: string;
-  /** Provider message id; drives replay-safe client nonces downstream. */
-  handle: string;
-  /** Opaque conversation id — pass back to sendToThread to reply. */
-  threadId: string;
-  /** True for a 1:1 conversation with the deployment's line/bot. */
-  isDirect: boolean;
-  /** Sender address within the provider (E.164, Slack user id, …). */
-  from: string;
-  /** Sender display name when the platform provides one. */
-  fromLabel: string | null;
-  /** Group/channel display name; null for DMs or when unknown. */
-  channelName: string | null;
-  /** Group roster addresses when the platform reports them; often empty. */
-  participants: string[];
-  content: string;
-  mediaUrl: string | null;
-  /** Team-room workspace/team id when the platform reports one (Slack team_id, …). */
-  workspaceId?: string;
-  /** Stable conversation key within the workspace (channel id, DM key, …). */
-  conversationKey?: string;
-  /** How this message should engage the team-chat bot. */
-  kind?: TeamChatMessageKind;
-  /** Provider thread id for in-channel replies (Slack thread_ts); null for channel root. */
-  replyThreadId?: string | null;
-  /** True when the sender is another bot/app. */
-  senderIsBot?: boolean;
-  /** Display names for room participants when the platform reports them. */
-  participantNames?: string[];
-}
-
-/** Provider-neutral inbound team/external room message for TeamChatBridge. */
-export interface TeamChatInboundMessage {
-  eventId: string;
-  workspaceId: string;
-  kind: TeamChatMessageKind;
-  conversationType?: "im" | "channel" | "group" | "mpim";
-  conversationKey: string;
-  /** Messaging threadId used with sendToThread. */
-  conversationId: string;
-  conversationName?: string;
-  participantNames?: string[];
-  replyThreadId: string | null;
-  senderId: string;
-  senderName: string;
-  senderIsBot?: boolean;
-  content: string;
-}
-
-export interface TeamChatSendRequest {
-  conversationId: string;
-  replyThreadId: string | null;
-  content: string;
-  idempotencyKey?: string;
-}
-
-export interface TeamChatSendResult {
-  handle: string;
-}
-
-/** Provider-neutral outbound delivery status after platform webhook parsing. */
-export interface MessagingOutboundStatus {
-  type: "status";
-  provider: string;
-  handle: string;
-  status: string;
-}
-
-export type MessagingInboundEvent = MessagingInboundMessage | MessagingOutboundStatus;
 
 export interface WebSearchCapabilities {
   search: boolean;
@@ -844,54 +681,6 @@ export type PageBrowserCommand =
   | { command: "act"; actions: BrowserActStep[] };
 
 export type PageBrowserResult = Partial<BrowserSnapshotResult & BrowserActResult> & { ok: boolean };
-
-/** Vendor-neutral status for a remote cloud coding agent. */
-export type CloudAgentStatus = "running" | "finished" | "failed" | "cancelled";
-
-export interface CloudAgentCapabilities {
-  launch: boolean;
-  reply: boolean;
-  cancel: boolean;
-  /** True when the adapter never leaves the process (tests / Playwright). */
-  offline?: boolean;
-}
-
-export type CloudAgentImage = { data: string; mimeType: string } | { url: string };
-
-export interface CloudAgentLaunchRequest {
-  /** Repeated launches with this key must resolve to the same remote agent. */
-  idempotencyKey: string;
-  prompt: string;
-  repository?: string;
-  images?: CloudAgentImage[];
-  openPr?: boolean;
-  signal?: AbortSignal;
-}
-
-export interface CloudAgentHandle {
-  id: string;
-  url: string;
-  title: string;
-  status: CloudAgentStatus;
-  /** Latest remote run id when the vendor exposes one (needed for cancel). */
-  latestRunId?: string;
-}
-
-export interface CloudAgentSnapshot {
-  id: string;
-  url: string;
-  title: string;
-  status: CloudAgentStatus;
-  branch?: string;
-  prUrl?: string;
-  latestRunId?: string;
-}
-
-export interface CloudAgentReplyRequest {
-  prompt: string;
-  images?: CloudAgentImage[];
-  signal?: AbortSignal;
-}
 
 /**
  * Optional auto-allow check for a consequential tool call. Core still runs when

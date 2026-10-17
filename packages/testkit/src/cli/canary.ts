@@ -7,17 +7,14 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testconta
 
 async function main() {
   loadRootEnv();
-  const runOpenRouter = Boolean(process.env.OPENROUTER_API_KEY);
-  if (!process.env.E2B_API_KEY && !process.env.BOX_API_KEY && !runOpenRouter) {
-    throw new Error(
-      "E2B_API_KEY, BOX_API_KEY, or OPENROUTER_API_KEY is required for live provider canaries",
-    );
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY is required for live provider canaries");
   }
 
   const dataDir = await mkdtemp(path.join(tmpdir(), "rakazo-canary-"));
   let postgres: StartedPostgreSqlContainer | undefined;
   try {
-    if (runOpenRouter) postgres = await new PostgreSqlContainer("postgres:16-alpine").start();
+    postgres = await new PostgreSqlContainer("postgres:16-alpine").start();
     const env = {
       ...process.env,
       DATABASE_URL: postgres?.getConnectionUri() ?? "",
@@ -26,9 +23,7 @@ async function main() {
       WAKEUP_DRIVER: "memory",
       AGENT_RUNTIME: "pi",
       SANDBOX_PROVIDER: "fake",
-      CLOUD_AGENT_PROVIDER: "emulator",
       COMPOSIO_API_KEY: "",
-      CURSOR_API_KEY: "",
       MAX_TOOL_CALLS_PER_TURN: "24",
       BETTER_AUTH_SECRET: "provider-canary-auth-secret-at-least-32-characters",
       ENCRYPTION_KEY: "provider-canary-encryption-key-at-least-32-characters",

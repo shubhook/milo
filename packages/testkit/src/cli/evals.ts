@@ -52,7 +52,7 @@ async function main() {
     model: values.model ?? process.env.PI_DEFAULT_MODEL ?? null,
     provider: values.provider ?? null,
     controls,
-    fixtures: "synthetic services, messaging and fake sandbox",
+    fixtures: "synthetic services and fake sandbox",
     assistedRetries: false,
     limitations: [
       "Does not evaluate browser perception, native recording perception, or real external services.",
@@ -121,13 +121,6 @@ async function main() {
       PIPEDREAM_CLIENT_SECRET: "",
       PIPEDREAM_PROJECT_ID: "",
       SMTP_URL: "",
-      SLACK_BOT_TOKEN: "",
-      TELEGRAM_BOT_TOKEN: "",
-      WHATSAPP_ACCESS_TOKEN: "",
-      LARK_APP_ID: "",
-      SENDBLUE_API_KEY_ID: "",
-      CURSOR_API_KEY: "",
-      CLOUD_AGENT_PROVIDER: "",
       MODEL_API_KEY: "",
     });
     execFileSync("pnpm", ["--filter", "@milo/db", "generate"], {
@@ -148,7 +141,7 @@ async function main() {
       trials[i] = await runTrial(scenario, planned.trial, {
         ...controls,
         connection,
-        createApp: async (composio, messaging) => {
+        createApp: async (composio) => {
           const sandbox = new EvalSandboxProvider();
           const handles = await createApp({
             sandbox,
@@ -159,14 +152,10 @@ async function main() {
             agentRuntime: "pi",
             wakeupDriver: "memory",
             composio,
-            messaging,
-            messagingOpenSignup: false,
             defaultProvider: connection.provider,
             defaultModel: connection.modelId!,
             deploymentModelKey: undefined,
             composioApiKey: undefined,
-            cursorApiKey: undefined,
-            cloudAgentProvider: "none",
             signupsEnabled: "true",
             signupAllowlist: "",
             emailEmulator: true,
@@ -175,12 +164,6 @@ async function main() {
             pipedreamProjectId: undefined,
             smtpUrl: undefined,
             emailFrom: undefined,
-            sendblueApiKeyId: undefined,
-            sendblueApiSecret: undefined,
-            slackBotToken: undefined,
-            whatsappAccessToken: undefined,
-            telegramBotToken: undefined,
-            larkAppId: undefined,
             mcpStdioEnabled: false,
             mcpStdioAllowedCommands: [],
             updaterUrl: undefined,

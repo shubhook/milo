@@ -20,11 +20,9 @@ describe("toolRequiresApproval", () => {
     expect(toolRequiresApproval("destination.write", true)).toBe(true);
     expect(toolRequiresApproval("secret_request", false)).toBe(true);
     expect(toolRequiresApproval("forget_secret", false)).toBe(true);
-    expect(toolRequiresApproval("forget_memory", false)).toBe(true);
     expect(toolRequiresApproval("list_secrets", false)).toBe(false);
     expect(toolRequiresApproval("delete_bot", false)).toBe(true);
     expect(toolRequiresApproval("archive_bot", false)).toBe(true);
-    expect(toolRequiresApproval("cloud_agent_launch", false)).toBe(true);
     expect(toolRequiresApproval("create_space", false)).toBe(true);
     expect(toolRequiresExplicitApproval("create_space")).toBe(true);
     expect(toolRequiresExplicitApproval("save_shared_memory")).toBe(false);
@@ -290,6 +288,13 @@ describe("resolveActionApproval", () => {
 
 describe("planActionGate", () => {
   const consequential = true;
+  const alwaysAllow = {
+    decision: "allow" as const,
+    source: "always_allow" as const,
+    matchingRules: [
+      { effect: "always_allow" as const, matchKind: "connector" as const, matchValue: "gmail" },
+    ],
+  };
 
   it("lets require_approval win without judging", () => {
     expect(
@@ -306,15 +311,41 @@ describe("planActionGate", () => {
     ).toBe("ask");
   });
 
-  it("lets always_allow skip the judge", () => {
+  it("judges consequential always_allow matches when auto review is ready", () => {
     expect(
       planActionGate({
-        resolved: {
-          decision: "allow",
-          source: "always_allow",
-          matchingRules: [],
-        },
+        resolved: alwaysAllow,
         consequential,
+        autoReviewEnabled: true,
+        checkerConfigured: true,
+      }),
+    ).toBe("judge");
+  });
+
+  it("lets always_allow run when auto review is off or checker missing", () => {
+    expect(
+      planActionGate({
+        resolved: alwaysAllow,
+        consequential,
+        autoReviewEnabled: false,
+        checkerConfigured: true,
+      }),
+    ).toBe("allow");
+    expect(
+      planActionGate({
+        resolved: alwaysAllow,
+        consequential,
+        autoReviewEnabled: true,
+        checkerConfigured: false,
+      }),
+    ).toBe("allow");
+  });
+
+  it("lets non-consequential always_allow matches run without judging", () => {
+    expect(
+      planActionGate({
+        resolved: alwaysAllow,
+        consequential: false,
         autoReviewEnabled: true,
         checkerConfigured: true,
       }),

@@ -18,11 +18,6 @@ import type {
   BrowserNavigateResult,
   BrowserSnapshotRequest,
   BrowserSnapshotResult,
-  CloudAgentCapabilities,
-  CloudAgentHandle,
-  CloudAgentLaunchRequest,
-  CloudAgentReplyRequest,
-  CloudAgentSnapshot,
   CommandRequest,
   ComputerActionRequest,
   ComputerActionResult,
@@ -44,10 +39,6 @@ import type {
   MemorySearchRequest,
   MemorySearchResult,
   MemorySnapshot,
-  MessagingInboundEvent,
-  MessagingPlatformDescriptor,
-  MessagingSendRequest,
-  MessagingSendResult,
   NotificationMessage,
   PageBrowserCommand,
   PageBrowserResult,
@@ -57,13 +48,6 @@ import type {
   ScreenRequest,
   ScreenSession,
   SecretRecord,
-  SemanticMemoryCapabilities,
-  SemanticMemoryForgetRequest,
-  SemanticMemoryPurgeHistoryRequest,
-  SemanticMemoryRecallRequest,
-  SemanticMemoryResponse,
-  SemanticMemoryResult,
-  SemanticMemorySaveRequest,
   SnapshotRef,
   SpeechClip,
   TerminalRequest,
@@ -220,28 +204,6 @@ export interface MemoryStore {
   ): Promise<MemoryRevision>;
 }
 
-/** Optional semantic memory. Durable Markdown memory remains owned by MemoryStore. */
-export interface SemanticMemoryProvider {
-  describe(): AdapterDescriptor<SemanticMemoryCapabilities>;
-  recall(
-    request: SemanticMemoryRecallRequest,
-    context: AdapterContext,
-  ): Promise<SemanticMemoryResponse<SemanticMemoryResult[]>>;
-  save(
-    request: SemanticMemorySaveRequest,
-    context: AdapterContext,
-  ): Promise<SemanticMemoryResponse>;
-  purgeHistory(
-    request: SemanticMemoryPurgeHistoryRequest,
-    context: AdapterContext,
-  ): Promise<SemanticMemoryResponse>;
-  /** Optional durable forget. Providers without a forget verb omit this. */
-  forget?(
-    request: SemanticMemoryForgetRequest,
-    context: AdapterContext,
-  ): Promise<SemanticMemoryResponse<{ id: string; expired: boolean; reason: string | null }>>;
-}
-
 export interface AgentRuntime {
   describe(): AdapterDescriptor<AgentRuntimeCapabilities>;
   run(
@@ -336,52 +298,6 @@ export interface VoiceProvider {
 }
 
 /**
- * Deployment-wide external chat surface: one bot presence across messaging
- * platforms (iMessage/SMS, Slack, WhatsApp, …). Conversations are addressed
- * by opaque provider-prefixed thread ids ("sendblue:…", "slack:C1:…"), so
- * orchestration never sees platform wire formats. Webhook verification and
- * payload translation live behind handleWebhook, per platform.
- */
-export interface MessagingSurface {
-  describe(): AdapterDescriptor<{ providers: string[] }>;
-  /** Enabled platforms and what each supports. */
-  platforms(): MessagingPlatformDescriptor[];
-  /**
-   * Verify and process one platform webhook request. Parsed events reach the
-   * sink registered via onInbound before the returned response resolves.
-   * Returns null for a provider this surface does not host.
-   */
-  handleWebhook(provider: string, request: Request): Promise<Response> | null;
-  /** Register the single downstream consumer of inbound events. */
-  onInbound(sink: (event: MessagingInboundEvent) => Promise<void>): void;
-  sendToThread(
-    request: MessagingSendRequest,
-    context: AdapterContext,
-  ): Promise<MessagingSendResult>;
-  /** Resolve (or create) the 1:1 thread for a provider address. */
-  openDirectThread(provider: string, address: string, context: AdapterContext): Promise<string>;
-  /**
-   * Best-effort "…" typing bubbles for 1:1 chats. Cosmetic: never gates
-   * message delivery, and silently no-ops on platforms without support.
-   */
-  sendTyping(threadId: string, context: AdapterContext): Promise<void>;
-  /**
-   * Start the surface eagerly instead of waiting for the first inbound
-   * webhook or outbound send to touch it. Needed for adapters that pull
-   * updates themselves (e.g. Telegram in "auto"/"polling" mode, used when
-   * no public webhook URL is reachable): without an explicit call here,
-   * nothing kicks off that pull loop until something else happens to
-   * initialize the adapter first.
-   */
-  initialize?(): Promise<void>;
-  /**
-   * Release long-lived inbound resources (Telegram getUpdates polling) so a
-   * replacement process can claim them. No-op when the surface never started.
-   */
-  shutdown?(): Promise<void>;
-}
-
-/**
  * Provider-neutral web search. Builtin `web_search` routes here so backends
  * (keyless HTTP, model-native search, future paid APIs) can be swapped without
  * changing tool names or the executor.
@@ -429,23 +345,6 @@ export interface BrowserProvider {
     request: BrowserActRequest,
     context: AdapterContext,
   ): Promise<BrowserActResult>;
-}
-
-/**
- * Provider-neutral remote cloud coding agents (clone a repo on a vendor VM,
- * open a PR). Not the bot computer — shell/sandbox stays separate. Core runs
- * with none configured; tools are injected only when a provider is present.
- */
-export interface CloudAgentProvider {
-  describe(): AdapterDescriptor<CloudAgentCapabilities>;
-  launch(request: CloudAgentLaunchRequest, context: AdapterContext): Promise<CloudAgentHandle>;
-  get(id: string, context: AdapterContext, runId?: string): Promise<CloudAgentSnapshot>;
-  reply(
-    id: string,
-    request: CloudAgentReplyRequest,
-    context: AdapterContext,
-  ): Promise<CloudAgentHandle>;
-  cancel(id: string, context: AdapterContext, runId?: string): Promise<CloudAgentSnapshot>;
 }
 
 /**

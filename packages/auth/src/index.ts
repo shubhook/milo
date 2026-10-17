@@ -285,11 +285,6 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
               where: { ownerUserId: user.id },
               data: { ownerUserId: null },
             }),
-            // Messaging identities are deliberately FK-free, so clear them
-            // here or the unique address would point at a deleted bot forever.
-            prisma.messagingIdentity.deleteMany({
-              where: { userId: user.id },
-            }),
             prisma.organization.deleteMany({
               where: { id: { in: personalOrganizationIds } },
             }),

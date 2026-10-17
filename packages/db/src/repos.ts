@@ -44,7 +44,6 @@ function mapBot(
     sectionId: string | null;
     archivedAt: Date | null;
     parentBotId: string | null;
-    memoryScope: string | null;
     createdAt: Date;
     updatedAt: Date;
     thread: { id: string; unread: boolean } | null;
@@ -54,8 +53,6 @@ function mapBot(
     modelProvider?: string | null;
     modelId?: string | null;
     thinkingLevel?: string | null;
-    teamChatAmbientEnabled?: boolean;
-    teamChatRules?: string;
     webhookSecretId?: string | null;
     spawnKey?: string | null;
   },
@@ -79,7 +76,6 @@ function mapBot(
     archivedAt: bot.archivedAt?.toISOString() ?? null,
     unread: bot.thread.unread,
     parentBotId: bot.parentBotId,
-    memoryScope: bot.memoryScope as "isolated" | "shared" | null,
     threadId: bot.thread.id,
     preview,
     status,
@@ -91,8 +87,6 @@ function mapBot(
     modelProvider: bot.modelProvider ?? null,
     modelId: bot.modelId ?? null,
     thinkingLevel: (bot.thinkingLevel as Bot["thinkingLevel"]) ?? null,
-    teamChatAmbientEnabled: bot.teamChatAmbientEnabled ?? false,
-    teamChatRules: bot.teamChatRules ?? "",
     webhookConfigured: Boolean(bot.webhookSecretId),
     spawnKey: bot.spawnKey ?? null,
   };

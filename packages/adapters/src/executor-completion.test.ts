@@ -275,7 +275,6 @@ describe("runReplyGuidance", () => {
     expect(runPromotesMidTurnNarration("user")).toBe(true);
     expect(runReplyGuidance("user")).toBe(LONG_WORK_PROGRESS_GUIDANCE);
     expect(runReplyGuidance("user")).toContain("message_user");
-    expect(runReplyGuidance("messaging")).toBe(LONG_WORK_PROGRESS_GUIDANCE);
   });
 });
 

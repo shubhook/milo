@@ -21,7 +21,6 @@ function setup() {
         findFirst: vi.fn(async () => ({ credential: { provider: "openai" }, voiceId: "alloy" })),
         findMany: vi.fn(async () => [{ credential: { provider: "openai" } }]),
       },
-      spaceMemoryConfig: { findUnique: vi.fn(async () => null) },
       deploymentSettings: { findUnique: vi.fn(async () => null) },
       aiDataConsent: { findMany: vi.fn(async () => []), upsert },
       $transaction: vi.fn(async (queries) => Promise.all(queries)),
@@ -30,14 +29,9 @@ function setup() {
   return { deps, upsert, actor: { userId: "user", spaceId: "space" } as Actor };
 }
 describe("consent grants", () => {
-  it("includes reachable helper models and cloud services for a targeted send", async () => {
+  it("includes reachable helper models for a targeted send", async () => {
     const { deps, actor } = setup();
     deps.env.agentRuntime = "pi";
-    deps.cloudAgent = {
-      key: "test",
-      spaceId: actor.spaceId,
-      provider: { describe: () => ({ id: "cursor", capabilities: { offline: false } }) },
-    } as RouterDeps["cloudAgent"];
     vi.mocked(deps.prisma.spaceModelPreference.findMany).mockResolvedValue([
       {
         modelId: "helper-model",
@@ -47,7 +41,7 @@ describe("consent grants", () => {
     ] as never);
     const status = await aiConsentStatus(deps, actor, { botId: "bot", uses: ["model"] });
     expect(status.recipients.map((recipient) => recipient.name)).toEqual(
-      expect.arrayContaining(["Anthropic", "Cursor"]),
+      expect.arrayContaining(["Anthropic"]),
     );
     expect(deps.prisma.spaceVoicePreference.findMany).not.toHaveBeenCalled();
     expect(deps.prisma.bot.findMany).toHaveBeenCalledWith(

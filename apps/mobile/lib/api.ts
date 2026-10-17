@@ -26,7 +26,6 @@ import {
   runFailureError,
   signupRequiresEmailVerification,
   takeLiveMessage,
-  updateCloudAgentMessages,
   upsertMessageById,
 } from "@milo/core";
 import * as SecureStore from "expo-secure-store";
@@ -934,27 +933,9 @@ export function prependMobileMessagePage(
   return prependThreadHistoryPage(prev, page);
 }
 
-const MESSAGING_PROVIDER_LABELS: Record<string, string> = {
-  sendblue: "iMessage",
-  slack: "Slack",
-  whatsapp: "WhatsApp",
-  telegram: "Telegram",
-  lark: "Feishu",
-};
-
-export function messagingProviderLabel(provider: string, transport?: string): string {
-  if (provider === "sendblue" && ["iMessage", "SMS", "RCS"].includes(transport ?? "")) {
-    return transport!;
-  }
-  return MESSAGING_PROVIDER_LABELS[provider] ?? provider;
-}
-
 export function copyableMobileMessageText(message: MobileMessage): string {
   return message.blocks
     .map((block) => {
-      if (block.kind === "channel_message") {
-        return `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`;
-      }
       if (block.kind === "text" || block.kind === "progress" || block.kind === "ask")
         return block.text;
       return "";
@@ -967,11 +948,6 @@ export function copyableMobileMessageText(message: MobileMessage): string {
 export function blockText(message: MobileMessage) {
   return message.blocks
     .map((block) => {
-      if (block.kind === "channel_message") {
-        return `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`;
-      }
-      if (block.kind === "cloud_agent")
-        return `${block.title}: ${block.status}${block.prUrl ? ` ${block.prUrl}` : ""}`;
       if (block.kind === "subagent") {
         return `${block.name ?? "subagent"}: ${block.result || block.progress || block.task || ""}`;
       }
@@ -1221,13 +1197,6 @@ export function applyMobileThreadEvent(
       ...prev,
       cursor: event.seq ?? prev.cursor,
       messages: [...prev.messages.filter((message) => message.id !== streaming.id), streaming],
-    };
-  }
-  if (event.type === "thread.cloud_agent") {
-    return {
-      ...prev,
-      cursor: event.seq ?? prev.cursor,
-      messages: updateCloudAgentMessages(prev.messages, event.payload ?? {}),
     };
   }
   if (event.type === "thread.message.created" || event.type === "thread.message.updated") {

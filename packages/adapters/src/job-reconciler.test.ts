@@ -36,7 +36,6 @@ function fakePrisma(
     run: { findMany: vi.fn(async () => runs) },
     routine: { findMany: vi.fn(async () => routines) },
     computer: { findMany: vi.fn(async () => controls) },
-    messagingOutbound: { findFirst: vi.fn(async () => null) },
   } as unknown as PrismaClient;
 }
 
@@ -44,68 +43,18 @@ describe("createJobReconciler", () => {
   it("continues the main scans when an auxiliary reconciler fails", async () => {
     const prisma = fakePrisma();
     const { jobs } = publisher();
-    const reconcileCloudAgents = vi.fn(async () => {
-      throw new Error("cloud unavailable");
-    });
     const reconcileComputerUpdates = vi.fn(() => {
       throw new Error("queue unavailable");
     });
     await createJobReconciler({
       prisma,
       jobs,
-      reconcileCloudAgents,
       reconcileComputerUpdates,
     }).reconcileOnce();
-    expect(reconcileCloudAgents).toHaveBeenCalledOnce();
     expect(reconcileComputerUpdates).toHaveBeenCalledOnce();
     expect(prisma.run.findMany).toHaveBeenCalled();
     expect(prisma.routine.findMany).toHaveBeenCalled();
     expect(prisma.computer.findMany).toHaveBeenCalled();
-    expect(prisma.messagingOutbound.findFirst).toHaveBeenCalled();
-  });
-
-  it("restores a due pending messaging outbox drain", async () => {
-    const prisma = fakePrisma();
-    vi.mocked(prisma.messagingOutbound.findFirst).mockResolvedValue({ id: "outbound-1" } as never);
-    const { jobs, enqueue } = publisher();
-
-    await createJobReconciler({ prisma, jobs }).reconcileOnce();
-
-    expect(prisma.messagingOutbound.findFirst).toHaveBeenCalledWith({
-      where: {
-        status: "pending",
-        OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: expect.any(Date) } }],
-      },
-      select: { id: true },
-    });
-    expect(enqueue).toHaveBeenCalledWith({
-      name: "messaging.deliver",
-      payload: {},
-      replaceKey: "messaging.deliver:drain",
-    });
-  });
-
-  it("restores a completed messaging run that was not durably mirrored", async () => {
-    const prisma = fakePrisma();
-    vi.mocked(prisma.run.findMany)
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ id: "run-unmirrored" }] as never);
-    const { jobs, enqueue } = publisher();
-
-    await createJobReconciler({ prisma, jobs }).reconcileOnce();
-
-    expect(prisma.run.findMany).toHaveBeenCalledWith({
-      where: { trigger: "messaging", status: "completed", messagingMirroredAt: null },
-      orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
-      take: 100,
-      select: { id: true },
-    });
-    expect(enqueue).toHaveBeenCalledWith({
-      name: "messaging.deliver",
-      payload: { runId: "run-unmirrored" },
-      replaceKey: "messaging.deliver:run-unmirrored",
-    });
   });
 
   it("restores queued runs and near-due routines with stable replacement keys", async () => {
@@ -230,7 +179,6 @@ describe("createJobReconciler", () => {
       run: { findMany: vi.fn(async () => []) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: computerFindMany },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
     } as unknown as PrismaClient;
     const { jobs, enqueue } = publisher();
     const reconciler = createJobReconciler({ prisma, jobs }, { batchSize: 2 });
@@ -282,7 +230,6 @@ describe("createJobReconciler", () => {
     const runPages = [runs.slice(0, 2), runs.slice(2, 4), runs.slice(4)];
     let runPage = 0;
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       const status = args.where?.status as { in?: string[] } | undefined;
       if (status?.in?.includes("waiting_takeover")) return [];
       return runPages[runPage++] ?? [];
@@ -296,7 +243,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany },
       routine: { findMany: routineFindMany },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
     } as unknown as PrismaClient;
     const { jobs, enqueue } = publisher();
     const reconciler = createJobReconciler({ prisma, jobs }, { batchSize: 2 });
@@ -318,7 +264,7 @@ describe("createJobReconciler", () => {
       "run:run-5",
       "routine:routine-5",
     ]);
-    expect(runFindMany.mock.calls[4]?.[0]).toMatchObject({
+    expect(runFindMany.mock.calls[3]?.[0]).toMatchObject({
       orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
       where: {
         AND: [
@@ -363,7 +309,6 @@ describe("createJobReconciler", () => {
     expect(prisma.run.findMany).not.toHaveBeenCalled();
     expect(prisma.routine.findMany).not.toHaveBeenCalled();
     expect(prisma.computer.findMany).not.toHaveBeenCalled();
-    expect(prisma.messagingOutbound.findFirst).not.toHaveBeenCalled();
     expect(enqueue).not.toHaveBeenCalled();
     expect(leadership.release).toHaveBeenCalledOnce();
   });
@@ -382,7 +327,6 @@ describe("createJobReconciler", () => {
     };
     let terminalScan = 0;
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       if (args.where?.trigger === "bot_message") {
         terminalScan += 1;
         return terminalScan === 2 ? [] : [terminalRun];
@@ -393,7 +337,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany, updateMany: vi.fn(async () => ({ count: 1 })) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
       message: {
         findMany: vi.fn(async () => [
           { blocks: [{ kind: "text", text: "Finished." }], clientNonce: null },
@@ -411,7 +354,7 @@ describe("createJobReconciler", () => {
     await reconciler.reconcileOnce();
 
     expect(runFindMany).toHaveBeenNthCalledWith(
-      4,
+      3,
       expect.objectContaining({
         orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
         where: {
@@ -453,7 +396,6 @@ describe("createJobReconciler", () => {
       bot: { name: "Researcher" },
     };
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       if (args.where?.trigger === "bot_message") return [terminalRun];
       return [];
     });
@@ -461,7 +403,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany, updateMany: vi.fn(async () => ({ count: 1 })) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
       message: {
         findMany: vi.fn(async () => [
           {
@@ -504,7 +445,6 @@ describe("createJobReconciler", () => {
       bot: { name: "Researcher" },
     };
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       if (args.where?.trigger === "bot_message") return [terminalRun];
       return [];
     });
@@ -512,7 +452,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany, updateMany: vi.fn(async () => ({ count: 1 })) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
       message: {
         findMany: vi.fn(async () => [
           {
@@ -555,7 +494,6 @@ describe("createJobReconciler", () => {
       bot: { name: "Researcher" },
     };
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       if (args.where?.trigger === "bot_message") return [terminalRun];
       return [];
     });
@@ -563,7 +501,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany, updateMany: vi.fn(async () => ({ count: 1 })) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
       message: {
         findMany: vi.fn(async () => [
           {
@@ -602,7 +539,6 @@ describe("createJobReconciler", () => {
       bot: { name: "Researcher" },
     };
     const runFindMany = vi.fn(async (args: { where?: Record<string, unknown> } = {}) => {
-      if (args.where?.messagingMirroredAt === null) return [];
       if (args.where?.trigger === "bot_message") return [terminalRun];
       return [];
     });
@@ -610,7 +546,6 @@ describe("createJobReconciler", () => {
       run: { findMany: runFindMany, updateMany: vi.fn(async () => ({ count: 1 })) },
       routine: { findMany: vi.fn(async () => []) },
       computer: { findMany: vi.fn(async () => []) },
-      messagingOutbound: { findFirst: vi.fn(async () => null) },
       message: { findMany: vi.fn(async () => []) },
     } as unknown as PrismaClient;
     const { jobs } = publisher();

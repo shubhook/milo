@@ -13,7 +13,6 @@ import {
   attachmentsForThread,
   buildComposerMentionOptions,
   type ComposerMention,
-  cloudAgentHttpsUrl,
   groupVoiceChats,
   isApprovalAskBlock,
   isRunTerminalEvent,
@@ -57,7 +56,6 @@ import {
   AppState,
   FlatList,
   Image,
-  Linking,
   Modal,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -96,7 +94,6 @@ import {
   type MobileMessagePage,
   type MobileSnapshot,
   mergeMobileSnapshot,
-  messagingProviderLabel,
   mobileThreadRefreshResult,
   prependMobileMessagePage,
   rpc,
@@ -1017,7 +1014,6 @@ function Thread() {
                 event.type === "thread.message.updated" ||
                 event.type === "thread.message.reaction" ||
                 event.type === "thread.subagent" ||
-                event.type === "thread.cloud_agent" ||
                 event.type === "thread.cleared" ||
                 event.type === "run.waiting_input" ||
                 event.type === "computer.takeover.requested" ||
@@ -2580,11 +2576,6 @@ function MentionChipIcon({ mention }: { mention: ComposerMention }) {
 function previewMessageText(message: MobileMessage): string {
   const text = message.blocks
     .flatMap((block) => {
-      if (block.kind === "channel_message" && block.text) {
-        return [
-          `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`,
-        ];
-      }
       if (block.kind === "text" && block.text) {
         // Bot text is Markdown; user text is already plain.
         return [message.role === "bot" ? plainTextFromMarkdown(block.text) : block.text];
@@ -2754,26 +2745,8 @@ const MessageBubble = memo(function MessageBubble({
       </Pressable>
     );
   }
-  const channelMessage = message.blocks.find(
-    (block): block is Extract<MessageBlock, { kind: "channel_message" }> =>
-      block.kind === "channel_message",
-  );
-  if (channelMessage) {
-    return (
-      <Pressable
-        {...actionProps}
-        style={{ width: "100%", paddingVertical: 4, alignItems: "center" }}
-      >
-        <Text style={{ color: tokens.mutedForeground, fontSize: 13.5, textAlign: "center" }}>
-          {messagingProviderLabel(channelMessage.provider, channelMessage.transport)} ·{" "}
-          {channelMessage.fromLabel}: {channelMessage.text}
-        </Text>
-      </Pressable>
-    );
-  }
   const special = message.blocks.find(
-    (block) =>
-      block.kind === "subagent" || block.kind === "child_bot" || block.kind === "cloud_agent",
+    (block) => block.kind === "subagent" || block.kind === "child_bot",
   );
   if (special?.kind === "subagent") {
     const running = special.status === "running";
@@ -2827,64 +2800,6 @@ const MessageBubble = memo(function MessageBubble({
               {special.result || special.progress || ""}
             </ChatMarkdown>
           </View>
-        ) : null}
-      </Pressable>
-    );
-  }
-  if (special?.kind === "cloud_agent") {
-    const title = special.title || t("Cloud agent");
-    const statusLabel =
-      special.status === "running"
-        ? t("running")
-        : special.status === "finished"
-          ? t("finished")
-          : special.status === "cancelled"
-            ? t("cancelled")
-            : t("failed");
-    const running = special.status === "running";
-    const failed = special.status === "failed" || special.status === "cancelled";
-    const prHref = cloudAgentHttpsUrl(special.prUrl);
-    const href = prHref ?? cloudAgentHttpsUrl(special.url);
-    return (
-      <Pressable
-        onPress={() => {
-          if (href) Linking.openURL(href).catch(() => undefined);
-        }}
-        testID="cloud-agent-card"
-        accessibilityRole={href ? "link" : "text"}
-        accessibilityLabel={`${title}: ${statusLabel}`}
-        disabled={!href}
-        style={{
-          width: "90%",
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: tokens.border,
-          backgroundColor: tokens.card,
-          paddingHorizontal: 16,
-          paddingVertical: 14,
-        }}
-      >
-        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-          <Text style={{ color: tokens.cardForeground, fontSize: 15, fontWeight: "600" }}>
-            {title}
-          </Text>
-          <Text
-            style={{
-              color: failed ? tokens.destructive : running ? tokens.warning : tokens.success,
-              fontSize: 13,
-            }}
-          >
-            {statusLabel}
-          </Text>
-        </View>
-        {prHref ? (
-          <Text style={{ color: tokens.mutedForeground, marginTop: 8, fontSize: 14.5 }}>
-            {t("Pull request")}
-          </Text>
-        ) : special.branch ? (
-          <Text style={{ color: tokens.mutedForeground, marginTop: 8, fontSize: 13.5 }}>
-            {special.branch}
-          </Text>
         ) : null}
       </Pressable>
     );
@@ -3067,11 +2982,6 @@ const MessageBubble = memo(function MessageBubble({
   );
   const caption = message.blocks
     .flatMap((block) => {
-      if (block.kind === "channel_message" && block.text) {
-        return [
-          `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`,
-        ];
-      }
       return block.kind === "text" && block.text ? [block.text] : [];
     })
     .join("\n");

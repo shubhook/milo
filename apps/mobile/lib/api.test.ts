@@ -2324,38 +2324,6 @@ describe("mobile thread event reduction", () => {
     );
   });
 
-  it("formats channel messages with their platform attribution", () => {
-    expect(
-      blockText(
-        mobileMessage("channel-1", [
-          {
-            kind: "channel_message",
-            provider: "sendblue",
-            transport: "SMS",
-            channelId: "ch-1",
-            fromAddress: "+15551234567",
-            fromLabel: "Alex",
-            text: "Hello from the group",
-          },
-        ]),
-      ),
-    ).toBe("SMS · Alex: Hello from the group");
-    expect(
-      blockText(
-        mobileMessage("channel-2", [
-          {
-            kind: "channel_message",
-            provider: "slack",
-            channelId: "ch-2",
-            fromAddress: "U123456",
-            fromLabel: "Alex",
-            text: "Hello from the group",
-          },
-        ]),
-      ),
-    ).toBe("Slack · Alex: Hello from the group");
-  });
-
   it("deduplicates durable messages and replaces matching transient subagent state", () => {
     const initial = snapshot([
       mobileMessage("message-1", [{ kind: "text", text: "old" }]),
@@ -2615,45 +2583,6 @@ describe("mobile thread event reduction", () => {
     expect(next?.messages).toEqual([]);
   });
 
-  it("updates a cloud agent card from thread.cloud_agent", () => {
-    const initial = snapshot([
-      mobileMessage("msg-ca", [
-        {
-          kind: "cloud_agent",
-          agentId: "ca-1",
-          title: "Add README",
-          status: "running",
-          url: "https://example.test/agents/ca-1",
-        },
-      ]),
-    ]);
-
-    const next = applyMobileThreadEvent(initial, {
-      type: "thread.cloud_agent",
-      seq: 9,
-      payload: {
-        messageId: "msg-ca",
-        agentId: "ca-1",
-        title: "Add README",
-        status: "finished",
-        url: "https://example.test/agents/ca-1",
-        branch: "cursor/add-readme",
-        prUrl: "https://github.com/example/repo/pull/1",
-      },
-    });
-
-    expect(next?.cursor).toBe(9);
-    expect(next?.messages[0]?.blocks[0]).toEqual({
-      kind: "cloud_agent",
-      agentId: "ca-1",
-      title: "Add README",
-      status: "finished",
-      url: "https://example.test/agents/ca-1",
-      branch: "cursor/add-readme",
-      prUrl: "https://github.com/example/repo/pull/1",
-    });
-  });
-
   it("leaves the snapshot unchanged for unrelated events", () => {
     const initial = snapshot();
     expect(applyMobileThreadEvent(initial, { type: "run.started" })).toBe(initial);
@@ -2724,7 +2653,7 @@ function mobileMessage(id: string, blocks: MobileMessage["blocks"], seq?: number
 }
 
 describe("mobile clipboard text", () => {
-  it("copies message content with transport labels and omits card chrome", async () => {
+  it("copies message content and omits card chrome", async () => {
     const { copyableMobileMessageText } = await import("./api");
     expect(
       copyableMobileMessageText({
@@ -2732,18 +2661,9 @@ describe("mobile clipboard text", () => {
         role: "bot",
         blocks: [
           { kind: "text", text: "Hello" },
-          {
-            kind: "channel_message",
-            provider: "sendblue",
-            transport: "SMS",
-            channelId: "ch-1",
-            fromAddress: "+15551234567",
-            fromLabel: "Sender",
-            text: "Reply",
-          },
           { kind: "card", lines: [] },
         ],
       }),
-    ).toBe("Hello\nSMS · Sender: Reply");
+    ).toBe("Hello");
   });
 });

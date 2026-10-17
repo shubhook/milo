@@ -5,15 +5,12 @@ import { loadRootEnv } from "@milo/core/node/load-root-env";
 loadRootEnv();
 
 import {
-  ChatSdkMessagingSurface,
   CLAUDE_CODE_PROVIDER,
   CodexCatalogCache,
   createAgentRuntime,
   createBackgroundJobHandlers,
-  createCloudAgentConnection,
   createConnectorStack,
   createJobReconciler,
-  createMessagingContextLoader,
   createPostgresReconciliationLeadership,
   createRunExecutor,
   createRunSandbox,
@@ -28,25 +25,19 @@ import {
   InMemoryJobQueue,
   InstalledConnectorProvider,
   isComposioEnabled,
-  isMessagingSurfaceEnabled,
   isPipedreamEnabled,
   LocalAgentHomeStore,
   LocalArtifactStore,
   McpConnector,
   McpOAuthBroker,
-  messagingEnvFromProcess,
-  messagingPlatformsFromEnv,
   PipedreamConnector,
   PostgresRealtimeFanout,
   pipedreamConfigFromEnv,
   probeClaudeCode,
-  reconcileCloudAgents,
   reconcileComputerUpdates,
   resolveDeploymentModel,
   resolvePiSessionRoot,
   resolveSandboxProvider,
-  SpaceMemoryProviderResolver,
-  sandboxProviderOptionsFromEnv,
 } from "@milo/adapters";
 import { resolveEncryptionKey, resolveSupervisorToken } from "@milo/core";
 import {
@@ -100,7 +91,6 @@ async function main() {
   const { key: deploymentModelKey } = resolveDeploymentModel();
   const sandboxProvider = resolveSandboxProvider(process.env);
   const sandbox = createRunSandbox(sandboxProvider, {
-    ...sandboxProviderOptionsFromEnv(process.env),
     supervisorUrl: process.env.SANDBOX_SUPERVISOR_URL ?? "http://127.0.0.1:7091",
     supervisorToken: sandboxProvider === "docker" ? resolveSupervisorToken(process.env) : undefined,
     dataDir,
@@ -132,17 +122,6 @@ async function main() {
   const pipedream = isPipedreamEnabled(pipedreamConfig)
     ? new PipedreamConnector(pipedreamConfig)
     : undefined;
-  // pollInboundMessages stays false (the default) here: this process
-  // only ever sends outbound (messaging.deliver jobs). It must never poll
-  // Telegram — that would steal the single getUpdates slot away from the
-  // API process, which is the one with the inbound sink actually wired up.
-  const messagingPlatforms = messagingPlatformsFromEnv(messagingEnvFromProcess(process.env));
-  const messaging = isMessagingSurfaceEnabled(messagingPlatforms, {
-    deploymentModelKey,
-    openSignup: process.env.MESSAGING_OPEN_SIGNUP === "true",
-  })
-    ? new ChatSdkMessagingSurface(messagingPlatforms)
-    : undefined;
   const integrationSettings = new IntegrationProviderSettings(
     prisma,
     secrets,
@@ -162,7 +141,6 @@ async function main() {
   const connector = stack.destination;
   await connector.start();
   integrationSettings.warmDirectories();
-  const memoryProviders = new SpaceMemoryProviderResolver(prisma, secrets);
   const home = new LocalAgentHomeStore(dataDir);
   const artifacts = new LocalArtifactStore(dataDir);
   const inMemoryJobs = process.env.WAKEUP_DRIVER === "memory" ? new InMemoryJobQueue() : undefined;
@@ -172,8 +150,6 @@ async function main() {
     new GraphileJobWorkerHost(pool, {
       concurrency: parsePositiveInteger(process.env.GRAPHILE_WORKER_CONCURRENCY, 4),
     });
-  // One provider instance so emulator launches and polls share the same Map.
-  const cloudAgent = createCloudAgentConnection();
   // Shared with the reconciler so a stuck wait uses the same push path as a finish notice.
   const notifications = new ExpoPushProvider(dataDir);
   const executor = createRunExecutor({
@@ -183,7 +159,6 @@ async function main() {
     codexCatalog: new CodexCatalogCache(),
     sandbox,
     memory: new MarkdownMemoryStore(prisma),
-    memoryProviders,
     home,
     artifacts,
     connector: stack.connector,
@@ -202,7 +177,6 @@ async function main() {
     secrets: [
       deploymentModelKey ?? "",
       process.env.COMPOSIO_API_KEY ?? "",
-      process.env.CURSOR_API_KEY ?? "",
       process.env.TYPESAFE_API_KEY ?? "",
     ].filter(Boolean),
     secretStore: secrets,
@@ -212,9 +186,7 @@ async function main() {
     notifications,
     jobs,
     events,
-    messaging: messaging ? createMessagingContextLoader(prisma) : undefined,
     web: createWebProvider(),
-    cloudAgent,
   });
 
   const jobHandlers = createBackgroundJobHandlers({
@@ -227,10 +199,7 @@ async function main() {
     workerId: process.pid.toString(),
     runtime,
     secretStore: secrets,
-    memoryProviders,
     deploymentModelKey,
-    messaging,
-    cloudAgent,
   });
   // graphile-worker run() connects through the shared pool. createPool already
   // retries connect() on 53300 a finite number of times. Keep retrying start
@@ -257,7 +226,6 @@ async function main() {
     events,
     notifications,
     leadership: createPostgresReconciliationLeadership(pool),
-    reconcileCloudAgents: () => reconcileCloudAgents({ prisma, jobs, cloudAgent }),
     reconcileComputerUpdates: () => reconcileComputerUpdates({ prisma, jobs }),
   });
   reconciler.start();

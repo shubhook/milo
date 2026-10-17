@@ -7,9 +7,6 @@ import { McpHeadersSchema, McpRemoteEndpointSchema, McpTransportSchema } from ".
 export const ComputerModeSchema = z.enum(["team", "dedicated"]);
 export type ComputerMode = z.infer<typeof ComputerModeSchema>;
 
-export const MemoryScopeSchema = z.enum(["isolated", "shared"]);
-export type MemoryScopeValue = z.infer<typeof MemoryScopeSchema>;
-
 export const AvatarStyleSchema = z.enum(["robot", "organic"]);
 export type AvatarStyle = z.infer<typeof AvatarStyleSchema>;
 
@@ -54,7 +51,6 @@ export const BotSchema = z.object({
   archivedAt: z.string().nullable(),
   unread: z.boolean(),
   parentBotId: Id.nullable(),
-  memoryScope: MemoryScopeSchema.nullable(),
   threadId: Id,
   preview: z.string(),
   status: z.string(),
@@ -66,8 +62,6 @@ export const BotSchema = z.object({
   modelProvider: z.string().nullable(),
   modelId: z.string().nullable(),
   thinkingLevel: ThinkingLevelSchema.nullable(),
-  teamChatAmbientEnabled: z.boolean(),
-  teamChatRules: z.string(),
   webhookConfigured: z.boolean(),
   /** Present when created with an idempotency key (e.g. onboarding:first). */
   spawnKey: z.string().nullable(),
@@ -189,72 +183,6 @@ export const SpaceGroupSchema = GroupSchema.pick({
 });
 export type SpaceGroup = z.infer<typeof SpaceGroupSchema>;
 
-export const TEAM_CHAT_RULES_MAX_LENGTH = 4000;
-export const AutomatedSenderPolicyModeSchema = z.enum(["ignore", "rollup", "action", "user"]);
-export type AutomatedSenderPolicyMode = z.infer<typeof AutomatedSenderPolicyModeSchema>;
-
-export const AutomatedSenderPolicySchema = z
-  .object({
-    name: z.string().trim().min(1).max(120),
-    mode: AutomatedSenderPolicyModeSchema,
-    rollupHours: z.number().int().min(1).max(720).optional(),
-  })
-  .superRefine((policy, ctx) => {
-    if (policy.mode === "rollup" && policy.rollupHours === undefined) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Rollup policies require a frequency",
-        path: ["rollupHours"],
-      });
-    }
-  });
-export type AutomatedSenderPolicy = z.infer<typeof AutomatedSenderPolicySchema>;
-
-export const AutomatedSenderPoliciesSchema = z
-  .record(z.string().trim().min(1).max(200), AutomatedSenderPolicySchema)
-  .refine((policies) => Object.keys(policies).length <= 50, {
-    message: "At most 50 automated sender policies are allowed",
-  });
-export type AutomatedSenderPolicies = z.infer<typeof AutomatedSenderPoliciesSchema>;
-
-export const AutomatedSenderSchema = z.object({
-  id: z.string().min(1).max(200),
-  name: z.string().min(1).max(120),
-});
-export type AutomatedSender = z.infer<typeof AutomatedSenderSchema>;
-
-export const ExternalConversationPolicySchema = z.object({
-  teamChatAmbientEnabled: z.boolean().nullable(),
-  teamChatRules: z.string().max(TEAM_CHAT_RULES_MAX_LENGTH).nullable(),
-  automatedSenderPolicies: AutomatedSenderPoliciesSchema,
-});
-export type ExternalConversationPolicy = z.infer<typeof ExternalConversationPolicySchema>;
-
-export const UpdateExternalConversationPolicyInput = ExternalConversationPolicySchema.extend({
-  externalConversationId: Id,
-});
-export type UpdateExternalConversationPolicyInput = z.infer<
-  typeof UpdateExternalConversationPolicyInput
->;
-
-export const ExternalConversationSchema = z.object({
-  id: Id,
-  spaceId: Id,
-  botId: Id,
-  provider: z.string(),
-  displayName: z.string().nullable(),
-  participantNames: z.array(z.string()),
-  teamChatAmbientEnabled: z.boolean().nullable(),
-  teamChatRules: z.string().nullable(),
-  automatedSenderPolicies: AutomatedSenderPoliciesSchema,
-  automatedSenders: z.array(AutomatedSenderSchema),
-  threadId: Id,
-  preview: z.string(),
-  unread: z.boolean(),
-  updatedAt: z.string(),
-});
-export type ExternalConversation = z.infer<typeof ExternalConversationSchema>;
-
 export const SpaceSchema = z.object({
   id: Id,
   name: z.string(),
@@ -265,7 +193,6 @@ export const SpaceSchema = z.object({
   canDelete: z.boolean().optional(),
   bots: z.array(SpaceBotSchema),
   groups: z.array(SpaceGroupSchema),
-  externalConversations: z.array(ExternalConversationSchema),
   botSections: z.array(BotSectionSchema),
 });
 export type Space = z.infer<typeof SpaceSchema>;
@@ -276,7 +203,6 @@ export const SpaceNavigationSchema = z.object({
     name: z.string(),
     bots: z.array(BotSchema),
     groups: z.array(GroupSchema),
-    externalConversations: z.array(ExternalConversationSchema),
     botSections: z.array(BotSectionSchema),
   }),
   spaces: z.array(SpaceSchema),
@@ -323,15 +249,12 @@ export const UpdateBotInput = z
     notifyOnFinish: z.boolean().optional(),
     color: BotAvatarValueSchema.optional(),
     pinned: z.boolean().optional(),
-    memoryScope: MemoryScopeSchema.nullable().optional(),
     sectionId: Id.nullable().optional(),
     voiceId: z.string().max(120).nullable().optional(),
     autoSpeak: z.boolean().optional(),
     modelProvider: z.string().trim().min(1).max(80).nullable().optional(),
     modelId: z.string().trim().min(1).max(200).nullable().optional(),
     thinkingLevel: ThinkingLevelSchema.nullable().optional(),
-    teamChatAmbientEnabled: z.boolean().optional(),
-    teamChatRules: z.string().max(TEAM_CHAT_RULES_MAX_LENGTH).optional(),
   })
   .superRefine((value, ctx) => {
     const providerProvided = value.modelProvider !== undefined;
@@ -369,12 +292,6 @@ export const RoutineSchema = z.object({
   notify: z.boolean(),
   webhookEnabled: z.boolean(),
   githubEnabled: z.boolean(),
-  messageProvider: z
-    .string()
-    .min(1)
-    .max(50)
-    .regex(/^[a-z0-9._-]+$/i)
-    .nullable(),
   lastRunAt: z.string().nullable(),
   nextRunAt: z.string().nullable(),
   createdAt: z.string(),
@@ -392,24 +309,12 @@ export const CreateRoutineInput = z
     active: z.boolean().default(false),
     webhookEnabled: z.boolean().default(false),
     githubEnabled: z.boolean().default(false),
-    messageProvider: z
-      .string()
-      .min(1)
-      .max(50)
-      .regex(/^[a-z0-9._-]+$/i)
-      .nullable()
-      .default(null),
   })
   .superRefine((value, ctx) => {
-    if (
-      value.crons.length === 0 &&
-      !value.webhookEnabled &&
-      !value.githubEnabled &&
-      !value.messageProvider
-    ) {
+    if (value.crons.length === 0 && !value.webhookEnabled && !value.githubEnabled) {
       ctx.addIssue({
         code: "custom",
-        message: "Add a schedule, webhook, GitHub, or message trigger",
+        message: "Add a schedule, webhook, or GitHub trigger",
         path: ["crons"],
       });
     }
@@ -795,49 +700,6 @@ export type ComputerStatus = z.infer<typeof ComputerStatusSchema>;
 export const ComputerReleaseReasonSchema = z.enum(["done", "skipped"]);
 export type ComputerReleaseReason = z.infer<typeof ComputerReleaseReasonSchema>;
 
-export const MessagingLinkedIdentitySchema = z.object({
-  id: Id,
-  provider: z.string(),
-  address: z.string(),
-  botId: Id,
-  botName: z.string(),
-});
-export type MessagingLinkedIdentity = z.infer<typeof MessagingLinkedIdentitySchema>;
-
-export const MessagingStatusSchema = z.object({
-  enabled: z.boolean(),
-  /** Messaging platforms mounted on this deployment (sendblue, slack, …). */
-  providers: z.array(z.string()),
-  /** True when unknown senders auto-provision their own accounts. */
-  openSignup: z.boolean(),
-  /** The caller's linked chat apps, one entry per (provider, address). */
-  identities: z.array(MessagingLinkedIdentitySchema),
-});
-export type MessagingStatus = z.infer<typeof MessagingStatusSchema>;
-
-export const MessagingChannelMembershipSchema = z.object({
-  /** One row per linked identity: the same group can hold two of the caller's. */
-  id: Id,
-  channelId: Id,
-  /** Which of the caller's linked chat apps this membership belongs to. */
-  identityId: Id,
-  provider: z.string(),
-  name: z.string().nullable(),
-  status: z.enum(["invited", "approved", "declined", "left"]),
-  memberCount: z.number().int().nonnegative(),
-});
-export type MessagingChannelMembership = z.infer<typeof MessagingChannelMembershipSchema>;
-
-export const MessagingAgentConnectionSchema = z.object({
-  id: Id,
-  peerBotName: z.string(),
-  peerOwnerLabel: z.string(),
-  status: z.enum(["pending", "approved", "declined", "revoked"]),
-  /** true when the caller's bot is the target (only the target can respond). */
-  incoming: z.boolean(),
-});
-export type MessagingAgentConnection = z.infer<typeof MessagingAgentConnectionSchema>;
-
 export const RunSchema = z.object({
   id: Id,
   botId: Id,
@@ -855,8 +717,6 @@ export const RunSchema = z.object({
     "skill",
     "bot_message",
     "webhook",
-    "messaging",
-    "cloud_agent",
     "created",
   ]),
   routineId: Id.nullable(),
@@ -1042,14 +902,6 @@ export const ModelOAuthBeginSchema = z.discriminatedUnion("mode", [
   ModelOAuthBeginBaseSchema.extend({ mode: z.literal("auth-url") }),
 ]);
 export type ModelOAuthBegin = z.infer<typeof ModelOAuthBeginSchema>;
-
-export const SpaceMemoryConfigSchema = z.object({
-  provider: z.string(),
-  settings: z.record(z.string(), z.string()),
-  defaultMemoryScope: MemoryScopeSchema,
-  updatedAt: z.string(),
-});
-export type SpaceMemoryConfig = z.infer<typeof SpaceMemoryConfigSchema>;
 
 export const ModelCatalogEntrySchema = z.object({
   provider: z.string(),

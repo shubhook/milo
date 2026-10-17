@@ -4,13 +4,9 @@ import path from "node:path";
 import type { ComputerRef, ProcessEvent, SandboxProvider } from "@milo/adapter-kit";
 import { EgressUnsupportedError } from "@milo/adapter-kit";
 import { OPEN_COMPUTER_EGRESS } from "@milo/contracts";
-import { describe, expect, it, vi } from "vitest";
-import { BoxSandboxEmulator } from "./box-emulator.js";
-import { CreateOSSandboxProvider } from "./createos-sandbox.js";
-import { DaytonaSandboxEmulator } from "./daytona-emulator.js";
+import { describe, expect, it } from "vitest";
 import { DesktopSandboxProvider } from "./desktop-sandbox.js";
 import { DockerSandboxProvider } from "./docker-sandbox.js";
-import { ManagedSandboxEmulator } from "./e2b-emulator.js";
 import { FakeSandboxProvider } from "./fake-sandbox.js";
 import { provisionPrepared } from "./sandbox-test-support.js";
 
@@ -32,43 +28,20 @@ async function drain(provider: SandboxProvider, computer: ComputerRef) {
 }
 
 describe("sandbox conformance", () => {
-  it("runs the same graphical command across fake, managed-provider emulators, and desktop", async () => {
+  it("runs the same graphical command across fake and desktop", async () => {
     const fake = new FakeSandboxProvider();
-    const managed = new ManagedSandboxEmulator();
-    const daytona = new DaytonaSandboxEmulator();
-    const box = new BoxSandboxEmulator();
     const desktop = new DesktopSandboxProvider();
     const a = await provisionPrepared(fake, { botId: "bot-a", homePath: "/tmp/a" }, ctx);
-    const b = await provisionPrepared(managed, { botId: "bot-b", homePath: "/tmp/b" }, ctx);
-    const c = await provisionPrepared(daytona, { botId: "bot-c", homePath: "/tmp/c" }, ctx);
-    const d = await provisionPrepared(box, { botId: "bot-d", homePath: "/tmp/d" }, ctx);
-    const e = await provisionPrepared(desktop, { botId: "bot-e", homePath: "/tmp/e" }, ctx);
-    const outA = await drain(fake, a);
-    const outB = await drain(managed, b);
-    const outC = await drain(daytona, c);
-    const outD = await drain(box, d);
-    const outE = await drain(desktop, e);
-    expect(outA).toContain("graphical-ok");
-    expect(outB).toContain("graphical-ok");
-    expect(outC).toContain("graphical-ok");
-    expect(outD).toContain("graphical-ok");
-    expect(outE).toContain("graphical-ok");
-    expect(new Set([a.id, b.id, c.id, d.id, e.id]).size).toBe(5);
+    const b = await provisionPrepared(desktop, { botId: "bot-b", homePath: "/tmp/b" }, ctx);
+    expect(await drain(fake, a)).toContain("graphical-ok");
+    expect(await drain(desktop, b)).toContain("graphical-ok");
+    expect(a.id).not.toBe(b.id);
     await fake.destroy(a, ctx);
-    await managed.destroy(b, ctx);
-    await daytona.destroy(c, ctx);
-    await box.destroy(d, ctx);
-    await desktop.destroy(e, ctx);
+    await desktop.destroy(b, ctx);
   });
 
   it("offers the same observation, action, and workspace contract across providers", async () => {
-    const providers: SandboxProvider[] = [
-      new FakeSandboxProvider(),
-      new ManagedSandboxEmulator(),
-      new DaytonaSandboxEmulator(),
-      new BoxSandboxEmulator(),
-      new DesktopSandboxProvider(),
-    ];
+    const providers: SandboxProvider[] = [new FakeSandboxProvider(), new DesktopSandboxProvider()];
     for (const [index, provider] of providers.entries()) {
       const computer = await provisionPrepared(
         provider,
@@ -231,9 +204,6 @@ describe("sandbox conformance", () => {
     const root = mkdtempSync(path.join(tmpdir(), "rakazo-destroy-idempotent-"));
     const providers: SandboxProvider[] = [
       new FakeSandboxProvider(),
-      new ManagedSandboxEmulator(),
-      new DaytonaSandboxEmulator(),
-      new BoxSandboxEmulator(),
       new DesktopSandboxProvider({ root }),
     ];
     for (const [index, provider] of providers.entries()) {
@@ -287,16 +257,8 @@ describe("sandbox conformance", () => {
       allowedDomains: ["pypi.org"],
       allowedTcp: [],
     };
-    const createosFetch = vi.fn<typeof fetch>();
-    const createos = new CreateOSSandboxProvider({ apiKey: "test-key", fetch: createosFetch });
-    const emulated: SandboxProvider[] = [
-      new FakeSandboxProvider(),
-      new ManagedSandboxEmulator(),
-      new DaytonaSandboxEmulator(),
-      new BoxSandboxEmulator(),
-      new DesktopSandboxProvider(),
-    ];
-    for (const [index, provider] of [...emulated, createos].entries()) {
+    const emulated: SandboxProvider[] = [new FakeSandboxProvider(), new DesktopSandboxProvider()];
+    for (const [index, provider] of emulated.entries()) {
       expect(provider.describe().capabilities.egress).toBe(false);
       await expect(
         provider.provision(
@@ -305,8 +267,6 @@ describe("sandbox conformance", () => {
         ),
       ).rejects.toBeInstanceOf(EgressUnsupportedError);
     }
-    // The refusal happens before any provider request.
-    expect(createosFetch).not.toHaveBeenCalled();
     for (const [index, provider] of emulated.entries()) {
       const computer = await provisionPrepared(
         provider,

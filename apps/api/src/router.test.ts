@@ -1068,7 +1068,7 @@ describe("computer screen url", () => {
   const computerRow = {
     id: "computer-1",
     screenGeneration: 3,
-    kind: "e2b",
+    kind: "docker",
     scope: "team",
     state: "running",
     providerRef: "sandbox-ref-1",
@@ -1102,7 +1102,7 @@ describe("computer screen url", () => {
         defaultModel: "fake-model",
         webOrigin: "http://127.0.0.1:5173",
         screenProxySecret: "fake-test-secret",
-        sandboxProvider: "e2b",
+        sandboxProvider: "docker",
       },
       dataDir: "/tmp/rakazo-router-test",
     } as unknown as RouterDeps;
@@ -1118,7 +1118,7 @@ describe("computer screen url", () => {
     return { response, updateMany };
   };
 
-  it("issues lifecycle-bound capabilities for managed-provider screens too", async () => {
+  it("issues lifecycle-bound capabilities for provider screens", async () => {
     const { response } = await callScreenUrl(async () => ({
       url: "https://screen.example/vnc.html?token=fake-token",
     }));
@@ -2807,7 +2807,6 @@ describe("bot model auth on save", () => {
       sectionId: null,
       archivedAt: null,
       parentBotId: null,
-      memoryScope: null,
       createdAt: now,
       updatedAt: now,
       voiceId: null,
@@ -2815,8 +2814,6 @@ describe("bot model auth on save", () => {
       modelProvider: "openai-codex",
       modelId,
       thinkingLevel: null,
-      teamChatAmbientEnabled: false,
-      teamChatRules: "",
       webhookSecretId: null,
       spawnKey: null,
       thread: { id: "thread-1", unread: false, messages: [] },
@@ -3096,7 +3093,6 @@ describe("routines.update", () => {
     notify: false,
     webhookEnabled: false,
     githubEnabled: false,
-    messageProvider: null,
     lastRunAt: null,
     nextRunAt: null,
     createdAt: new Date("2026-09-01T00:00:00.000Z"),
