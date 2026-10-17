@@ -933,27 +933,9 @@ export function prependMobileMessagePage(
   return prependThreadHistoryPage(prev, page);
 }
 
-const MESSAGING_PROVIDER_LABELS: Record<string, string> = {
-  sendblue: "iMessage",
-  slack: "Slack",
-  whatsapp: "WhatsApp",
-  telegram: "Telegram",
-  lark: "Feishu",
-};
-
-export function messagingProviderLabel(provider: string, transport?: string): string {
-  if (provider === "sendblue" && ["iMessage", "SMS", "RCS"].includes(transport ?? "")) {
-    return transport!;
-  }
-  return MESSAGING_PROVIDER_LABELS[provider] ?? provider;
-}
-
 export function copyableMobileMessageText(message: MobileMessage): string {
   return message.blocks
     .map((block) => {
-      if (block.kind === "channel_message") {
-        return `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`;
-      }
       if (block.kind === "text" || block.kind === "progress" || block.kind === "ask")
         return block.text;
       return "";
@@ -966,9 +948,6 @@ export function copyableMobileMessageText(message: MobileMessage): string {
 export function blockText(message: MobileMessage) {
   return message.blocks
     .map((block) => {
-      if (block.kind === "channel_message") {
-        return `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`;
-      }
       if (block.kind === "subagent") {
         return `${block.name ?? "subagent"}: ${block.result || block.progress || block.task || ""}`;
       }

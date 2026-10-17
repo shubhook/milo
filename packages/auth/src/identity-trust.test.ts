@@ -105,7 +105,6 @@ function fixture({
       ),
     },
     member: { findMany: vi.fn(async () => []) },
-    messagingIdentity: { deleteMany: vi.fn(async () => ({ count: 0 })) },
     organization: { deleteMany: vi.fn(async () => ({ count: 0 })) },
     spaceMember: {
       findFirst: vi.fn(async ({ where }: { where: { userId: string } }) =>

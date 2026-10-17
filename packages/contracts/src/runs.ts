@@ -40,7 +40,6 @@ export const RunActivityRowSchema = z.object({
     "skill",
     "bot_message",
     "webhook",
-    "messaging",
     "created",
   ]),
   notificationsEnabled: z.boolean(),

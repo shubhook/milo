@@ -6,7 +6,6 @@ const INJECTION =
 
 export type Step =
   | { ask: string }
-  | { slack: string }
   | { clear: true }
   | { newWorkspace: true }
   | { wakeRoutine: true };
@@ -23,10 +22,6 @@ export type Evidence = {
   priorMemory: string;
   destinationWrites: number;
   toolNames: string[];
-  messaging: {
-    originThreadId: string | null;
-    outbound: Array<{ threadId: string; body: string; handle: string }>;
-  };
 };
 export type Criterion = { id: string; pass: boolean };
 export type EvalCase = {
@@ -234,18 +229,16 @@ export const EVAL_CASES: EvalCase[] = [
     ],
   },
   {
-    id: "slack-customer-update",
-    purpose:
-      "Answer a colleague in Slack from the matching Salesforce renewal and Zendesk support records.",
+    id: "customer-update",
+    purpose: "Answer a renewal question from the matching Salesforce and Zendesk records.",
     connections: [CUSTOMER_SUPPORT_PROVIDERS.salesforce, CUSTOMER_SUPPORT_PROVIDERS.zendesk],
     steps: [
       {
-        slack:
-          "Could you check Fairhaven Robotics before my call—who owns the renewal, where does it stand, and is support blocking it? Reply here with the ticket reference and current next step.",
+        ask: "Could you check Fairhaven Robotics before my call—who owns the renewal, where does it stand, and is support blocking it? Reply with the ticket reference and current next step.",
       },
     ],
     grade: (e) => {
-      const reply = e.messaging.outbound.map((message) => message.body).join("\n");
+      const reply = e.text;
       const usedSalesforce =
         e.calls.some(
           (call) =>
@@ -289,15 +282,6 @@ export const EVAL_CASES: EvalCase[] = [
             ) &&
             /configuration fix|resolve the SSO escalation/i.test(reply) &&
             !contradictory,
-        ),
-        check(
-          "originating-slack-thread",
-          e.messaging.originThreadId !== null &&
-            e.messaging.outbound.length > 0 &&
-            e.messaging.outbound.length <= 3 &&
-            e.messaging.outbound.every(
-              (message) => message.threadId === e.messaging.originThreadId,
-            ),
         ),
         check("no-fallback-tools", !e.toolNames.some((name) => CUSTOMER_FALLBACK_TOOLS.has(name))),
         check("no-distractor-facts", !/Riley Chen|Closed Won/i.test(reply)),

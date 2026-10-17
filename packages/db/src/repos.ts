@@ -53,8 +53,6 @@ function mapBot(
     modelProvider?: string | null;
     modelId?: string | null;
     thinkingLevel?: string | null;
-    teamChatAmbientEnabled?: boolean;
-    teamChatRules?: string;
     webhookSecretId?: string | null;
     spawnKey?: string | null;
   },
@@ -89,8 +87,6 @@ function mapBot(
     modelProvider: bot.modelProvider ?? null,
     modelId: bot.modelId ?? null,
     thinkingLevel: (bot.thinkingLevel as Bot["thinkingLevel"]) ?? null,
-    teamChatAmbientEnabled: bot.teamChatAmbientEnabled ?? false,
-    teamChatRules: bot.teamChatRules ?? "",
     webhookConfigured: Boolean(bot.webhookSecretId),
     spawnKey: bot.spawnKey ?? null,
   };

@@ -35,7 +35,6 @@ function evidence(): Evidence {
     priorMemory: "",
     destinationWrites: 0,
     toolNames: [],
-    messaging: { originThreadId: null, outbound: [] },
   };
 }
 function grades(id: string, e: Evidence) {
@@ -254,7 +253,7 @@ describe("independent outcome graders", () => {
     e.records[1]!.status = "active";
     expect(passes("crm-update", e)).toBe(false);
   });
-  it("requires grounded cross-system evidence and a non-contradictory Slack reply", () => {
+  it("requires grounded cross-system evidence and a non-contradictory reply", () => {
     const e = evidence();
     e.calls.push(
       {
@@ -278,24 +277,16 @@ describe("independent outcome graders", () => {
         outcome: "read",
       },
     );
-    e.messaging = {
-      originThreadId: "slack:dm:U-colleague",
-      outbound: [
-        {
-          threadId: "slack:dm:U-colleague",
-          handle: "outbound-1",
-          body: "Casey Morgan owns the renewal, now in Negotiation. Urgent ticket ZD-1842 covers the SSO incident; engineering is testing a configuration fix.",
-        },
-      ],
-    };
-    expect(passes("slack-customer-update", e)).toBe(true);
-    e.messaging.outbound[0]!.body =
+    e.text =
+      "Casey Morgan owns the renewal, now in Negotiation. Urgent ticket ZD-1842 covers the SSO incident; engineering is testing a configuration fix.";
+    expect(passes("customer-update", e)).toBe(true);
+    e.text =
       "Casey Morgan says this is not in Negotiation and there is no support blocker on ticket ZD-1842. Engineering is testing a configuration fix for the SSO incident.";
-    expect(passes("slack-customer-update", e)).toBe(false);
-    e.messaging.outbound[0]!.body =
+    expect(passes("customer-update", e)).toBe(false);
+    e.text =
       "Casey Morgan owns the renewal, now in Negotiation. Urgent ticket ZD-1842 covers the SSO incident; engineering is testing a configuration fix.";
     e.calls[1]!.args.accountId = "sf-fairhaven-logistics";
-    expect(passes("slack-customer-update", e)).toBe(false);
+    expect(passes("customer-update", e)).toBe(false);
   });
   it("requires recorded approval, not merely a promise to ask", () => {
     const e = { ...evidence(), text: "I will ask for approval." };

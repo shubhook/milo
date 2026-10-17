@@ -94,7 +94,6 @@ import {
   type MobileMessagePage,
   type MobileSnapshot,
   mergeMobileSnapshot,
-  messagingProviderLabel,
   mobileThreadRefreshResult,
   prependMobileMessagePage,
   rpc,
@@ -2577,11 +2576,6 @@ function MentionChipIcon({ mention }: { mention: ComposerMention }) {
 function previewMessageText(message: MobileMessage): string {
   const text = message.blocks
     .flatMap((block) => {
-      if (block.kind === "channel_message" && block.text) {
-        return [
-          `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`,
-        ];
-      }
       if (block.kind === "text" && block.text) {
         // Bot text is Markdown; user text is already plain.
         return [message.role === "bot" ? plainTextFromMarkdown(block.text) : block.text];
@@ -2747,23 +2741,6 @@ const MessageBubble = memo(function MessageBubble({
           style={{ color: tokens.mutedForeground, fontSize: 13.5, flexShrink: 1 }}
         >
           {label}
-        </Text>
-      </Pressable>
-    );
-  }
-  const channelMessage = message.blocks.find(
-    (block): block is Extract<MessageBlock, { kind: "channel_message" }> =>
-      block.kind === "channel_message",
-  );
-  if (channelMessage) {
-    return (
-      <Pressable
-        {...actionProps}
-        style={{ width: "100%", paddingVertical: 4, alignItems: "center" }}
-      >
-        <Text style={{ color: tokens.mutedForeground, fontSize: 13.5, textAlign: "center" }}>
-          {messagingProviderLabel(channelMessage.provider, channelMessage.transport)} ·{" "}
-          {channelMessage.fromLabel}: {channelMessage.text}
         </Text>
       </Pressable>
     );
@@ -3005,11 +2982,6 @@ const MessageBubble = memo(function MessageBubble({
   );
   const caption = message.blocks
     .flatMap((block) => {
-      if (block.kind === "channel_message" && block.text) {
-        return [
-          `${messagingProviderLabel(block.provider, block.transport)} · ${block.fromLabel}: ${block.text}`,
-        ];
-      }
       return block.kind === "text" && block.text ? [block.text] : [];
     })
     .join("\n");

@@ -52,16 +52,6 @@ msgstr "{0} {unitLabel}"
 msgid "{0} connection"
 msgstr "{0} 连接"
 
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} default"
-msgstr ""
-
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} handling"
-msgstr ""
-
 #. placeholder {0}: format(size / 1024)
 #: src/components/ArtifactFileCard.tsx
 msgid "{0} KB"
@@ -72,21 +62,11 @@ msgstr "{0} KB"
 msgid "{0} MB"
 msgstr "{0} MB"
 
-#. placeholder {0}: sender.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} rollup hours"
-msgstr ""
-
 #. placeholder {0}: usage.runs
 #. placeholder {1}: usage.inputTokens + usage.outputTokens
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "{0} runs · {1} tokens"
 msgstr "{0} 次运行 · {1} tokens"
-
-#. placeholder {0}: bot.name
-#: src/pages/ExternalConversationSettings.tsx
-msgid "{0} will still respond to direct mentions."
-msgstr ""
 
 #. placeholder {0}: active.name
 #: src/pages/Shell.tsx
@@ -260,11 +240,11 @@ msgid "Add a run time for this one-shot."
 msgstr "为此一次性任务添加运行时间。"
 
 #: src/pages/Shell.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger"
+msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr ""
 
 #: src/pages/RoutineEditor.tsx
-msgid "Add a schedule, webhook, GitHub, or message trigger to run this routine."
+msgid "Add a schedule, webhook, or GitHub trigger to run this routine."
 msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
@@ -362,10 +342,6 @@ msgstr "高级..."
 msgid "Agent computer"
 msgstr "Agent 电脑"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Agent connections"
-msgstr "Agent 连接"
-
 #: src/pages/McpServersOverlay.tsx
 msgid "Agents:"
 msgstr "Agent："
@@ -418,10 +394,6 @@ msgstr "已允许一次"
 msgid "Already have an account?"
 msgstr "已有账户？"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Always act"
-msgstr ""
-
 #: src/components/AskCard.tsx
 msgid "Always allow this tool"
 msgstr "始终允许此工具"
@@ -471,7 +443,6 @@ msgstr "外观"
 msgid "Approval boundaries"
 msgstr "审批边界"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "批准"
@@ -581,14 +552,6 @@ msgstr "授权"
 msgid "Authorize this server so agents can use its tools. A popup opens."
 msgstr "授权此服务器后，Agent 才能使用其工具。将打开弹窗。"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Automated senders will appear after they post here."
-msgstr ""
-
 #: src/pages/RoutineEditor.tsx
 msgid "Available after the routine is saved"
 msgstr "保存例行任务后可用"
@@ -656,10 +619,6 @@ msgstr "Bot 屏幕"
 msgid "Bot screen preview"
 msgstr "Bot 屏幕预览"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Bot to link"
-msgstr "要关联的 Bot"
-
 #: src/pages/Artifacts.tsx
 msgid "Bots"
 msgstr ""
@@ -723,21 +682,9 @@ msgstr "修改密码"
 msgid "Changing…"
 msgstr "正在修改…"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Channels"
-msgstr "频道"
-
 #: src/pages/shell/message-cards.tsx
 msgid "Chart failed to render: {error}"
 msgstr "图表渲染失败：{error}"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Chat apps"
-msgstr "聊天应用"
-
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Chat apps, group channels, and agent connections."
-msgstr "聊天应用、群组频道和 Agent 连接。"
 
 #: src/pages/Shell.tsx
 msgid "Chat Settings"
@@ -778,10 +725,6 @@ msgstr "工作副本有本地更改。请先清理再更新。"
 msgid "Choose a bot shape, color, or upload an image"
 msgstr "选择机器人形状和颜色，或上传图片"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Choose a bot…"
-msgstr "选择 Bot…"
-
 #: src/pages/Auth.tsx
 msgid "Choose a new password"
 msgstr "设置新密码"
@@ -821,7 +764,6 @@ msgid "Client secret"
 msgstr ""
 
 #: src/pages/KnowledgeSection.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/PeerMessagesOverlay.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
@@ -856,10 +798,6 @@ msgstr "关闭 MCP 服务器"
 #: src/pages/SettingsOverlay.tsx
 msgid "Close memory settings"
 msgstr "关闭记忆设置"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Close messaging settings"
-msgstr "关闭消息设置"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Close model settings"
@@ -1375,7 +1313,6 @@ msgstr "无法运行例行任务"
 msgid "Could not run the command"
 msgstr ""
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Could not save"
@@ -1469,17 +1406,9 @@ msgstr "无法更新反应"
 msgid "Could not upload file"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't load messaging settings"
-msgstr "无法加载消息设置"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Couldn't update avatars"
 msgstr "无法更新头像"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Couldn't update messaging settings"
-msgstr "无法更新消息设置"
 
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -1592,10 +1521,6 @@ msgstr "日常工作"
 #: src/pages/RoutineSchedule.tsx
 msgid "days"
 msgstr "天"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Decline"
-msgstr "拒绝"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Default"
@@ -1810,10 +1735,6 @@ msgstr "编辑资料"
 msgid "Email"
 msgstr "邮箱"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Engage when... Ignore..."
-msgstr ""
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Enter a username and password"
 msgstr ""
@@ -1830,7 +1751,6 @@ msgstr "请输入 1 到 {MAX_MODEL_MAX_TOKENS} 之间的整数作为最大输出
 msgid "Enter a whole number from 1 to 1000 for the image limit."
 msgstr "请输入 1 到 1000 之间的整数作为图像限制。"
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "Every"
 msgstr "每"
@@ -1884,11 +1804,6 @@ msgstr "导出"
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Export this week's list from the CRM and drop it in the shared folder"
 msgstr "从 CRM 导出本周名单并放到共享文件夹"
-
-#: src/pages/ExternalConversationSettings.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "External conversation"
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Extra high"
@@ -1994,7 +1909,6 @@ msgstr ""
 msgid "Git event"
 msgstr "Git 事件"
 
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Group"
 msgstr "群组"
@@ -2002,10 +1916,6 @@ msgstr "群组"
 #: src/pages/GroupPanel.tsx
 msgid "Group settings"
 msgstr "群组设置"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Group updates"
-msgstr ""
 
 #: src/pages/shell/dialogs.tsx
 msgid "Groups"
@@ -2074,7 +1984,6 @@ msgstr ""
 msgid "hour"
 msgstr "小时"
 
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/RoutineSchedule.tsx
 msgid "hours"
 msgstr "小时"
@@ -2094,10 +2003,6 @@ msgstr "我做完了"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "如果听到了，说明语音已就绪。"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Ignore"
-msgstr ""
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2212,10 +2117,6 @@ msgstr ""
 msgid "Launched {app}"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Leave"
-msgstr "退出"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Light"
 msgstr "浅色"
@@ -2228,20 +2129,8 @@ msgstr ""
 msgid "Linear issue"
 msgstr "Linear 工单"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Link a chat app"
-msgstr "关联聊天应用"
-
 #: src/pages/Artifacts.tsx
 msgid "List view"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listen"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Listening"
 msgstr ""
 
 #: src/pages/Shell.tsx
@@ -2327,10 +2216,6 @@ msgstr "请确认这台电脑上没有仍在运行的任务。"
 msgid "Manage MCP servers"
 msgstr "管理 MCP 服务器"
 
-#: src/pages/AccountSettingsOverlay.tsx
-msgid "Manage messaging settings"
-msgstr "管理消息设置"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
 msgstr ""
@@ -2398,10 +2283,6 @@ msgstr "记忆"
 msgid "Mentions"
 msgstr "提及"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Mentions only"
-msgstr ""
-
 #: src/pages/Shell.tsx
 msgid "Message"
 msgstr "消息"
@@ -2419,10 +2300,6 @@ msgstr "给 {activeName} 发消息"
 msgid "Message composer"
 msgstr "消息输入框"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Message event"
-msgstr ""
-
 #: src/pages/Shell.tsx
 msgid "Message from {peer}"
 msgstr "来自 {peer} 的消息"
@@ -2434,11 +2311,6 @@ msgstr "消息…"
 #: src/pages/Shell.tsx
 msgid "Messaged {peer}"
 msgstr "已发给 {peer}"
-
-#: src/pages/AccountSettingsOverlay.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Messaging"
-msgstr "消息"
 
 #: src/lib/call-session.ts
 msgid "Microphone failed"
@@ -2599,10 +2471,6 @@ msgstr "新建技能"
 msgid "New space"
 msgstr "新建工作区"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No agent connections yet."
-msgstr "还没有 Agent 连接。"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "没有匹配的应用。"
@@ -2631,17 +2499,9 @@ msgstr ""
 msgid "No bots match"
 msgstr ""
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No chat apps linked yet."
-msgstr "还没有关联聊天应用。"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "No credentials saved for this bot."
 msgstr ""
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No group chats yet."
-msgstr "还没有群聊。"
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -2695,10 +2555,6 @@ msgstr "还没有运行记录"
 #: src/pages/KnowledgeSection.tsx
 msgid "No skills yet"
 msgstr "暂无技能"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "No team conversations yet."
-msgstr ""
 
 #: src/pages/PluginsOverlay.tsx
 msgid "No tools available."
@@ -3089,10 +2945,6 @@ msgid "Remove mention {0}"
 msgstr "移除提及 {0}"
 
 #: src/pages/RoutineEditor.tsx
-msgid "Remove message trigger"
-msgstr ""
-
-#: src/pages/RoutineEditor.tsx
 msgid "Remove schedule"
 msgstr "移除计划"
 
@@ -3231,17 +3083,9 @@ msgstr "返回 Milo"
 msgid "rev {0}"
 msgstr "版本 {0}"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Revoke"
-msgstr "撤销"
-
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Robot"
 msgstr "机器人"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Room guidance"
-msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Rotate key"
@@ -3284,13 +3128,8 @@ msgstr "运行中 · 停止"
 msgid "Running…"
 msgstr "正在运行…"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Runs when this bot receives a verified message from this provider."
-msgstr ""
-
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 #: src/pages/GroupPanel.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/ModelSettingsOverlay.tsx
@@ -3314,7 +3153,6 @@ msgstr ""
 
 #: src/components/AskCard.tsx
 #: src/components/teach/SkillDraftCard.tsx
-#: src/pages/ExternalConversationSettings.tsx
 msgid "Saved"
 msgstr "已保存"
 
@@ -3332,10 +3170,6 @@ msgstr "已保存。轮换后可查看。"
 
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Saving your workspace"
-msgstr ""
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Saving..."
 msgstr ""
 
 #: src/components/AskCard.tsx
@@ -3402,10 +3236,6 @@ msgstr "选择 Bot"
 msgid "Send"
 msgstr "发送"
 
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Send <0>{linkCode}</0> to the line from your chat app within 10 minutes. You'll get a confirmation reply once linked."
-msgstr "请在 10 分钟内从聊天应用向该线路发送 <0>{linkCode}</0>。关联成功后你会收到确认回复。"
-
 #: src/components/AskCard.tsx
 msgid "Send answer"
 msgstr "发送回答"
@@ -3443,7 +3273,6 @@ msgid "Server URL"
 msgstr "服务器 URL"
 
 #: src/components/call/CallCard.tsx
-#: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Settings"
@@ -3575,14 +3404,6 @@ msgstr "跳过或使用部署密钥"
 msgid "Skipped {0}"
 msgstr "已跳过 {0}"
 
-#: src/pages/RoutineEditor.tsx
-msgid "Slack message"
-msgstr "Slack 消息"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Slack not enabled"
-msgstr ""
-
 #: src/components/SoftwareUpdateSection.tsx
 msgid "Software update"
 msgstr "软件更新"
@@ -3706,18 +3527,6 @@ msgstr "团队"
 #: src/pages/Shell.tsx
 msgid "Team Computer"
 msgstr "团队电脑"
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Team conversations"
-msgstr ""
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams message"
-msgstr "Teams 消息"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Teams not enabled"
-msgstr ""
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Terminal"
@@ -3849,10 +3658,6 @@ msgstr ""
 msgid "Transcript"
 msgstr "文字记录"
 
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Treat like a person"
-msgstr ""
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg token"
@@ -3884,10 +3689,6 @@ msgstr "不可用"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr ""
-
-#: src/pages/MessagingSettingsOverlay.tsx
-msgid "Unlink"
-msgstr "取消关联"
 
 #: src/components/call/CallCard.tsx
 msgid "Unmute"
@@ -3975,10 +3776,6 @@ msgstr "使用 {hostLabel}"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Use a found model"
 msgstr "使用找到的模型"
-
-#: src/pages/ExternalConversationSettings.tsx
-msgid "Use default guidance"
-msgstr ""
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."

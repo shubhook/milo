@@ -31,7 +31,6 @@ const runTriggers = new Set<Run["trigger"]>([
   "skill",
   "bot_message",
   "webhook",
-  "messaging",
   "created",
 ]);
 

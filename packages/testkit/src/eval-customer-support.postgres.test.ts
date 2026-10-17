@@ -9,8 +9,8 @@ import { type ModelEmulatorRequest, startModelEmulator } from "./model-emulator.
 
 const databaseAvailable = process.env.VERIFY_DATABASE === "1" && Boolean(process.env.DATABASE_URL);
 
-describe.skipIf(!databaseAvailable)("offline Slack customer-support eval", () => {
-  it("runs the messaging, Salesforce, Zendesk, and reply path through the product", async () => {
+describe.skipIf(!databaseAvailable)("offline customer-support eval", () => {
+  it("runs the Salesforce, Zendesk, and reply path through the product", async () => {
     const fixtureKey = "offline-customer-support-key";
     const model = await startModelEmulator({
       apiKey: fixtureKey,
@@ -70,7 +70,7 @@ describe.skipIf(!databaseAvailable)("offline Slack customer-support eval", () =>
     const dataDir = await mkdtemp(path.join(tmpdir(), "rakazo-customer-eval-"));
     try {
       const { createApp } = await import("../../../apps/api/src/app.ts");
-      const scenario = EVAL_CASES.find((candidate) => candidate.id === "slack-customer-update")!;
+      const scenario = EVAL_CASES.find((candidate) => candidate.id === "customer-update")!;
       const result = await runTrial(scenario, 1, {
         connection: {
           provider: model.model.provider,
@@ -80,7 +80,7 @@ describe.skipIf(!databaseAvailable)("offline Slack customer-support eval", () =>
         },
         timeoutMs: 20_000,
         maxToolCalls: 8,
-        createApp: (composio, messaging) => {
+        createApp: (composio) => {
           const sandbox = new EvalSandboxProvider();
           return createApp({
             sandbox,
@@ -94,8 +94,6 @@ describe.skipIf(!databaseAvailable)("offline Slack customer-support eval", () =>
             wakeupDriver: "memory",
             signupsEnabled: "true",
             composio,
-            messaging,
-            messagingOpenSignup: false,
             encryptionKey: "offline-customer-eval-encryption-key",
           });
         },

@@ -18,7 +18,6 @@ export type WebhookEvents = {
     prompt: string;
     trigger: "webhook";
     clientNonce?: string;
-    allowParallelRun?: boolean;
   }): Promise<{ messageId: string; runId: string | null; seq: number }>;
 };
 
@@ -56,7 +55,7 @@ export function formatUntrustedDeliveryPayload(label: string, payload: unknown):
 }
 
 /** Keep inbound event labels to a short safe token so they cannot break prompt framing. */
-export function inboundEventName(value: unknown): string {
+function inboundEventName(value: unknown): string {
   if (typeof value !== "string") return "webhook";
   const trimmed = value.trim();
   return /^[a-z0-9._-]{1,100}$/i.test(trimmed) ? trimmed : "webhook";
@@ -134,14 +133,9 @@ export async function loadWebhookTarget(
   };
 }
 
-/** Idempotency key shared by messaging wakes and TeamChat duplicate-skip lookups. */
-export function messagingWakeIdempotencyKey(provider: string, handle: string): string {
-  return `${provider}:${handle}`;
-}
-
-/** Client nonce for idempotent inbound deliveries (webhook / github / messaging). */
-export function inboundDeliveryClientNonce(
-  source: "webhook" | "github" | "messaging",
+/** Client nonce for idempotent inbound deliveries (webhook / github). */
+function inboundDeliveryClientNonce(
+  source: "webhook" | "github",
   botId: string,
   idempotencyKey: string,
 ): string {
@@ -154,10 +148,8 @@ export async function deliverWebhookEvent(
   input: {
     prompt: string;
     routines: Array<{ name: string; prompt: string }>;
-    source: "webhook" | "github" | "messaging";
+    source: "webhook" | "github";
     idempotencyKey?: string;
-    /** Messaging wakes share the live chat thread; keep a separate webhook run. */
-    allowParallelRun?: boolean;
   },
 ) {
   const promptText =
@@ -167,11 +159,7 @@ export async function deliverWebhookEvent(
             (routine) => `Run routine "${routine.name}":\n${routine.prompt.trim()}`,
           ),
           "",
-          input.source === "github"
-            ? "Inbound GitHub event metadata:"
-            : input.source === "messaging"
-              ? "Inbound messaging event:"
-              : "Inbound webhook payload:",
+          input.source === "github" ? "Inbound GitHub event metadata:" : "Inbound webhook payload:",
           input.prompt,
         ].join("\n")
       : input.prompt;
@@ -189,7 +177,6 @@ export async function deliverWebhookEvent(
     prompt: promptText,
     trigger: "webhook",
     clientNonce,
-    ...(input.allowParallelRun ? { allowParallelRun: true } : {}),
   });
 
   if (sent.runId) {
