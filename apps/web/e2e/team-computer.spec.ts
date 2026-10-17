@@ -4,7 +4,6 @@ import {
   captureScreenshot,
   completeOnboarding,
   createNamedBot,
-  realSandboxTimeout,
   rpc,
   signup,
 } from "./helpers";
@@ -306,7 +305,7 @@ async function waitForRun(page: Page, botId: string, runId: string) {
         return snapshot.messages.some((message) => message.runId === runId);
       },
       {
-        timeout: realSandboxTimeout(90_000, 20_000),
+        timeout: 20_000,
         message: `run ${runId} must finish before its result is inspected`,
       },
     )
@@ -316,7 +315,7 @@ async function waitForRun(page: Page, botId: string, runId: string) {
 async function waitForIdle(page: Page, botId: string) {
   await expect
     .poll(async () => (await threadSnapshot(page, botId)).run?.status ?? "idle", {
-      timeout: realSandboxTimeout(90_000, 20_000),
+      timeout: 20_000,
     })
     .toBe("idle");
 }
