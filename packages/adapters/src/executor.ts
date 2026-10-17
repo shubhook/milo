@@ -319,6 +319,7 @@ import {
   isRunningShellCommand,
   observeShellCommand,
   SHELL_STILL_RUNNING_NOTICE,
+  spillFinishedShellOutput,
 } from "./shell-command-stream.js";
 import { isExactNoResponse, NO_RESPONSE, stripNoResponseReply } from "./silent-reply.js";
 import {
@@ -4484,6 +4485,15 @@ export function createRunExecutor(deps: ExecutorDeps) {
               })
               // The Activity feed is a view; losing an entry must not fail the tool.
               .catch((error: unknown) => getLogger().error("computer command event", error));
+          /** Save tool output that is too long to return inline. */
+          const saveToWorkspace = async (filePath: string, content: Uint8Array) => {
+            workspaceCheckpoint.markDirty();
+            await deps.sandbox.writeFile(
+              computer,
+              { path: resolveBotWorkspacePath(computerMode, bot.id, filePath), content },
+              context,
+            );
+          };
           /** Record a finished file/app action for the terminal's Activity view. */
           const recordComputerAction = (
             kind: Exclude<ComputerCommand["kind"], "shell">,
@@ -4865,7 +4875,14 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 exitCode: redacted.code,
                 output: commandOutput(redacted).slice(-COMPUTER_COMMAND_OUTPUT_MAX_CHARS),
               });
-              return finish(redacted);
+              return finish(
+                await spillFinishedShellOutput(
+                  redacted,
+                  commandEvent.command,
+                  commandEvent.cwd,
+                  saveToWorkspace,
+                ),
+              );
             } catch (error) {
               await appendComputerCommand({
                 ...commandEvent,
@@ -4996,7 +5013,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             return finish(await webSearchFromTool(web, context, args));
           }
           if (name === "web_fetch") {
-            return finish(await webFetchFromTool(web, context, args));
+            return finish(await webFetchFromTool(web, context, args, saveToWorkspace));
           }
           if (PAGE_BROWSER_TOOL_NAMES.has(name)) {
             if (heldForTakeover) {

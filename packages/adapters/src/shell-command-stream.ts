@@ -1,6 +1,8 @@
 import type { ProcessEvent } from "@milo/adapter-kit";
 import { redactSecrets } from "@milo/core";
 import { clipToolResultText } from "./pi-runtime-limits.js";
+import type { SaveWorkspaceFile } from "./workspace-spill.js";
+import { saveSpillFile, spillFileName } from "./workspace-spill.js";
 
 /**
  * Device-code logins print a code and then wait. Once that output goes quiet,
@@ -42,6 +44,35 @@ export function formatFinishedShellCommand(result: FinishedShellCommand): string
   if (result.stdout) parts.push(`stdout:\n${clipToolResultText(result.stdout)}`);
   if (result.stderr) parts.push(`stderr:\n${clipToolResultText(result.stderr)}`);
   return parts.join("\n");
+}
+
+/** Per stream, so stdout and stderr previews both fit in one clipped tool result. */
+export const SHELL_OUTPUT_INLINE_CHARS = 5_000;
+
+/**
+ * Save stdout or stderr longer than the inline limit under shell/ and return a
+ * preview plus the path and length. Output that fits, or fails to save, is unchanged.
+ */
+export async function spillFinishedShellOutput<T extends ShellCommandSnapshot & { code: unknown }>(
+  result: T,
+  command: string,
+  cwd: string,
+  save: SaveWorkspaceFile,
+): Promise<T | Record<string, unknown>> {
+  const files: Record<string, unknown> = {};
+  const inline = { stdout: result.stdout, stderr: result.stderr };
+  for (const stream of ["stdout", "stderr"] as const) {
+    const text = result[stream];
+    if (text.length <= SHELL_OUTPUT_INLINE_CHARS) continue;
+    const path = `shell/${spillFileName(command, `${cwd}\n${command}`, `.${stream}.txt`)}`;
+    if (!(await saveSpillFile(save, path, text))) continue;
+    files[`${stream}Path`] = path;
+    files[`${stream}Chars`] = text.length;
+    inline[stream] = text.slice(0, SHELL_OUTPUT_INLINE_CHARS);
+  }
+  if (Object.keys(files).length === 0) return result;
+  // Paths first: the runtime clips long tool results from the end.
+  return { code: result.code, ...files, ...inline };
 }
 
 /**
