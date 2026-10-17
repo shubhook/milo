@@ -105,6 +105,8 @@ test("create group from + and see two bots in one transcript", async ({ page }, 
   await page.unroute("**/rpc/groups/list");
   await page.unroute("**/rpc/threads/get");
   await page.reload();
+  // Open settings only once the group has loaded, or the trigger opens the wrong panel.
+  await expect(page.getByRole("combobox", { name: "Message Draft team" })).toBeVisible();
 
   await page.getByTestId("bot-settings-trigger").click();
   const desktopSettings = page.getByTestId("side-panel");
@@ -121,6 +123,8 @@ test("create group from + and see two bots in one transcript", async ({ page }, 
   await expect(desktopSettings.getByRole("button", { name: "Save", exact: true })).toBeEnabled();
   await page.unroute("**/rpc/groups/update");
   await desktopSettings.getByRole("button", { name: "Save", exact: true }).click();
+  // Saving closes the panel; switching chats before that would leave it open on return.
+  await expect(desktopSettings).toHaveAttribute("data-panel", "closed");
 
   await page
     .getByRole("combobox", { name: "Message Draft team" })
