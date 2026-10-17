@@ -295,7 +295,7 @@ export const builtinAgentTools: ConnectorTool[] = [
   {
     name: "shell",
     description:
-      "Run a command inside this bot's computer. cwd defaults to the bot's folder on a Team Computer and the workspace root on a Private Computer. Output can arrive while the command is still running; tell the user any one-time code or sign-in URL in that output.",
+      "Run a command inside this bot's computer. cwd defaults to the bot's folder on a Team Computer and the workspace root on a Private Computer. Output can arrive while the command is still running; tell the user any one-time code or sign-in URL in that output. Long output is saved to a file and its path returned.",
     inputSchema: {
       type: "object",
       properties: {
@@ -539,14 +539,14 @@ export const builtinAgentTools: ConnectorTool[] = [
   {
     name: "web_fetch",
     description:
-      "Fetch a public http(s) page and return readable text (title + content). Read-only; no JavaScript. Use after web_search when you need the page itself.",
+      "Fetch a public http(s) page and return readable text (title + content). Read-only; no JavaScript. Use after web_search when you need the page itself. A longer page is saved whole to a workspace file; read the rest from the returned path.",
     inputSchema: {
       type: "object",
       properties: {
         url: { type: "string", description: "Page URL (http or https)." },
         maxChars: {
           type: "number",
-          description: "Max characters of body text (default 8000).",
+          description: "Max characters returned inline (default 8000).",
         },
       },
       required: ["url"],

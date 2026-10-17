@@ -8,7 +8,7 @@ import type {
 } from "@milo/adapter-kit";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
-import { clampMaxChars, clampMaxResults } from "./web-limits.js";
+import { clampMaxChars, clampMaxResults, MAX_WEB_FETCH_FILE_CHARS } from "./web-limits.js";
 import { fetchSafeWebText, type ResolveHostname } from "./web-ssrf.js";
 
 export {
@@ -104,7 +104,8 @@ export class KeylessHttpWebProvider implements WebProvider {
   }
 
   async fetch(request: WebFetchRequest, context: AdapterContext): Promise<WebFetchResult> {
-    const maxChars = clampMaxChars(request.maxChars);
+    // The web_fetch tool clamps its inline limit; a larger request is for a workspace file.
+    const maxChars = clampMaxChars(request.maxChars, MAX_WEB_FETCH_FILE_CHARS);
     const { url, body } = await fetchSafeWebText(request.url, {
       fetch: this.fetchImpl,
       resolveHostname: this.resolveHostname,
