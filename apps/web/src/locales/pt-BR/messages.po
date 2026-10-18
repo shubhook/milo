@@ -923,9 +923,14 @@ msgid "Confirm password"
 msgstr "Confirmar senha"
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "Conectar"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Connect {label}"
+msgstr "Conectar {label}"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connect API key"
@@ -955,9 +960,14 @@ msgstr "Conectar Treg"
 msgid "Connect your agent"
 msgstr ""
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connect your apps"
+msgstr "Conecte seus apps"
+
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
@@ -985,6 +995,7 @@ msgstr "Conectado. Suas ferramentas estão disponíveis na sua próxima mensagem
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -995,6 +1006,10 @@ msgstr "Conectando…"
 msgid "Connection to {0} is still pending. You can close this and check again."
 msgstr "A conexão com o {0} ainda está pendente. Você pode fechar isso e verificar novamente."
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connection to {label} is still pending."
+msgstr "A conexão com {label} ainda está pendente."
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Context limit"
 msgstr "Limite de contexto"
@@ -1002,6 +1017,7 @@ msgstr "Limite de contexto"
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
+#: src/pages/OnboardingApps.tsx
 msgid "Continue"
 msgstr "Continuar"
 
@@ -1073,6 +1089,7 @@ msgid "Could not complete the update. Try again."
 msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "Could not connect"
 msgstr "Não foi possível conectar"
@@ -2314,6 +2331,10 @@ msgstr "Médio"
 msgid "Medium"
 msgstr ""
 
+#: src/pages/Onboarding.tsx
+msgid "Meet your first bot"
+msgstr "Conheça seu primeiro bot"
+
 #: src/pages/GroupPanel.tsx
 msgid "Members ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "Membros ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
@@ -2363,14 +2384,6 @@ msgstr "Enviou mensagem para {peer}"
 #: src/lib/call-session.ts
 msgid "Microphone failed"
 msgstr "Falha no microfone"
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on Claude Code."
-msgstr ""
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on your ChatGPT plan."
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
@@ -2458,6 +2471,7 @@ msgstr "Silenciar"
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
+#: src/pages/Onboarding.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -3240,6 +3254,10 @@ msgstr ""
 msgid "Saving…"
 msgstr "Salvando..."
 
+#: src/pages/Onboarding.tsx
+msgid "Say hi"
+msgstr "Dizer oi"
+
 #: src/lib/call-session.ts
 msgid "Say yes or no, or answer in a sentence."
 msgstr "Diga sim ou não, ou responda em uma frase."
@@ -3454,6 +3472,10 @@ msgstr "Habilidades"
 #: src/pages/Shell.tsx
 msgid "Skip"
 msgstr "Pular"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Skip for now"
+msgstr "Pular por enquanto"
 
 #: src/lib/localized-provider-hint.ts
 msgid "Skip or deploy key"
@@ -3731,10 +3753,6 @@ msgstr "Token Treg"
 #: src/lib/create-bot-starters.ts
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "Organizar meus e-mails, rascunhar respostas e perguntar antes de enviar."
-
-#: src/pages/Onboarding.tsx
-msgid "Try again"
-msgstr "Tentar novamente"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"

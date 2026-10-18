@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, signup } from "./helpers";
+import { captureScreenshot, sayHiToFirstBot, signup } from "./helpers";
 
 test("onboarding waits for Claude Code before opening Chief", async ({ page }, testInfo) => {
   let installed = false;
@@ -47,11 +47,12 @@ test("onboarding waits for Claude Code before opening Chief", async ({ page }, t
 
   installed = true;
   await page.getByRole("button", { name: "Check again" }).click();
-  await expect(page.getByText("Ready", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("onboarding-agent-claude").getByLabel("Ready")).toBeVisible();
   await expect(page.getByRole("button", { name: "Install" })).toHaveCount(0);
   await captureScreenshot(page, testInfo, "onboarding-agent-ready");
 
   await continueButton.click();
+  await sayHiToFirstBot(page);
   await expect(page.getByRole("combobox", { name: "Message Chief" })).toBeVisible({
     timeout: 20_000,
   });

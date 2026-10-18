@@ -1,8 +1,10 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { type AgentSetupAction, type AgentStatus, agentSetupCommand } from "@milo/contracts";
 import { Button, Input, Spinner } from "@milo/ui-web";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { AgentLogo } from "../components/AgentLogo";
+import { Shimmer } from "../components/ai/primitives";
 import type { ChatGptCapture } from "../lib/chatgpt-sign-in";
 import { chatGptAvailable, useChatGptSignIn } from "../lib/chatgpt-sign-in";
 import { useCopyText } from "../lib/copy-text";
@@ -131,135 +133,148 @@ export function OnboardingAgentStep({
           ? t`Version ${status.version}`
           : t`Signed in`;
 
+  const cardClass =
+    "flex min-w-0 flex-col gap-3.5 rounded-[18px] border border-border bg-card p-[18px] shadow-raised";
   return (
-    <div>
-      <h1 className="text-[32px] font-medium text-foreground">
+    <div className="flex flex-col items-center gap-7">
+      <h1 className="text-center text-title font-semibold tracking-tight text-foreground">
         <Trans>Connect your agent</Trans>
       </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {status.chatgpt ? (
-          <Trans>Milo runs your bots on your ChatGPT plan.</Trans>
-        ) : (
-          <Trans>Milo runs your bots on Claude Code.</Trans>
-        )}
-      </p>
-      <div className="mt-8 overflow-hidden rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-3 p-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground">Claude Code</p>
-            <p className="mt-0.5 text-xs text-muted-foreground" aria-live="polite">
-              {statusLabel}
-            </p>
+      <div className="grid w-full max-w-[720px] gap-4 sm:grid-cols-2">
+        <div className={cardClass} data-testid="onboarding-agent-claude">
+          <div className="flex items-center gap-3">
+            <AgentLogo agent="claude" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-foreground">Claude Code</p>
+              <p
+                className={`text-small ${status.installed && status.loggedIn ? "text-success" : "text-muted-foreground"}`}
+                aria-live="polite"
+              >
+                {checking ? <Shimmer>{statusLabel}</Shimmer> : statusLabel}
+              </p>
+            </div>
+            {checking ? (
+              <Spinner className="size-4 text-muted-foreground" />
+            ) : status.installed && status.loggedIn ? (
+              <Check className="size-[18px] text-success" aria-label={t`Ready`} />
+            ) : null}
           </div>
-          {checking ? (
-            <Spinner className="size-4 text-muted-foreground" />
-          ) : status.installed && status.loggedIn ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
-              <Check className="size-3.5" aria-hidden />
-              <Trans>Ready</Trans>
-            </span>
-          ) : next && action === null ? (
-            <Button size="sm" variant="outline" onClick={() => setAction(next)}>
+          {!checking && next && action === null ? (
+            <Button className="self-start" variant="outline" onClick={() => setAction(next)}>
               {next === "install" ? <Trans>Install</Trans> : <Trans>Sign in</Trans>}
             </Button>
           ) : null}
-        </div>
-        {action !== null && canRun ? (
-          <div className="border-t border-border bg-muted">
-            <pre className="max-h-64 overflow-auto px-4 py-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-foreground">
-              <span className="text-muted-foreground">$ </span>
-              {command}
-              {output ? `\n${output}` : ""}
-            </pre>
-            {running && CODE_PROMPT.test(output) ? (
-              <form
-                className="flex gap-2 px-4 pb-3"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  submitCode();
-                }}
-              >
-                <Input
-                  aria-label={t`Sign-in code`}
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  autoComplete="off"
-                  className="font-mono"
-                />
-                <Button type="submit" size="sm" variant="outline" disabled={!code.trim()}>
-                  <Trans>Submit</Trans>
-                </Button>
-              </form>
-            ) : null}
-            <div className="flex justify-end gap-2 border-t border-border px-4 py-2">
-              {running ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => void desktopBridge()?.agentSetup?.cancel()}
+          {action !== null && canRun ? (
+            <div className="overflow-hidden rounded-xl border border-border bg-muted">
+              <pre className="max-h-64 overflow-auto px-3.5 py-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-foreground">
+                <span className="text-muted-foreground">$ </span>
+                {command}
+                {output ? `\n${output}` : ""}
+              </pre>
+              {running && CODE_PROMPT.test(output) ? (
+                <form
+                  className="flex gap-2 px-3.5 pb-3"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    submitCode();
+                  }}
                 >
-                  <Trans>Cancel</Trans>
-                </Button>
-              ) : (
-                <>
-                  <Button size="sm" variant="ghost" onClick={() => setAction(null)}>
+                  <Input
+                    aria-label={t`Sign-in code`}
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                    autoComplete="off"
+                    className="font-mono"
+                  />
+                  <Button type="submit" variant="outline" disabled={!code.trim()}>
+                    <Trans>Submit</Trans>
+                  </Button>
+                </form>
+              ) : null}
+              <div className="flex justify-end gap-2 border-t border-border px-3.5 py-2">
+                {running ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void desktopBridge()?.agentSetup?.cancel()}
+                  >
                     <Trans>Cancel</Trans>
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => void run()}>
-                    <Trans>Run</Trans>
-                  </Button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Button size="sm" variant="ghost" onClick={() => setAction(null)}>
+                      <Trans>Cancel</Trans>
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => void run()}>
+                      <Trans>Run</Trans>
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ) : null}
-        {action !== null && !canRun ? (
-          <div className="flex items-center gap-2 border-t border-border bg-muted px-4 py-3">
-            <code className="min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap text-foreground">
-              {command}
-            </code>
-            <Button size="sm" variant="outline" onClick={() => copy(command)}>
-              {copied ? <Trans>Copied</Trans> : <Trans>Copy</Trans>}
-            </Button>
-            <Button size="sm" variant="outline" disabled={checking} onClick={() => void recheck()}>
-              <Trans>Check again</Trans>
-            </Button>
-          </div>
-        ) : null}
-      </div>
-      {status.chatgpt || chatGptAvailable(chatgptCapture) ? (
-        <div className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-          <p className="min-w-0 flex-1 text-sm font-medium text-foreground">ChatGPT</p>
-          {status.chatgpt ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
-              <Check className="size-3.5" aria-hidden />
-              <Trans>Ready</Trans>
-            </span>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={chatgpt.pending}
-              onClick={() => void chatgpt.start()}
-            >
-              {chatgpt.pending ? (
-                <Trans>Waiting for ChatGPT…</Trans>
-              ) : (
-                <Trans>Sign in with ChatGPT</Trans>
-              )}
-            </Button>
-          )}
+          ) : null}
+          {action !== null && !canRun ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-muted px-3.5 py-3">
+              <code className="min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap text-foreground">
+                {command}
+              </code>
+              <Button size="sm" variant="outline" onClick={() => copy(command)}>
+                {copied ? <Trans>Copied</Trans> : <Trans>Copy</Trans>}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={checking}
+                onClick={() => void recheck()}
+              >
+                <Trans>Check again</Trans>
+              </Button>
+            </div>
+          ) : null}
         </div>
-      ) : null}
-      {error || chatgpt.error ? (
-        <p className="mt-3 text-sm text-destructive">{error ?? chatgpt.error}</p>
-      ) : null}
-      <div className="mt-6 flex justify-end">
-        <Button onClick={onContinue} disabled={!ready || checking}>
-          <Trans>Continue</Trans>
-          <ArrowRight className="size-3.5" aria-hidden />
-        </Button>
+        {status.chatgpt || chatGptAvailable(chatgptCapture) ? (
+          <div className={cardClass} data-testid="onboarding-agent-chatgpt">
+            <div className="flex items-center gap-3">
+              <AgentLogo agent="openai" />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">ChatGPT</p>
+                {status.chatgpt ? (
+                  <p className="text-small text-success">
+                    <Trans>Ready</Trans>
+                  </p>
+                ) : null}
+              </div>
+              {status.chatgpt ? (
+                <Check className="size-[18px] text-success" aria-hidden="true" />
+              ) : null}
+            </div>
+            {status.chatgpt ? null : (
+              <Button
+                className="self-start"
+                variant="outline"
+                disabled={chatgpt.pending}
+                onClick={() => void chatgpt.start()}
+              >
+                {chatgpt.pending ? (
+                  <Shimmer>
+                    <Trans>Waiting for ChatGPT…</Trans>
+                  </Shimmer>
+                ) : (
+                  <Trans>Sign in with ChatGPT</Trans>
+                )}
+              </Button>
+            )}
+          </div>
+        ) : null}
       </div>
+      {error || chatgpt.error ? (
+        <p role="alert" className="text-small text-destructive">
+          {error ?? chatgpt.error}
+        </p>
+      ) : null}
+      <Button size="lg" className="px-5" onClick={onContinue} disabled={!ready || checking}>
+        <Trans>Continue</Trans>
+      </Button>
     </div>
   );
 }

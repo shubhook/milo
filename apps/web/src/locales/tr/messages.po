@@ -923,9 +923,14 @@ msgid "Confirm password"
 msgstr "Parolayı doğrulayın"
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "Bağlan"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Connect {label}"
+msgstr "{label} bağla"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connect API key"
@@ -955,9 +960,14 @@ msgstr "Treg'i bağla"
 msgid "Connect your agent"
 msgstr ""
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connect your apps"
+msgstr "Uygulamalarını bağla"
+
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
@@ -985,6 +995,7 @@ msgstr "Bağlandı. Araçları bir sonraki mesajından itibaren kullanılabilir.
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -995,6 +1006,10 @@ msgstr "Bağlanıyor…"
 msgid "Connection to {0} is still pending. You can close this and check again."
 msgstr "{0} bağlantısı hâlâ beklemede. Bunu kapatıp daha sonra tekrar kontrol edebilirsin."
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connection to {label} is still pending."
+msgstr "{label} bağlantısı hâlâ bekliyor."
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Context limit"
 msgstr "Bağlam sınırı"
@@ -1002,6 +1017,7 @@ msgstr "Bağlam sınırı"
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
+#: src/pages/OnboardingApps.tsx
 msgid "Continue"
 msgstr "Devam"
 
@@ -1073,6 +1089,7 @@ msgid "Could not complete the update. Try again."
 msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "Could not connect"
 msgstr "Bağlanılamadı"
@@ -2314,6 +2331,10 @@ msgstr "Orta"
 msgid "Medium"
 msgstr ""
 
+#: src/pages/Onboarding.tsx
+msgid "Meet your first bot"
+msgstr "İlk botunla tanış"
+
 #: src/pages/GroupPanel.tsx
 msgid "Members ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "Üyeler ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
@@ -2363,14 +2384,6 @@ msgstr "{peer} botuna mesaj gönderildi"
 #: src/lib/call-session.ts
 msgid "Microphone failed"
 msgstr "Mikrofon hatası"
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on Claude Code."
-msgstr ""
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on your ChatGPT plan."
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
@@ -2458,6 +2471,7 @@ msgstr "Sesi kapat"
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
+#: src/pages/Onboarding.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -3240,6 +3254,10 @@ msgstr ""
 msgid "Saving…"
 msgstr "Kaydediliyor…"
 
+#: src/pages/Onboarding.tsx
+msgid "Say hi"
+msgstr "Merhaba de"
+
 #: src/lib/call-session.ts
 msgid "Say yes or no, or answer in a sentence."
 msgstr "Evet ya da hayır de veya bir cümleyle yanıtla."
@@ -3454,6 +3472,10 @@ msgstr "Beceriler"
 #: src/pages/Shell.tsx
 msgid "Skip"
 msgstr "Atla"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Skip for now"
+msgstr "Şimdilik atla"
 
 #: src/lib/localized-provider-hint.ts
 msgid "Skip or deploy key"
@@ -3731,10 +3753,6 @@ msgstr "Treg token'ı"
 #: src/lib/create-bot-starters.ts
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "E-postalarımı ayıkla, yanıt taslakları yaz ve göndermeden önce sor."
-
-#: src/pages/Onboarding.tsx
-msgid "Try again"
-msgstr "Tekrar dene"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"

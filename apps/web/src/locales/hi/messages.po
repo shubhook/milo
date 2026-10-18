@@ -923,9 +923,14 @@ msgid "Confirm password"
 msgstr "पासवर्ड की पुष्टि करें"
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "कनेक्ट करें"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Connect {label}"
+msgstr "{label} जोड़ें"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connect API key"
@@ -955,9 +960,14 @@ msgstr "Treg कनेक्ट करें"
 msgid "Connect your agent"
 msgstr ""
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connect your apps"
+msgstr "अपने ऐप जोड़ें"
+
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
@@ -985,6 +995,7 @@ msgstr "कनेक्टेड। इसके टूल आपके अग�
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -995,6 +1006,10 @@ msgstr "कनेक्ट हो रहा है…"
 msgid "Connection to {0} is still pending. You can close this and check again."
 msgstr "{0} से कनेक्शन अभी लंबित है। आप इसे बंद करके बाद में जांच सकते हैं।"
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connection to {label} is still pending."
+msgstr "{label} से कनेक्शन अभी बाकी है।"
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Context limit"
 msgstr "कॉन्टेक्स्ट सीमा"
@@ -1002,6 +1017,7 @@ msgstr "कॉन्टेक्स्ट सीमा"
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
+#: src/pages/OnboardingApps.tsx
 msgid "Continue"
 msgstr "जारी रखें"
 
@@ -1073,6 +1089,7 @@ msgid "Could not complete the update. Try again."
 msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "Could not connect"
 msgstr "कनेक्ट नहीं हो सका"
@@ -2314,6 +2331,10 @@ msgstr "मध्यम"
 msgid "Medium"
 msgstr ""
 
+#: src/pages/Onboarding.tsx
+msgid "Meet your first bot"
+msgstr "अपने पहले बॉट से मिलें"
+
 #: src/pages/GroupPanel.tsx
 msgid "Members ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "सदस्य ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
@@ -2363,14 +2384,6 @@ msgstr "{peer} को संदेश भेजा"
 #: src/lib/call-session.ts
 msgid "Microphone failed"
 msgstr "माइक्रोफ़ोन विफल"
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on Claude Code."
-msgstr ""
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on your ChatGPT plan."
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
@@ -2458,6 +2471,7 @@ msgstr "म्यूट करें"
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
+#: src/pages/Onboarding.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -3240,6 +3254,10 @@ msgstr ""
 msgid "Saving…"
 msgstr "सहेजा जा रहा है…"
 
+#: src/pages/Onboarding.tsx
+msgid "Say hi"
+msgstr "नमस्ते कहें"
+
 #: src/lib/call-session.ts
 msgid "Say yes or no, or answer in a sentence."
 msgstr "हां या ना कहें, या एक वाक्य में उत्तर दें।"
@@ -3454,6 +3472,10 @@ msgstr "स्किल्स"
 #: src/pages/Shell.tsx
 msgid "Skip"
 msgstr "छोड़ें"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Skip for now"
+msgstr "अभी के लिए छोड़ें"
 
 #: src/lib/localized-provider-hint.ts
 msgid "Skip or deploy key"
@@ -3731,10 +3753,6 @@ msgstr "Treg टोकन"
 #: src/lib/create-bot-starters.ts
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "मेरे ईमेल छाँटें, जवाब का ड्राफ़्ट बनाएँ और भेजने से पहले पूछें।"
-
-#: src/pages/Onboarding.tsx
-msgid "Try again"
-msgstr "फिर से कोशिश करें"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"

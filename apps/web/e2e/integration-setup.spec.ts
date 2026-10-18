@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+import {
+  captureScreenshot,
+  completeOnboarding,
+  reachMeetStep,
+  sayHiToFirstBot,
+  signup,
+} from "./helpers";
 
 test("setup exposes all integration choices and saves only the selected provider", async ({
   page,
@@ -43,7 +49,7 @@ test("setup exposes all integration choices and saves only the selected provider
   await expect
     .poll(() => saved)
     .toEqual([{ json: { provider: "composio", apiKey: "fake-composio-key" } }]);
-  await expect(page.getByRole("heading", { name: "Create your first bot" })).toHaveCount(0);
+  await sayHiToFirstBot(page);
   await expect(page.getByRole("combobox", { name: "Message Chief" })).toBeVisible({
     timeout: 20_000,
   });
@@ -117,6 +123,8 @@ test("direct MCP connects a catalog result without asking for a URL and assigns 
     (response) => response.url().includes("/rpc/mcp/assignments/approve") && response.ok(),
   );
   await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await reachMeetStep(page);
+  await page.getByRole("button", { name: "Say hi", exact: true }).click();
   await expect(page.getByText("Opening chat…")).toBeVisible();
   await expect.poll(() => createCalls).toBe(1);
   releaseCreate();
@@ -207,7 +215,6 @@ test("remote members skip server setup and keep direct MCP connections", async (
   );
   await signup(page, `remote-member-${Date.now()}@rakazo.test`, "password12", "Remote Member");
   await expect(page.getByRole("heading", { name: "Server integrations" })).toBeHidden();
-  await expect(page.getByRole("heading", { name: "Create your first bot" })).toHaveCount(0);
   await captureScreenshot(page, testInfo, "remote-member-onboarding");
   await completeOnboarding(page);
   await page.goto("/integrations/setup?mode=mcp");

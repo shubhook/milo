@@ -16,13 +16,13 @@ export function WelcomePage() {
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-11 pb-[90px]">
         <div className="flex items-center gap-[26px]">
-          <div className="flex h-[88px] w-[88px] items-center justify-center gap-[13px] rounded-full bg-muted">
-            <span className="h-6 w-[11px] rounded-full bg-primary" />
-            <span className="h-6 w-[11px] rounded-full bg-primary" />
+          <div aria-hidden="true" className="flex gap-2">
+            <span className="milo-blink h-6 w-[11px] rounded-full bg-foreground" />
+            <span className="milo-blink h-6 w-[11px] rounded-full bg-foreground" />
           </div>
           <div className="text-[76px] leading-none tracking-[-0.03em] text-foreground">Milo</div>
         </div>
-        <p className="max-w-[600px] text-center text-[27px] leading-[1.4] text-foreground/75">
+        <p className="max-w-[600px] text-center text-[27px] leading-[1.4] text-muted-foreground">
           <Trans>
             Your team of always-on agents
             <br />
@@ -32,7 +32,7 @@ export function WelcomePage() {
         <button
           type="button"
           onClick={() => navigate("/sign-up")}
-          className="app-no-drag rounded-full bg-accent px-[34px] py-[15px] text-[19px] text-foreground transition hover:scale-[1.04] hover:bg-accent"
+          className="app-no-drag inline-flex h-[58px] items-center rounded-full bg-muted px-[34px] text-[19px] whitespace-nowrap text-foreground transition-transform hover:scale-[1.04] motion-reduce:transition-none"
         >
           <Trans>Sign up</Trans>&nbsp;&nbsp;→
         </button>

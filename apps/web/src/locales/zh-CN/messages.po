@@ -923,9 +923,14 @@ msgid "Confirm password"
 msgstr "确认密码"
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "连接"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Connect {label}"
+msgstr "连接 {label}"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connect API key"
@@ -955,9 +960,14 @@ msgstr "连接 Treg"
 msgid "Connect your agent"
 msgstr ""
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connect your apps"
+msgstr "连接你的应用"
+
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpOAuthCallback.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
@@ -985,6 +995,7 @@ msgstr "已连接，下一条消息起即可使用其工具。"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/McpServersOverlay.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
@@ -995,6 +1006,10 @@ msgstr "正在连接…"
 msgid "Connection to {0} is still pending. You can close this and check again."
 msgstr "与 {0} 的连接仍在等待。可以关闭此窗口稍后再看。"
 
+#: src/pages/OnboardingApps.tsx
+msgid "Connection to {label} is still pending."
+msgstr "与 {label} 的连接仍在等待中。"
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Context limit"
 msgstr "上下文限制"
@@ -1002,6 +1017,7 @@ msgstr "上下文限制"
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
+#: src/pages/OnboardingApps.tsx
 msgid "Continue"
 msgstr "继续"
 
@@ -1073,6 +1089,7 @@ msgid "Could not complete the update. Try again."
 msgstr ""
 
 #: src/components/integrations/IntegrationSetup.tsx
+#: src/pages/OnboardingApps.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "Could not connect"
 msgstr "无法连接"
@@ -2314,6 +2331,10 @@ msgstr "中"
 msgid "Medium"
 msgstr ""
 
+#: src/pages/Onboarding.tsx
+msgid "Meet your first bot"
+msgstr "认识你的第一个机器人"
+
 #: src/pages/GroupPanel.tsx
 msgid "Members ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
 msgstr "成员（{GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX}）"
@@ -2363,14 +2384,6 @@ msgstr "已发给 {peer}"
 #: src/lib/call-session.ts
 msgid "Microphone failed"
 msgstr "麦克风失败"
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on Claude Code."
-msgstr ""
-
-#: src/pages/OnboardingAgent.tsx
-msgid "Milo runs your bots on your ChatGPT plan."
-msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
@@ -2458,6 +2471,7 @@ msgstr "静音"
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
+#: src/pages/Onboarding.tsx
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
@@ -3240,6 +3254,10 @@ msgstr ""
 msgid "Saving…"
 msgstr "正在保存…"
 
+#: src/pages/Onboarding.tsx
+msgid "Say hi"
+msgstr "打个招呼"
+
 #: src/lib/call-session.ts
 msgid "Say yes or no, or answer in a sentence."
 msgstr "回答是或否，或一句话说明。"
@@ -3454,6 +3472,10 @@ msgstr "技能"
 #: src/pages/Shell.tsx
 msgid "Skip"
 msgstr "跳过"
+
+#: src/pages/OnboardingApps.tsx
+msgid "Skip for now"
+msgstr "暂时跳过"
 
 #: src/lib/localized-provider-hint.ts
 msgid "Skip or deploy key"
@@ -3731,10 +3753,6 @@ msgstr "Treg token"
 #: src/lib/create-bot-starters.ts
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "整理我的邮件，起草回复，发送前先问我。"
-
-#: src/pages/Onboarding.tsx
-msgid "Try again"
-msgstr "重试"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"

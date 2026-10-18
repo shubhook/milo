@@ -60,3 +60,20 @@ body {
 .sidebar-surface {
   --avatar-surface: var(--sidebar);
 }
+
+/* Milo's eyes blink every few seconds on first-run screens. */
+@keyframes milo-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .milo-blink {
+    animation: milo-blink 4s infinite;
+  }
+}

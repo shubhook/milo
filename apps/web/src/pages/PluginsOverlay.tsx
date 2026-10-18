@@ -7,7 +7,6 @@ import type {
   IntegrationCatalogSurface,
 } from "@milo/contracts";
 import {
-  abortableDelay,
   buildFeaturedConnectorTiles,
   CONNECTION_CATALOG_PAGE_SIZE,
   filterConnectionCatalogItems,
@@ -31,6 +30,7 @@ import {
 import { ChevronDown, ChevronLeft, ChevronUp, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IntegrationSetup } from "../components/integrations/IntegrationSetup";
+import { connectCatalogApp } from "../lib/connect-app";
 import { optionalCatalogFeedProbe } from "../lib/optional-catalog-feed";
 import { rpc } from "../lib/rpc";
 
@@ -223,35 +223,17 @@ export function PluginsOverlay({
       const existing = activeAccounts(connections, item).filter(
         (row) => row.status === "connected",
       );
-      const started = await rpc.connections.begin({
-        connectorId: item.connectorId,
-        provider: item.slug,
-        displayName: nextAccountLabel(item.name, existing.length),
-      });
-      if (started.authorizationUrl)
-        window.open(started.authorizationUrl, "rakazo-plugin-connect", "noopener,noreferrer");
-      if (item.noAuth && !started.authorizationUrl) {
-        if (controller.signal.aborted) return;
+      const outcome = await connectCatalogApp(
+        item,
+        nextAccountLabel(item.name, existing.length),
+        controller.signal,
+      );
+      if (outcome === "connected") {
         setItemConnected(item, true);
         void notifyAppConnected(item);
         await refresh().catch(() => undefined);
         setToolsTick((tick) => tick + 1);
         return;
-      }
-      for (let i = 0; i < 45; i += 1) {
-        if (controller.signal.aborted) return;
-        const row = await rpc.connections
-          .complete({ connectionId: started.connectionId })
-          .catch(() => undefined);
-        if (row?.status === "connected") {
-          if (controller.signal.aborted) return;
-          setItemConnected(item, true);
-          void notifyAppConnected(item);
-          await refresh().catch(() => undefined);
-          setToolsTick((tick) => tick + 1);
-          return;
-        }
-        await abortableDelay(2_000, controller.signal);
       }
       if (controller.signal.aborted) return;
       setCatalogError(
