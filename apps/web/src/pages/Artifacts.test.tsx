@@ -36,6 +36,7 @@ vi.mock("@milo/ui-web", () => {
     AlertDialogTitle: Container,
     BotAvatar: () => <span />,
     Button: (props: ComponentProps<"button">) => <button {...props} />,
+    buttonVariants: () => "",
     cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
     Input: (props: ComponentProps<"input">) => <input {...props} />,
     NativeSelect: (props: ComponentProps<"select">) => <select {...props} />,

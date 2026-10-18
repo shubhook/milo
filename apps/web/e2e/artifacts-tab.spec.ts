@@ -61,6 +61,10 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await expect(page).toHaveURL(/\/app\/artifacts\/[^/]+$/);
   await expect(page.getByRole("heading", { name: "notes/artifacts-tab.md" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Artifacts tab" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "View chat" })).toHaveAttribute(
+    "href",
+    `/app/${chiefId}`,
+  );
   await captureScreenshot(page, testInfo, "artifacts-preview");
 
   await page.getByRole("button", { name: "List view" }).click();

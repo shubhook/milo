@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   BotAvatar,
   Button,
+  buttonVariants,
   cn,
   Input,
   NativeSelect,
@@ -25,6 +26,7 @@ import {
   List,
   Lock,
   Maximize2,
+  MessageSquare,
   Minimize2,
   Search,
   Trash2,
@@ -790,6 +792,16 @@ function PreviewPane({
             >
               <Download size={16} strokeWidth={1.9} />
             </Button>
+            {ready.artifact.botId ? (
+              <Link
+                to={`/app/${ready.artifact.botId}`}
+                aria-label={t`View chat`}
+                title={t`View chat`}
+                className={buttonVariants({ variant: "ghost", size: "icon" })}
+              >
+                <MessageSquare size={16} strokeWidth={1.9} />
+              </Link>
+            ) : null}
             <Button
               variant="ghost"
               size="icon"
