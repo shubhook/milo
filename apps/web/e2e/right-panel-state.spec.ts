@@ -77,6 +77,7 @@ test("reload restores the selected routine and scopes preferences to the chat", 
     active: false,
   });
   await page.getByTitle("Agent computer").click();
+  await page.getByRole("tab", { name: "Activity" }).click();
   await page.getByRole("button", { name: /Weekly summary/ }).click();
   const name = page.locator("label:has-text('Name') input");
   await expect(name).toHaveValue("Weekly summary");
@@ -143,9 +144,11 @@ test("reload restores the selected routine and scopes preferences to the chat", 
   await page.reload();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "settings");
   await page.getByTitle("Agent computer").click();
+  await page.getByRole("tab", { name: "Activity" }).click();
   await page.getByRole("button", { name: /Weekly summary/ }).click();
   await rpc(page, "routines/remove", { routineId: routine.id });
   await page.reload();
-  await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "computer");
+  // A saved routine that no longer exists falls back to the tab that lists routines.
+  await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "activity");
   await expect(page.getByRole("button", { name: /Weekly summary/ })).toHaveCount(0);
 });
