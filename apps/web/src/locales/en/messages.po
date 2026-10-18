@@ -605,6 +605,7 @@ msgstr "Booting up {0}’s computer"
 msgid "bot"
 msgstr "bot"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
 #: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
@@ -775,6 +776,7 @@ msgstr "Client ID"
 msgid "Client secret"
 msgstr "Client secret"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PeerMessagesOverlay.tsx
 #: src/pages/RoutineEditor.tsx
@@ -1587,9 +1589,9 @@ msgstr "Delete"
 msgid "Delete \"{0}\"?"
 msgstr "Delete \"{0}\"?"
 
-#. placeholder {0}: artifact.name
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.name
+#. placeholder {0}: ready.artifact.name
 #: src/pages/Artifacts.tsx
 #: src/pages/Shell.tsx
 msgid "Delete {0}"
@@ -1901,10 +1903,6 @@ msgstr "Files"
 #: src/pages/Artifacts.tsx
 msgid "Filter by date"
 msgstr "Filter by date"
-
-#: src/pages/Artifacts.tsx
-msgid "Filters"
-msgstr "Filters"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Find models"
@@ -2475,6 +2473,7 @@ msgid "Mute"
 msgstr "Mute"
 
 #: src/components/teach/SkillDraftCard.tsx
+#: src/pages/Artifacts.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
 #: src/pages/Onboarding.tsx
@@ -3764,6 +3763,7 @@ msgstr "Treg token"
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "Triage my email, draft replies and ask before sending."
 
+#: src/pages/Artifacts.tsx
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"
 msgstr "Type"
@@ -3832,6 +3832,7 @@ msgid "Update progress"
 msgstr "Update progress"
 
 #: src/components/SoftwareUpdateSection.tsx
+#: src/pages/Artifacts.tsx
 msgid "Updated"
 msgstr "Updated"
 
@@ -3908,6 +3909,10 @@ msgstr "Version"
 #: src/pages/OnboardingAgent.tsx
 msgid "Version {0}"
 msgstr "Version {0}"
+
+#: src/pages/Artifacts.tsx
+msgid "View"
+msgstr "View"
 
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"

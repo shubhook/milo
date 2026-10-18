@@ -605,6 +605,7 @@ msgstr "Démarrage de l'ordinateur de {0}"
 msgid "bot"
 msgstr "bot"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
 #: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
@@ -775,6 +776,7 @@ msgstr "ID client"
 msgid "Client secret"
 msgstr "Secret client"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PeerMessagesOverlay.tsx
 #: src/pages/RoutineEditor.tsx
@@ -1587,9 +1589,9 @@ msgstr "Supprimer"
 msgid "Delete \"{0}\"?"
 msgstr "Supprimer « {0} » ?"
 
-#. placeholder {0}: artifact.name
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.name
+#. placeholder {0}: ready.artifact.name
 #: src/pages/Artifacts.tsx
 #: src/pages/Shell.tsx
 msgid "Delete {0}"
@@ -1901,10 +1903,6 @@ msgstr ""
 #: src/pages/Artifacts.tsx
 msgid "Filter by date"
 msgstr "Filtrer par date"
-
-#: src/pages/Artifacts.tsx
-msgid "Filters"
-msgstr "Filtres"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Find models"
@@ -2475,6 +2473,7 @@ msgid "Mute"
 msgstr "Couper le micro"
 
 #: src/components/teach/SkillDraftCard.tsx
+#: src/pages/Artifacts.tsx
 #: src/pages/Auth.tsx
 #: src/pages/GroupPanel.tsx
 #: src/pages/Onboarding.tsx
@@ -3764,6 +3763,7 @@ msgstr "Jeton Treg"
 msgid "Triage my email, draft replies and ask before sending."
 msgstr "Trier mes e-mails, rédiger des réponses et demander avant d’envoyer."
 
+#: src/pages/Artifacts.tsx
 #: src/pages/shell/bot-credentials.tsx
 msgid "Type"
 msgstr ""
@@ -3832,6 +3832,7 @@ msgid "Update progress"
 msgstr "Progression de la mise à jour"
 
 #: src/components/SoftwareUpdateSection.tsx
+#: src/pages/Artifacts.tsx
 msgid "Updated"
 msgstr "Mis à jour"
 
@@ -3908,6 +3909,10 @@ msgstr "Version"
 #: src/pages/OnboardingAgent.tsx
 msgid "Version {0}"
 msgstr ""
+
+#: src/pages/Artifacts.tsx
+msgid "View"
+msgstr "Affichage"
 
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"

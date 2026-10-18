@@ -36,10 +36,11 @@ vi.mock("@milo/ui-web", () => {
     AlertDialogTitle: Container,
     BotAvatar: () => <span />,
     Button: (props: ComponentProps<"button">) => <button {...props} />,
+    cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
+    Input: (props: ComponentProps<"input">) => <input {...props} />,
     NativeSelect: (props: ComponentProps<"select">) => <select {...props} />,
     NativeSelectOption: (props: ComponentProps<"option">) => <option {...props} />,
-    parseBotAvatar: () => ({ color: undefined }),
-    resolvePersonaColorDef: () => ({ hex: "#000000" }),
+    Toggle: ({ children }: { children?: ReactNode }) => <button type="button">{children}</button>,
   };
 });
 
@@ -118,13 +119,6 @@ it("keeps loading later pages when search hides the current snapshot", async () 
   const page = await renderArtifacts();
   try {
     expect(page.container.textContent).toContain("Alpha notes");
-    const filters = [...page.container.querySelectorAll("button")].find((button) =>
-      button.textContent?.includes("Filters"),
-    );
-    expect(filters).toBeTruthy();
-    await act(async () => {
-      filters?.click();
-    });
     await act(async () => {
       typeSearch(page.container, "Beta");
     });
@@ -141,7 +135,7 @@ it("keeps loading later pages when search hides the current snapshot", async () 
   }
 });
 
-it("still offers Load more when filters match nothing on the loaded page", async () => {
+it("still offers Load more when search matches nothing on the loaded page", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   let releaseSecondPage: (() => void) | undefined;
   const secondPage = new Promise<{
@@ -159,12 +153,6 @@ it("still offers Load more when filters match nothing on the loaded page", async
   });
   const page = await renderArtifacts();
   try {
-    const filters = [...page.container.querySelectorAll("button")].find((button) =>
-      button.textContent?.includes("Filters"),
-    );
-    await act(async () => {
-      filters?.click();
-    });
     await act(async () => {
       typeSearch(page.container, "Beta");
     });

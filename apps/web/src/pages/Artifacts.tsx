@@ -13,15 +13,14 @@ import {
   AlertDialogTitle,
   BotAvatar,
   Button,
+  cn,
+  Input,
   NativeSelect,
   NativeSelectOption,
-  parseBotAvatar,
-  resolvePersonaColorDef,
 } from "@milo/ui-web";
 import {
   ChevronLeft,
   Download,
-  Filter,
   LayoutGrid,
   List,
   Lock,
@@ -29,11 +28,15 @@ import {
   Minimize2,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Shimmer } from "../components/ai/primitives";
 import { PdfViewer } from "../components/PdfViewer";
 import { SandboxedHtmlViewer } from "../components/SandboxedHtmlViewer";
+import { SegmentedControl } from "../components/SegmentedControl";
 import { decodeArtifactBase64, downloadArtifactBytes } from "../lib/artifact-open";
 import { takeInitialBootstrap } from "../lib/bootstrap";
 import { desktopBridge } from "../lib/desktop";
@@ -91,7 +94,6 @@ export function ArtifactsPage() {
   const listingGenerationRef = useRef(0);
   const [activeBotId, setActiveBotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [maximized, setMaximized] = useState(false);
@@ -210,136 +212,119 @@ export function ArtifactsPage() {
     }
   }
 
-  return (
-    <div className="flex h-full min-w-0 flex-col bg-background text-foreground/90">
-      <header className="app-drag border-b border-border px-4 py-4 md:px-6">
-        {/* Wraps so window controls and the way back stay on screen with Filters. */}
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <div className="flex items-center gap-2">
-            {/* This route is the window's leading edge, so Electron window controls sit in the header. */}
-            {desktopBridge() ? <WindowChrome /> : null}
-            <Link
-              to="/app"
-              className="app-no-drag flex shrink-0 items-center gap-0.5 rounded-lg py-1 pe-1.5 text-[13px] font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            >
-              <ChevronLeft size={16} strokeWidth={1.9} aria-hidden="true" />
-              <Trans>Bots</Trans>
-            </Link>
-            <h1 className="text-xl font-semibold">
-              <Trans>Artifacts</Trans>
-            </h1>
-          </div>
-          <div className="app-no-drag flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              aria-pressed={filtersOpen}
-              onClick={() => setFiltersOpen((open) => !open)}
-              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                filtersOpen
-                  ? "border-transparent bg-primary text-primary-foreground"
-                  : "border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-            >
-              <Filter size={14} strokeWidth={1.9} />
-              <Trans>Filters</Trans>
-            </button>
-            {!artifactId ? (
-              <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
-                <ViewModeButton
-                  active={viewMode === "grid"}
-                  label={t`Card view`}
-                  onClick={() => setMode("grid")}
-                >
-                  <LayoutGrid size={15} strokeWidth={1.9} />
-                </ViewModeButton>
-                <ViewModeButton
-                  active={viewMode === "list"}
-                  label={t`List view`}
-                  onClick={() => setMode("list")}
-                >
-                  <List size={15} strokeWidth={1.9} />
-                </ViewModeButton>
-              </div>
-            ) : null}
-          </div>
-        </div>
+  const openSummary = artifactId ? (items?.find((item) => item.id === artifactId) ?? null) : null;
 
-        {filtersOpen ? (
-          <div className="app-no-drag mt-3 flex flex-wrap items-center gap-2">
-            <div className="relative w-full max-w-[260px]">
-              <Search
-                size={14}
-                strokeWidth={1.9}
-                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder={t`Search artifacts…`}
-                className="w-full rounded-lg border border-border bg-background py-1.5 ps-8 pe-3 text-[13px] outline-none focus:border-ring"
-              />
-            </div>
-            <NativeSelect
-              aria-label={t`Filter by date`}
-              className="w-auto text-[13px]"
-              value={dateFilter}
-              onChange={(event) => setDateFilter(event.target.value as DateFilter)}
-            >
-              <NativeSelectOption value="all">{t`All time`}</NativeSelectOption>
-              <NativeSelectOption value="today">{t`Today`}</NativeSelectOption>
-              <NativeSelectOption value="week">{t`This week`}</NativeSelectOption>
-              <NativeSelectOption value="month">{t`This month`}</NativeSelectOption>
-            </NativeSelect>
-            <FilterChip active={activeBotId === null} onClick={() => setActiveBotId(null)}>
-              <Trans>All bots</Trans>
-            </FilterChip>
-            {bots.map((bot) => (
-              <BotFilterChip
-                key={bot.id}
-                bot={bot}
-                active={activeBotId === bot.id}
-                onClick={() => setActiveBotId(bot.id)}
-              />
-            ))}
-          </div>
-        ) : null}
+  return (
+    <div className="flex h-full min-w-0 flex-col bg-background text-foreground">
+      <header className="app-drag flex items-center gap-2 border-b border-border px-4 py-3 md:px-6">
+        {/* This route is the window's leading edge, so Electron window controls sit in the header. */}
+        {desktopBridge() ? <WindowChrome /> : null}
+        <Link
+          to="/app"
+          className="app-no-drag flex shrink-0 items-center gap-0.5 rounded-lg py-1 pe-1.5 text-small font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <ChevronLeft size={16} strokeWidth={1.9} aria-hidden="true" />
+          <Trans>Bots</Trans>
+        </Link>
       </header>
 
-      <div className="flex min-h-0 flex-1 overflow-hidden">
-        {artifactId ? (
-          <>
-            {!maximized ? (
-              <IndexPane
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        {!maximized || !artifactId ? (
+          <main className="rk-scroll min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-4 pt-[18px] pb-10 md:px-7">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="min-w-[120px] flex-1 text-section font-semibold">
+                  <Trans>Artifacts</Trans>
+                </h1>
+                <div className="relative min-w-[200px] max-w-[360px] flex-1">
+                  <Search
+                    size={16}
+                    strokeWidth={1.9}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder={t`Search artifacts…`}
+                    aria-label={t`Search artifacts…`}
+                    className="h-[38px] rounded-full bg-card ps-9 pe-3.5"
+                  />
+                </div>
+                <SegmentedControl
+                  label={t`View`}
+                  value={viewMode}
+                  onChange={setMode}
+                  options={[
+                    {
+                      value: "grid",
+                      label: t`Card view`,
+                      icon: <LayoutGrid size={15} strokeWidth={1.9} />,
+                    },
+                    {
+                      value: "list",
+                      label: t`List view`,
+                      icon: <List size={15} strokeWidth={1.9} />,
+                    },
+                  ]}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <FilterChip active={activeBotId === null} onClick={() => setActiveBotId(null)}>
+                  <Trans>All bots</Trans>
+                </FilterChip>
+                {bots.map((bot) => (
+                  <FilterChip
+                    key={bot.id}
+                    active={activeBotId === bot.id}
+                    onClick={() => setActiveBotId(bot.id)}
+                    className="ps-1.5"
+                  >
+                    <BotAvatar color={bot.color} identity={bot.id} size={20} />
+                    <span className="max-w-[120px] truncate">{bot.name}</span>
+                  </FilterChip>
+                ))}
+                <span className="flex-1" />
+                <NativeSelect
+                  aria-label={t`Filter by date`}
+                  className="w-auto text-small [&>select]:rounded-full [&>select]:bg-card [&>select]:ps-3"
+                  value={dateFilter}
+                  onChange={(event) => setDateFilter(event.target.value as DateFilter)}
+                >
+                  <NativeSelectOption value="all">{t`All time`}</NativeSelectOption>
+                  <NativeSelectOption value="today">{t`Today`}</NativeSelectOption>
+                  <NativeSelectOption value="week">{t`This week`}</NativeSelectOption>
+                  <NativeSelectOption value="month">{t`This month`}</NativeSelectOption>
+                </NativeSelect>
+              </div>
+
+              <BrowsingPane
                 items={filteredItems}
                 loadError={loadError}
+                viewMode={viewMode}
                 botsById={botsById}
-                selectedId={artifactId}
-                onRequestDelete={setPendingDelete}
+                selectedId={artifactId ?? null}
                 nextCursor={nextCursor}
                 loadingMore={loadingMore}
                 onLoadMore={() => void loadMore()}
               />
-            ) : null}
-            <PreviewPane
-              key={artifactId}
-              artifactId={artifactId}
-              maximized={maximized}
-              onToggleMaximize={() => setMaximized((value) => !value)}
-            />
-          </>
-        ) : (
-          <BrowsingPane
-            items={filteredItems}
-            loadError={loadError}
-            viewMode={viewMode}
-            botsById={botsById}
+            </div>
+          </main>
+        ) : null}
+        {artifactId ? (
+          <PreviewPane
+            key={artifactId}
+            artifactId={artifactId}
+            summary={openSummary}
+            bot={openSummary?.botId ? botsById.get(openSummary.botId) : undefined}
+            maximized={maximized}
+            onToggleMaximize={() => setMaximized((value) => !value)}
             onRequestDelete={setPendingDelete}
-            nextCursor={nextCursor}
-            loadingMore={loadingMore}
-            onLoadMore={() => void loadMore()}
+            onClose={() => navigate("/app/artifacts")}
           />
-        )}
+        ) : null}
       </div>
 
       {pendingDelete ? (
@@ -365,7 +350,7 @@ export function ArtifactsPage() {
                 )}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            {deleteError ? <p className="text-[13.5px] text-destructive">{deleteError}</p> : null}
+            {deleteError ? <p className="text-small text-destructive">{deleteError}</p> : null}
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleteBusy}>
                 <Trans>Cancel</Trans>
@@ -390,7 +375,7 @@ function BrowsingPane({
   loadError,
   viewMode,
   botsById,
-  onRequestDelete,
+  selectedId,
   nextCursor,
   loadingMore,
   onLoadMore,
@@ -399,22 +384,19 @@ function BrowsingPane({
   loadError: string | null;
   viewMode: ViewMode;
   botsById: Map<string, Bot>;
-  onRequestDelete: (artifact: ArtifactSummary) => void;
+  selectedId: string | null;
   nextCursor: string | null;
   loadingMore: boolean;
   onLoadMore: () => void;
 }) {
+  const emptyClass = "py-16 text-center text-muted-foreground";
   if (items === null) {
-    return (
-      <div className="grid flex-1 place-items-center text-sm text-muted-foreground/80">
-        {loadError ?? <Trans>Loading…</Trans>}
-      </div>
-    );
+    return <div className={emptyClass}>{loadError ?? <Trans>Loading…</Trans>}</div>;
   }
   if (items.length === 0) {
     return (
       <EmptyArtifacts
-        className="grid flex-1 place-items-center text-sm text-muted-foreground/80"
+        className={emptyClass}
         nextCursor={nextCursor}
         loadingMore={loadingMore}
         onLoadMore={onLoadMore}
@@ -422,39 +404,59 @@ function BrowsingPane({
     );
   }
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+    <>
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
           {items.map((item) => (
             <ArtifactCard
               key={item.id}
               artifact={item}
               bot={item.botId ? botsById.get(item.botId) : undefined}
-              onRequestDelete={onRequestDelete}
+              selected={item.id === selectedId}
             />
           ))}
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border">
-          {items.map((item) => (
-            <ArtifactRow
-              key={item.id}
-              artifact={item}
-              bot={item.botId ? botsById.get(item.botId) : undefined}
-              onRequestDelete={onRequestDelete}
-            />
-          ))}
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <table className="w-full min-w-[560px] border-collapse">
+            <thead>
+              <tr className="text-start text-[12.5px] text-muted-foreground">
+                <th className="px-4 py-2.5 text-start font-medium">
+                  <Trans>Name</Trans>
+                </th>
+                <th className="px-2 py-2.5 text-start font-medium">
+                  <Trans>Bot</Trans>
+                </th>
+                <th className="px-2 py-2.5 text-start font-medium">
+                  <Trans>Type</Trans>
+                </th>
+                <th className="px-4 py-2.5 text-start font-medium">
+                  <Trans>Updated</Trans>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <ArtifactRow
+                  key={item.id}
+                  artifact={item}
+                  bot={item.botId ? botsById.get(item.botId) : undefined}
+                  selected={item.id === selectedId}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
       {nextCursor ? <LoadMoreButton loading={loadingMore} onClick={onLoadMore} /> : null}
-    </div>
+    </>
   );
 }
 
 function LoadMoreButton({ loading, onClick }: { loading: boolean; onClick: () => void }) {
   return (
-    <div className="mt-4 flex justify-center">
-      <Button variant="outline" size="sm" disabled={loading} onClick={onClick}>
+    <div className="flex justify-center">
+      <Button variant="outline" disabled={loading} onClick={onClick}>
         {loading ? <Trans>Loading…</Trans> : <Trans>Load more</Trans>}
       </Button>
     </div>
@@ -480,313 +482,187 @@ function EmptyArtifacts({
     );
   }
   return (
-    <div className={className}>
-      <div className="flex flex-col items-center gap-3">
-        <span>
-          {loadingMore ? (
-            <Trans>Loading…</Trans>
-          ) : (
-            <Trans>No matching artifacts on this page.</Trans>
-          )}
-        </span>
-        <LoadMoreButton loading={loadingMore} onClick={onLoadMore} />
-      </div>
+    <div className={cn(className, "flex flex-col items-center gap-3")}>
+      <span>
+        {loadingMore ? <Trans>Loading…</Trans> : <Trans>No matching artifacts on this page.</Trans>}
+      </span>
+      <LoadMoreButton loading={loadingMore} onClick={onLoadMore} />
     </div>
-  );
-}
-
-function IndexPane({
-  items,
-  loadError,
-  botsById,
-  selectedId,
-  onRequestDelete,
-  nextCursor,
-  loadingMore,
-  onLoadMore,
-}: {
-  items: ArtifactSummary[] | null;
-  loadError: string | null;
-  botsById: Map<string, Bot>;
-  selectedId: string;
-  onRequestDelete: (artifact: ArtifactSummary) => void;
-  nextCursor: string | null;
-  loadingMore: boolean;
-  onLoadMore: () => void;
-}) {
-  return (
-    <aside className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-e border-border">
-      {items === null ? (
-        <div className="grid flex-1 place-items-center p-6 text-center text-sm text-muted-foreground/80">
-          {loadError ?? <Trans>Loading…</Trans>}
-        </div>
-      ) : items.length === 0 ? (
-        <EmptyArtifacts
-          className="grid flex-1 place-items-center p-6 text-center text-sm text-muted-foreground/80"
-          nextCursor={nextCursor}
-          loadingMore={loadingMore}
-          onLoadMore={onLoadMore}
-        />
-      ) : (
-        <div className="flex flex-col divide-y divide-border">
-          {items.map((item) => (
-            <ArtifactRow
-              key={item.id}
-              artifact={item}
-              bot={item.botId ? botsById.get(item.botId) : undefined}
-              active={item.id === selectedId}
-              onRequestDelete={onRequestDelete}
-            />
-          ))}
-          {nextCursor ? (
-            <div className="p-3">
-              <LoadMoreButton loading={loadingMore} onClick={onLoadMore} />
-            </div>
-          ) : null}
-        </div>
-      )}
-    </aside>
   );
 }
 
 function FilterChip({
   active,
   onClick,
+  className,
   children,
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  className?: string;
+  children: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
-        active
-          ? "bg-primary text-primary-foreground"
-          : "border border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function useBotColorHex(bot: Bot): string {
-  return useMemo(() => {
-    const parsed = parseBotAvatar(bot.color, bot.id);
-    const effectiveId = bot.id || parsed.color || "agent";
-    return resolvePersonaColorDef(effectiveId, parsed.color).hex;
-  }, [bot.color, bot.id]);
-}
-
-function BotFilterChip({
-  bot,
-  active,
-  onClick,
-}: {
-  bot: Bot;
-  active: boolean;
-  onClick: () => void;
-}) {
-  const hex = useBotColorHex(bot);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{ backgroundColor: active ? `${hex}26` : undefined, borderColor: `${hex}66` }}
-      className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] font-medium transition-colors ${
-        active
-          ? "text-foreground"
-          : "text-muted-foreground hover:bg-accent/40 hover:text-accent-foreground"
-      }`}
-    >
-      <BotAvatar color={bot.color} identity={bot.id} size={16} status={bot.status} />
-      <span className="max-w-[120px] truncate">{bot.name}</span>
-    </button>
-  );
-}
-
-function ViewModeButton({
-  active,
-  label,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
+    <Button
+      variant="outline"
       aria-pressed={active}
-      title={label}
       onClick={onClick}
-      className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
-        active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-      }`}
+      className={cn(
+        "h-8 gap-1.5 px-3 font-normal",
+        active && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+        className,
+      )}
     >
       {children}
-    </button>
+    </Button>
+  );
+}
+
+type ArtifactKind = "doc" | "sheet" | "html" | "image";
+
+const SHEET_MIME_TYPES = new Set([
+  "text/csv",
+  "text/tab-separated-values",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]);
+
+function artifactKind(mimeType: string): ArtifactKind {
+  if (mimeType === "text/html") return "html";
+  if (isAttachmentImageMimeType(mimeType)) return "image";
+  if (SHEET_MIME_TYPES.has(mimeType)) return "sheet";
+  return "doc";
+}
+
+const previewLineClass = "h-1.5 rounded-full bg-border";
+
+/** A drawing of the file's type; cards never fetch content. */
+function ArtifactThumbnail({ mimeType }: { mimeType: string }) {
+  const kind = artifactKind(mimeType);
+  if (kind === "image") {
+    return (
+      <div className="grid w-full grid-cols-3 content-center gap-1.5 p-3.5">
+        <div className="aspect-video rounded-md bg-foreground/80" />
+        <div className="aspect-video rounded-md bg-foreground/40" />
+        <div className="aspect-video rounded-md bg-foreground/15" />
+      </div>
+    );
+  }
+  if (kind === "sheet") {
+    return (
+      <div className="m-3.5 grid flex-1 grid-cols-4 gap-px overflow-hidden rounded-md bg-border p-px shadow-raised">
+        {Array.from({ length: 16 }, (_, index) => (
+          <div key={index} className={cn("h-[18px]", index < 4 ? "bg-muted" : "bg-card")} />
+        ))}
+      </div>
+    );
+  }
+  if (kind === "html") {
+    return (
+      <div className="mx-3.5 mt-3.5 flex flex-1 flex-col overflow-hidden rounded-t-lg bg-card shadow-raised">
+        <div className="flex h-3.5 items-center gap-[3px] bg-muted ps-1.5">
+          <span className="size-[5px] rounded-full bg-border" />
+          <span className="size-[5px] rounded-full bg-border" />
+        </div>
+        <div className="flex flex-col items-center gap-1.5 p-3">
+          <div className="h-[9px] w-1/2 rounded-full bg-foreground/70" />
+          <div className={cn(previewLineClass, "w-[70%]")} />
+          <div className="mt-1 h-3.5 w-11 rounded-full bg-foreground" />
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto mt-3.5 flex w-[64%] flex-col gap-[7px] rounded-t-md bg-card p-3.5 shadow-raised">
+      <div className="h-2 w-[60%] rounded-full bg-foreground/70" />
+      <div className={previewLineClass} />
+      <div className={previewLineClass} />
+      <div className={cn(previewLineClass, "w-[80%]")} />
+      <div className={cn(previewLineClass, "w-[40%] bg-muted")} />
+      <div className={previewLineClass} />
+    </div>
   );
 }
 
 function ArtifactCard({
   artifact,
   bot,
-  onRequestDelete,
+  selected,
 }: {
   artifact: ArtifactSummary;
   bot: Bot | undefined;
-  onRequestDelete: (artifact: ArtifactSummary) => void;
+  selected: boolean;
 }) {
-  const { t } = useLingui();
   return (
-    <div className="group relative">
-      <Link
-        to={`/app/artifacts/${artifact.id}`}
-        className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 text-foreground hover:bg-accent/40"
-      >
-        <div className="flex items-start justify-between">
-          <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-accent text-accent-foreground">
-            <ArtifactMimeIcon mimeType={artifact.mimeType} />
-          </span>
-          <div className="flex items-center gap-1.5">
-            {artifact.versionCount > 1 ? (
-              <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">
-                {`v${artifact.version}`}
-              </span>
-            ) : null}
-            <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">
-              {mimeLabel(artifact.mimeType)}
-            </span>
-          </div>
-        </div>
-        <div className="min-w-0">
-          <div className="truncate text-[15px] font-semibold">{artifact.name}</div>
-          {artifact.description ? (
-            <div className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
-              {artifact.description}
-            </div>
-          ) : null}
-        </div>
-        <div className="mt-auto flex items-center gap-2 text-[12px] text-muted-foreground">
-          {bot ? (
-            <>
-              <BotAvatar color={bot.color} identity={bot.id} size={20} status={bot.status} />
-              <span className="min-w-0 flex-1 truncate">{bot.name}</span>
-            </>
-          ) : (
-            <span className="flex-1" />
-          )}
-          <span className="shrink-0">{formatRelativeTime(artifact.createdAt)}</span>
-        </div>
-      </Link>
-      <button
-        type="button"
-        aria-label={t`Delete ${artifact.name}`}
-        title={t`Delete ${artifact.name}`}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onRequestDelete(artifact);
-        }}
-        className="absolute bottom-3 end-3 grid h-7 w-7 place-items-center rounded-lg bg-card text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 group-focus-within:opacity-100"
-      >
-        <Trash2 size={14} strokeWidth={1.9} />
-      </button>
-    </div>
+    <Link
+      to={`/app/artifacts/${artifact.id}`}
+      aria-current={selected ? "page" : undefined}
+      className={cn(
+        "flex flex-col overflow-hidden rounded-[18px] border border-border bg-card text-foreground transition-[box-shadow,translate] hover:-translate-y-px hover:shadow-raised",
+        selected && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
+      )}
+    >
+      <div className="relative flex aspect-[16/10] overflow-hidden bg-muted">
+        <ArtifactThumbnail mimeType={artifact.mimeType} />
+        <span className="absolute start-2.5 top-2.5 flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          {mimeLabel(artifact.mimeType)}
+          {artifact.versionCount > 1 ? <span>{`· v${artifact.version}`}</span> : null}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1 px-3.5 py-3">
+        <span className="truncate font-medium">{artifact.name}</span>
+        <ArtifactByline bot={bot} createdAt={artifact.createdAt} />
+      </div>
+    </Link>
+  );
+}
+
+function ArtifactByline({ bot, createdAt }: { bot: Bot | undefined; createdAt: string }) {
+  return (
+    <span className="flex min-w-0 items-center gap-1.5 text-[12.5px] text-muted-foreground">
+      {bot ? (
+        <>
+          <BotAvatar color={bot.color} identity={bot.id} size={16} />
+          <span className="min-w-0 truncate">{bot.name}</span>
+          <span aria-hidden="true">·</span>
+        </>
+      ) : null}
+      <span className="shrink-0">{formatRelativeTime(createdAt)}</span>
+    </span>
   );
 }
 
 function ArtifactRow({
   artifact,
   bot,
-  active,
-  onRequestDelete,
+  selected,
 }: {
   artifact: ArtifactSummary;
   bot: Bot | undefined;
-  active?: boolean;
-  onRequestDelete: (artifact: ArtifactSummary) => void;
+  selected: boolean;
 }) {
-  const { t } = useLingui();
   return (
-    <div className={`group relative ${active ? "bg-accent/60" : "hover:bg-accent/40"}`}>
-      <Link to={`/app/artifacts/${artifact.id}`} className="flex flex-col gap-1 px-4 py-3 pe-10">
-        <div className="flex items-center gap-2">
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-[7px] bg-accent text-accent-foreground">
-            <ArtifactMimeIcon mimeType={artifact.mimeType} small />
+    <tr className={cn("border-t border-border", selected ? "bg-muted" : "hover:bg-foreground/5")}>
+      <td className="px-4">
+        <Link
+          to={`/app/artifacts/${artifact.id}`}
+          aria-current={selected ? "page" : undefined}
+          className="block py-3 font-medium"
+        >
+          {artifact.name}
+        </Link>
+      </td>
+      <td className="px-2">
+        {bot ? (
+          <span className="inline-flex items-center gap-1.5">
+            <BotAvatar color={bot.color} identity={bot.id} size={18} />
+            {bot.name}
           </span>
-          <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium">{artifact.name}</span>
-          {artifact.versionCount > 1 ? (
-            <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
-              {`v${artifact.version}`}
-            </span>
-          ) : null}
-        </div>
-        {artifact.description ? (
-          <div className="ps-8 text-[12.5px] leading-snug text-muted-foreground">
-            {artifact.description}
-          </div>
         ) : null}
-        <div className="flex items-center gap-1.5 ps-8 text-[11.5px] text-muted-foreground">
-          {bot ? (
-            <>
-              <BotAvatar color={bot.color} identity={bot.id} size={14} status={bot.status} />
-              <span className="max-w-[140px] truncate">{bot.name}</span>
-              <span aria-hidden="true">·</span>
-            </>
-          ) : null}
-          <span>{formatRelativeTime(artifact.createdAt)}</span>
-        </div>
-      </Link>
-      <button
-        type="button"
-        aria-label={t`Delete ${artifact.name}`}
-        title={t`Delete ${artifact.name}`}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onRequestDelete(artifact);
-        }}
-        className="absolute end-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 group-focus-within:opacity-100"
-      >
-        <Trash2 size={14} strokeWidth={1.9} />
-      </button>
-    </div>
-  );
-}
-
-function ArtifactMimeIcon({ mimeType, small }: { mimeType: string; small?: boolean }) {
-  const size = small ? 12 : 16;
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {mimeType === "text/html" ? (
-        <>
-          <polyline points="8 6 2 12 8 18" />
-          <polyline points="16 6 22 12 16 18" />
-        </>
-      ) : (
-        <>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-        </>
-      )}
-    </svg>
+      </td>
+      <td className="px-2 text-muted-foreground">{mimeLabel(artifact.mimeType)}</td>
+      <td className="px-4 text-muted-foreground">{formatRelativeTime(artifact.createdAt)}</td>
+    </tr>
   );
 }
 
@@ -800,12 +676,20 @@ function mimeLabel(mimeType: string): string {
 
 function PreviewPane({
   artifactId,
+  summary,
+  bot,
   maximized,
   onToggleMaximize,
+  onRequestDelete,
+  onClose,
 }: {
   artifactId: string;
+  summary: ArtifactSummary | null;
+  bot: Bot | undefined;
   maximized: boolean;
   onToggleMaximize: () => void;
+  onRequestDelete: (artifact: ArtifactSummary) => void;
+  onClose: () => void;
 }) {
   const { t } = useLingui();
   const [versions, setVersions] = useState<ArtifactVersion[] | null>(null);
@@ -863,23 +747,26 @@ function PreviewPane({
     };
   }, [selectedVersionId, t]);
 
+  const ready = state.status === "ready" ? state : null;
+  const name = ready?.artifact.name ?? summary?.name ?? null;
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex items-center gap-3 border-b border-border px-6 py-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-[16px] font-semibold">
-            {state.status === "ready" ? state.artifact.name : t`Loading…`}
-          </h2>
-          {state.status === "ready" && state.artifact.description ? (
-            <p className="truncate text-[12.5px] text-muted-foreground">
-              {state.artifact.description}
-            </p>
-          ) : null}
+    <aside
+      aria-label={name ?? undefined}
+      className={cn(
+        "flex min-w-0 flex-col bg-card max-md:absolute max-md:inset-0 max-md:z-10",
+        maximized ? "flex-1" : "md:w-[min(560px,55%)] md:flex-none md:border-s md:border-border",
+      )}
+    >
+      <header className="flex items-center gap-1.5 border-b border-border py-3 ps-[18px] pe-3">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <h2 className="truncate font-semibold">{name ?? t`Loading…`}</h2>
+          {ready ? <ArtifactByline bot={bot} createdAt={ready.artifact.createdAt} /> : null}
         </div>
         {versions && versions.length > 1 && selectedVersionId ? (
           <NativeSelect
             aria-label={t`Version`}
-            className="w-auto shrink-0 text-[13px]"
+            className="w-auto shrink-0 text-small [&>select]:rounded-full [&>select]:ps-3"
             value={selectedVersionId}
             onChange={(event) => setSelectedVersionId(event.target.value)}
           >
@@ -890,49 +777,75 @@ function PreviewPane({
             ))}
           </NativeSelect>
         ) : null}
-        {state.status === "ready" ? (
+        {ready ? (
           <>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon"
+              aria-label={t`Download`}
+              title={t`Download`}
               onClick={() =>
-                downloadArtifactBytes(state.artifact.name, state.artifact.mimeType, state.bytes)
+                downloadArtifactBytes(ready.artifact.name, ready.artifact.mimeType, ready.bytes)
               }
             >
-              <Download className="me-1.5" size={15} strokeWidth={1.9} />
-              <Trans>Download</Trans>
+              <Download size={16} strokeWidth={1.9} />
             </Button>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label={maximized ? t`Show list` : t`Maximize`}
               title={maximized ? t`Show list` : t`Maximize`}
               onClick={onToggleMaximize}
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border text-muted-foreground hover:bg-accent"
+              className="max-md:hidden"
             >
               {maximized ? (
-                <Minimize2 size={15} strokeWidth={1.9} />
+                <Minimize2 size={16} strokeWidth={1.9} />
               ) : (
-                <Maximize2 size={15} strokeWidth={1.9} />
+                <Maximize2 size={16} strokeWidth={1.9} />
               )}
-            </button>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t`Delete ${ready.artifact.name}`}
+              title={t`Delete ${ready.artifact.name}`}
+              onClick={() =>
+                onRequestDelete(
+                  summary ?? { ...ready.artifact, versionCount: versions?.length ?? 1 },
+                )
+              }
+            >
+              <Trash2 size={16} strokeWidth={1.9} />
+            </Button>
           </>
         ) : null}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t`Close`}
+          title={t`Close`}
+          onClick={onClose}
+        >
+          <X size={16} strokeWidth={1.9} />
+        </Button>
       </header>
 
-      <div className="min-h-0 flex-1 p-5">
+      <div className="min-h-0 flex-1 bg-background p-5">
         {state.status === "loading" ? (
-          <div className="grid h-full place-items-center text-sm text-muted-foreground/80">
-            <Trans>Loading…</Trans>
+          <div className="grid h-full place-items-center">
+            <Shimmer>
+              <Trans>Loading…</Trans>
+            </Shimmer>
           </div>
         ) : state.status === "error" ? (
-          <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-destructive">
+          <div className="rounded-xl bg-destructive-surface px-4 py-3 text-destructive">
             {state.message}
           </div>
         ) : (
-          <div className="relative h-full overflow-hidden rounded-2xl border border-border">
+          <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card">
             <ArtifactPreview artifact={state.artifact} bytes={state.bytes} />
             {state.artifact.mimeType === "text/html" ? (
-              <div className="absolute bottom-3 end-3 flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1.5 text-[11px] text-white">
+              <div className="absolute bottom-3 end-3 flex items-center gap-1.5 rounded-full bg-foreground/80 px-2.5 py-1.5 text-[11px] text-background">
                 <Lock size={12} strokeWidth={2} />
                 <span>
                   <Trans>Isolated preview — no access to your account</Trans>
@@ -942,7 +855,7 @@ function PreviewPane({
           </div>
         )}
       </div>
-    </div>
+    </aside>
   );
 }
 

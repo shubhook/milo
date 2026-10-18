@@ -28,7 +28,7 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await artifactsItem.click();
   await expect(page).toHaveURL(/\/app\/artifacts$/);
   await expect(page.getByRole("heading", { name: "Artifacts", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Filters" })).toBeVisible();
+  await expect(page.getByRole("searchbox", { name: "Search artifacts…" })).toBeVisible();
   await expect(page.getByText("No artifacts found.")).toBeVisible();
   await captureScreenshot(page, testInfo, "artifacts-empty");
 
@@ -62,6 +62,12 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await expect(page.getByRole("heading", { name: "notes/artifacts-tab.md" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Artifacts tab" })).toBeVisible();
   await captureScreenshot(page, testInfo, "artifacts-preview");
+
+  await page.getByRole("button", { name: "List view" }).click();
+  await expect(page.getByRole("columnheader", { name: "Updated" })).toBeVisible();
+  await captureScreenshot(page, testInfo, "artifacts-list-view");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/artifacts$/);
 
   await page.getByRole("link", { name: "Bots" }).click();
   await expect(page).toHaveURL(/\/app\/(?!artifacts(?:\/|$))[^/]+$/);
