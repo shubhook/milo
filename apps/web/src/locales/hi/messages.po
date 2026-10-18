@@ -653,11 +653,12 @@ msgstr "सर्वर तक नहीं पहुंचा जा सका�
 #: src/pages/OnboardingAgent.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Cancel"
 msgstr "रद्द करें"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Cancel new bot"
 msgstr "नया बॉट रद्द करें"
 
@@ -741,7 +742,7 @@ msgstr "फ़ाइल चुनें"
 msgid "Choose which connected model Milo uses."
 msgstr "चुनें कि Milo किस कनेक्टेड मॉडल का उपयोग करे।"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Circle"
 msgstr ""
 
@@ -846,11 +847,13 @@ msgstr "कोड"
 msgid "Collapse {0}"
 msgstr ""
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Color"
 msgstr "रंग"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Color {color}"
 msgstr "रंग {color}"
 
@@ -869,6 +872,7 @@ msgstr "पूर्ण"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "कंप्यूटर"
 
@@ -1090,7 +1094,7 @@ msgstr ""
 msgid "Could not continue"
 msgstr "जारी नहीं रखा जा सका"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Could not create bot"
 msgstr "बॉट नहीं बनाया जा सका"
 
@@ -1419,7 +1423,7 @@ msgid "Couldn't update avatars"
 msgstr ""
 
 #: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Create"
 msgstr "बनाएं"
@@ -1468,7 +1472,7 @@ msgid "Created"
 msgstr ""
 
 #: src/pages/GroupPanel.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Creating…"
 msgstr "बनाया जा रहा है…"
@@ -1608,13 +1612,17 @@ msgstr "अस्वीकार करें"
 msgid "Deployment default"
 msgstr "डिप्लॉयमेंट डिफ़ॉल्ट"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Describe what this bot does"
 msgstr "बताएं कि यह बॉट क्या करता है"
 
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
 msgstr "विवरण"
+
+#: src/lib/create-bot-starters.ts
+msgid "Design"
+msgstr "डिज़ाइन"
 
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop app"
@@ -1678,7 +1686,7 @@ msgstr "Docker"
 msgid "Docker limits access to your computer for added security. Using {hostLabel} lets bots work with your local files and tools."
 msgstr "Docker अतिरिक्त सुरक्षा के लिए आपके कंप्यूटर तक पहुँच सीमित करता है। {hostLabel} चुनने पर बॉट्स आपकी स्थानीय फ़ाइलों और टूल्स के साथ काम कर सकते हैं।"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Dome"
 msgstr ""
 
@@ -1813,6 +1821,10 @@ msgstr "विस्तृत करें"
 msgid "Expand {0}"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Expenses"
+msgstr "खर्च"
+
 #: src/pages/shell/bot-panel.tsx
 msgid "Export"
 msgstr "एक्सपोर्ट करें"
@@ -1854,6 +1866,10 @@ msgstr "विफलता प्रबंधन"
 #: src/components/computer/FilesApp.tsx
 msgid "File is too large to upload."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "File receipts from Gmail into my expenses sheet every Friday."
+msgstr "हर शुक्रवार Gmail की रसीदें मेरी खर्च शीट में दर्ज करें।"
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Files"
@@ -2032,9 +2048,17 @@ msgstr "OpenAPI JSON इम्पोर्ट करें"
 msgid "In use"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Inbox"
+msgstr "इनबॉक्स"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Inbox & email"
 msgstr ""
+
+#: src/pages/shell/create-bot-dialog.tsx
+msgid "Inbox, Research…"
+msgstr "इनबॉक्स, रिसर्च…"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
@@ -2211,6 +2235,10 @@ msgstr ""
 msgid "Log out"
 msgstr "लॉग आउट"
 
+#: src/lib/create-bot-starters.ts
+msgid "Look things up across the web and come back with a short answer and sources."
+msgstr "वेब पर खोजें और छोटे जवाब व स्रोतों के साथ लौटें।"
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Low"
 msgstr "निम्न"
@@ -2223,6 +2251,10 @@ msgstr ""
 #: src/pages/shell/bot-credentials.tsx
 msgid "Lowercase letters, numbers, hyphens and underscores, starting with a letter."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "Make images, slides and mockups from a short brief."
+msgstr "छोटे ब्रीफ़ से इमेज, स्लाइड और मॉकअप बनाएँ।"
 
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Make sure nothing is still running on this computer."
@@ -2429,11 +2461,12 @@ msgstr "म्यूट करें"
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Name"
 msgstr "नाम"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Name this bot"
 msgstr "इस बॉट को नाम दें"
 
@@ -2457,7 +2490,7 @@ msgstr "नियंत्रण लेना ज़रूरी"
 msgid "Needs you"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"
 msgstr "नया बॉट"
 
@@ -2799,6 +2832,7 @@ msgid "Preview isn't available for this file type — download it to view it."
 msgstr ""
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Private"
 msgstr "निजी"
 
@@ -3028,6 +3062,10 @@ msgstr "{replyName} को उत्तर दे रहे हैं"
 msgid "Replying to {replyName}: “{replyQuote}”"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Research"
+msgstr "रिसर्च"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Research & writing"
 msgstr ""
@@ -3107,7 +3145,7 @@ msgstr ""
 msgid "Rotate key"
 msgstr ""
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Rounded square"
 msgstr ""
 
@@ -3311,7 +3349,9 @@ msgstr "सेटिंग्स: उपयोग"
 msgid "Setup help"
 msgstr "सेटअप सहायता"
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Shape"
 msgstr "आकार"
 
@@ -3541,6 +3581,7 @@ msgid "Teaching in progress. Stop teaching before sending a new message."
 msgstr "सिखाना जारी है। नया संदेश भेजने से पहले सिखाना रोकें।"
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Team"
 msgstr "टीम"
 
@@ -3650,7 +3691,7 @@ msgstr "यह सब्सक्रिप्शन साइन-इन अभ�
 msgid "This week"
 msgstr ""
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Tile"
 msgstr ""
 
@@ -3659,6 +3700,7 @@ msgid "Time of day"
 msgstr "दिन का समय"
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Title"
 msgstr "शीर्षक"
 
@@ -3685,6 +3727,10 @@ msgstr "ट्रांसक्रिप्ट"
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg टोकन"
+
+#: src/lib/create-bot-starters.ts
+msgid "Triage my email, draft replies and ask before sending."
+msgstr "मेरे ईमेल छाँटें, जवाब का ड्राफ़्ट बनाएँ और भेजने से पहले पूछें।"
 
 #: src/pages/Onboarding.tsx
 msgid "Try again"
@@ -3904,7 +3950,7 @@ msgstr ""
 msgid "What should we call you?"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "What this bot is for"
 msgstr "यह बॉट किस लिए है"
 

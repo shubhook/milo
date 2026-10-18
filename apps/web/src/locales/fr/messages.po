@@ -653,11 +653,12 @@ msgstr "Impossible d'atteindre le serveur."
 #: src/pages/OnboardingAgent.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Cancel new bot"
 msgstr "Annuler le nouveau bot"
 
@@ -741,7 +742,7 @@ msgstr "Choisir un fichier"
 msgid "Choose which connected model Milo uses."
 msgstr "Choisissez le modèle connecté utilisé par Milo."
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Circle"
 msgstr ""
 
@@ -846,11 +847,13 @@ msgstr "Code"
 msgid "Collapse {0}"
 msgstr "Réduire {0}"
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Color"
 msgstr "Couleur"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Color {color}"
 msgstr "Couleur {color}"
 
@@ -869,6 +872,7 @@ msgstr "Terminé"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "Ordinateur"
 
@@ -1090,7 +1094,7 @@ msgstr "Impossible de se connecter à l'écran de l'ordinateur"
 msgid "Could not continue"
 msgstr "Impossible de continuer"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Could not create bot"
 msgstr "Impossible de créer le bot"
 
@@ -1419,7 +1423,7 @@ msgid "Couldn't update avatars"
 msgstr "Impossible de mettre à jour les avatars"
 
 #: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Create"
 msgstr "Créer"
@@ -1468,7 +1472,7 @@ msgid "Created"
 msgstr "Créé"
 
 #: src/pages/GroupPanel.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Creating…"
 msgstr "Création en cours…"
@@ -1608,13 +1612,17 @@ msgstr "Refuser"
 msgid "Deployment default"
 msgstr "Défaut du déploiement"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Describe what this bot does"
 msgstr "Décrivez ce que fait ce bot"
 
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
 msgstr "Description"
+
+#: src/lib/create-bot-starters.ts
+msgid "Design"
+msgstr "Design"
 
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop app"
@@ -1678,7 +1686,7 @@ msgstr "Docker"
 msgid "Docker limits access to your computer for added security. Using {hostLabel} lets bots work with your local files and tools."
 msgstr "Docker limite l'accès à votre ordinateur pour une sécurité renforcée. Utiliser {hostLabel} permet aux bots de travailler avec vos fichiers et outils locaux."
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Dome"
 msgstr ""
 
@@ -1813,6 +1821,10 @@ msgstr "Développer"
 msgid "Expand {0}"
 msgstr "Développer {0}"
 
+#: src/lib/create-bot-starters.ts
+msgid "Expenses"
+msgstr "Dépenses"
+
 #: src/pages/shell/bot-panel.tsx
 msgid "Export"
 msgstr "Exporter"
@@ -1854,6 +1866,10 @@ msgstr "Gestion des échecs"
 #: src/components/computer/FilesApp.tsx
 msgid "File is too large to upload."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "File receipts from Gmail into my expenses sheet every Friday."
+msgstr "Classer chaque vendredi les reçus de Gmail dans ma feuille de dépenses."
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Files"
@@ -2032,9 +2048,17 @@ msgstr "Importer OpenAPI JSON"
 msgid "In use"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Inbox"
+msgstr "Boîte de réception"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Inbox & email"
 msgstr "Boîte de réception et e-mail"
+
+#: src/pages/shell/create-bot-dialog.tsx
+msgid "Inbox, Research…"
+msgstr "Boîte de réception, Recherche…"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
@@ -2211,6 +2235,10 @@ msgstr "Paramètres du serveur local"
 msgid "Log out"
 msgstr "Se déconnecter"
 
+#: src/lib/create-bot-starters.ts
+msgid "Look things up across the web and come back with a short answer and sources."
+msgstr "Chercher sur le web et revenir avec une réponse courte et des sources."
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Low"
 msgstr "Faible"
@@ -2223,6 +2251,10 @@ msgstr ""
 #: src/pages/shell/bot-credentials.tsx
 msgid "Lowercase letters, numbers, hyphens and underscores, starting with a letter."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "Make images, slides and mockups from a short brief."
+msgstr "Créer des images, des diapositives et des maquettes à partir d’un brief court."
 
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Make sure nothing is still running on this computer."
@@ -2429,11 +2461,12 @@ msgstr "Couper le micro"
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Name"
 msgstr "Nom"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Name this bot"
 msgstr "Nommez ce bot"
 
@@ -2457,7 +2490,7 @@ msgstr "Nécessite une intervention"
 msgid "Needs you"
 msgstr "A besoin de vous"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"
 msgstr "Nouveau bot"
 
@@ -2799,6 +2832,7 @@ msgid "Preview isn't available for this file type — download it to view it."
 msgstr "L'aperçu n'est pas disponible pour ce type de fichier — téléchargez-le pour le consulter."
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Private"
 msgstr "Privé"
 
@@ -3028,6 +3062,10 @@ msgstr "Réponse à {replyName}"
 msgid "Replying to {replyName}: “{replyQuote}”"
 msgstr "Réponse à {replyName} : « {replyQuote} »"
 
+#: src/lib/create-bot-starters.ts
+msgid "Research"
+msgstr "Recherche"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Research & writing"
 msgstr "Recherche et rédaction"
@@ -3107,7 +3145,7 @@ msgstr "Robot"
 msgid "Rotate key"
 msgstr "Tourner la clé"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Rounded square"
 msgstr ""
 
@@ -3311,7 +3349,9 @@ msgstr "Paramètres : Utilisation"
 msgid "Setup help"
 msgstr "Aide à la configuration"
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Shape"
 msgstr "Forme"
 
@@ -3541,6 +3581,7 @@ msgid "Teaching in progress. Stop teaching before sending a new message."
 msgstr "Enseignement en cours. Arrêtez l'enseignement avant d'envoyer un nouveau message."
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Team"
 msgstr "Équipe"
 
@@ -3650,7 +3691,7 @@ msgstr "Cette connexion par abonnement n'est pas encore disponible dans Milo. Ut
 msgid "This week"
 msgstr "Cette semaine"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Tile"
 msgstr ""
 
@@ -3659,6 +3700,7 @@ msgid "Time of day"
 msgstr "Heure de la journée"
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Title"
 msgstr "Titre"
 
@@ -3685,6 +3727,10 @@ msgstr "Transcription"
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Jeton Treg"
+
+#: src/lib/create-bot-starters.ts
+msgid "Triage my email, draft replies and ask before sending."
+msgstr "Trier mes e-mails, rédiger des réponses et demander avant d’envoyer."
 
 #: src/pages/Onboarding.tsx
 msgid "Try again"
@@ -3904,7 +3950,7 @@ msgstr "Que devrait faire cette routine à chaque exécution ?"
 msgid "What should we call you?"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "What this bot is for"
 msgstr "À quoi sert ce bot"
 

@@ -6,7 +6,6 @@ import type {
   AgentSkillCatalogEntry,
   Bot,
   BotSection,
-  ComputerMode,
   ComputerReleaseReason,
   ComputerStatus,
   Connection,
@@ -252,9 +251,10 @@ import {
 } from "./RoutineEditor";
 import type { SettingsSection } from "./SettingsOverlay";
 import { SpaceSearchResults } from "./SpaceSearch";
-import { BotSettings, CreateBotForm } from "./shell/bot-panel";
+import { BotSettings } from "./shell/bot-panel";
 import { BotCreatePicker } from "./shell/bot-picker";
 import { CommandPalette, isCommandPaletteHotkey } from "./shell/command-palette";
+import { CreateBotDialog, type CreateBotInputDraft } from "./shell/create-bot-dialog";
 import {
   ClearConversationDialog,
   DeleteBotDialog,
@@ -2332,16 +2332,12 @@ export function ShellPage() {
     setSettingsOpen(true);
   }
 
-  async function createBot(input: {
-    name: string;
-    title: string;
-    description: string;
-    computerMode: ComputerMode;
-  }) {
+  async function createBot(input: CreateBotInputDraft) {
     const isFirstBot = botsRef.current.length === 0;
     const bot = await rpc.bots.create({
       ...normalizeCreateBotProfile(input),
       notifyOnFinish: true,
+      color: input.color,
       computerMode: input.computerMode,
     });
     setBots((current) =>
@@ -3717,17 +3713,22 @@ export function ShellPage() {
 
       <CallCard onSettings={() => openSettings("voice")} />
 
+      {panel === "create" ? (
+        <CreateBotDialog
+          open
+          onCancel={() => setPanel(null)}
+          onCreate={(input) => createBot(input)}
+        />
+      ) : null}
+
       <ResizableSidePanel
         botsSidebarCollapsed={botsSidebarCollapsed}
-        open={Boolean(panel && (active || activeGroup || panel === "create"))}
-        panel={panel ?? "closed"}
+        open={Boolean(panel && panel !== "create" && (active || activeGroup))}
+        panel={panel && panel !== "create" ? panel : "closed"}
       >
-        {panel && (active || activeGroup || panel === "create") ? (
+        {panel && panel !== "create" && (active || activeGroup) ? (
           <div className="rk-scroll h-full w-full overflow-y-auto px-5 py-[17px]">
-            {panel !== "routine" &&
-            panel !== "create" &&
-            panel !== "create-group" &&
-            panel !== "group-settings" ? (
+            {panel !== "routine" && panel !== "create-group" && panel !== "group-settings" ? (
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-[13.5px] text-muted-foreground">
                   {panel === "settings" ? (
@@ -3886,12 +3887,6 @@ export function ShellPage() {
                   navigate(firstThreadRoute(bots, remainingGroups), { replace: true });
                   await refreshBots().catch(() => undefined);
                 }}
-              />
-            ) : null}
-            {panel === "create" ? (
-              <CreateBotForm
-                onCancel={() => setPanel(null)}
-                onCreate={(input) => createBot(input)}
               />
             ) : null}
             {panel === "settings" && active ? (

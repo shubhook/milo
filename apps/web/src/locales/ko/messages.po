@@ -653,11 +653,12 @@ msgstr "서버에 연결할 수 없습니다."
 #: src/pages/OnboardingAgent.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/shell/bot-credentials.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Cancel"
 msgstr "취소"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Cancel new bot"
 msgstr "새 Bot 만들기 취소"
 
@@ -741,7 +742,7 @@ msgstr "파일 선택"
 msgid "Choose which connected model Milo uses."
 msgstr "Milo에서 기본으로 사용할 연결된 모델을 선택하세요."
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Circle"
 msgstr ""
 
@@ -846,11 +847,13 @@ msgstr "코드"
 msgid "Collapse {0}"
 msgstr "{0} 접기"
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Color"
 msgstr "색상"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Color {color}"
 msgstr "색상 {color}"
 
@@ -869,6 +872,7 @@ msgstr "완료"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "컴퓨터"
 
@@ -1090,7 +1094,7 @@ msgstr ""
 msgid "Could not continue"
 msgstr "계속 진행하지 못했습니다."
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Could not create bot"
 msgstr "Bot을 만들지 못했습니다."
 
@@ -1419,7 +1423,7 @@ msgid "Couldn't update avatars"
 msgstr "아바타를 업데이트할 수 없습니다"
 
 #: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Create"
 msgstr "만들기"
@@ -1468,7 +1472,7 @@ msgid "Created"
 msgstr "생성됨"
 
 #: src/pages/GroupPanel.tsx
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Creating…"
 msgstr "만드는 중…"
@@ -1608,13 +1612,17 @@ msgstr "거부"
 msgid "Deployment default"
 msgstr "서버 기본값"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Describe what this bot does"
 msgstr "이 Bot이 하는 일을 짧게 설명하세요"
 
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
 msgstr "설명"
+
+#: src/lib/create-bot-starters.ts
+msgid "Design"
+msgstr "디자인"
 
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop app"
@@ -1678,7 +1686,7 @@ msgstr "Docker"
 msgid "Docker limits access to your computer for added security. Using {hostLabel} lets bots work with your local files and tools."
 msgstr "Docker는 보안을 위해 컴퓨터 접근을 제한합니다. {hostLabel}에서는 Bot이 로컬 파일과 도구로 작업할 수 있습니다."
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Dome"
 msgstr ""
 
@@ -1813,6 +1821,10 @@ msgstr "펼치기"
 msgid "Expand {0}"
 msgstr "{0} 펼치기"
 
+#: src/lib/create-bot-starters.ts
+msgid "Expenses"
+msgstr "지출"
+
 #: src/pages/shell/bot-panel.tsx
 msgid "Export"
 msgstr "내보내기"
@@ -1854,6 +1866,10 @@ msgstr "실패했을 때 처리"
 #: src/components/computer/FilesApp.tsx
 msgid "File is too large to upload."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "File receipts from Gmail into my expenses sheet every Friday."
+msgstr "매주 금요일 Gmail의 영수증을 지출 시트에 정리합니다."
 
 #: src/components/computer/ComputerWorkspace.tsx
 msgid "Files"
@@ -2032,9 +2048,17 @@ msgstr "OpenAPI JSON 가져오기"
 msgid "In use"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Inbox"
+msgstr "받은편지함"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Inbox & email"
 msgstr ""
+
+#: src/pages/shell/create-bot-dialog.tsx
+msgid "Inbox, Research…"
+msgstr "받은편지함, 리서치…"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Inputs"
@@ -2211,6 +2235,10 @@ msgstr ""
 msgid "Log out"
 msgstr "로그아웃"
 
+#: src/lib/create-bot-starters.ts
+msgid "Look things up across the web and come back with a short answer and sources."
+msgstr "웹에서 찾아보고 짧은 답과 출처를 가져옵니다."
+
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Low"
 msgstr "낮음"
@@ -2223,6 +2251,10 @@ msgstr ""
 #: src/pages/shell/bot-credentials.tsx
 msgid "Lowercase letters, numbers, hyphens and underscores, starting with a letter."
 msgstr ""
+
+#: src/lib/create-bot-starters.ts
+msgid "Make images, slides and mockups from a short brief."
+msgstr "짧은 요청으로 이미지, 슬라이드, 목업을 만듭니다."
 
 #: src/components/ComputerUpdateProgress.tsx
 msgid "Make sure nothing is still running on this computer."
@@ -2429,11 +2461,12 @@ msgstr "음소거"
 #: src/pages/RoutineEditor.tsx
 #: src/pages/shell/bot-credentials.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 #: src/pages/shell/dialogs.tsx
 msgid "Name"
 msgstr "이름"
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Name this bot"
 msgstr "Bot 이름"
 
@@ -2457,7 +2490,7 @@ msgstr "인수 필요"
 msgid "Needs you"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"
 msgstr "새 Bot 만들기"
 
@@ -2799,6 +2832,7 @@ msgid "Preview isn't available for this file type — download it to view it."
 msgstr ""
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Private"
 msgstr "Bot 전용"
 
@@ -3028,6 +3062,10 @@ msgstr "{replyName}에게 답장"
 msgid "Replying to {replyName}: “{replyQuote}”"
 msgstr ""
 
+#: src/lib/create-bot-starters.ts
+msgid "Research"
+msgstr "리서치"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Research & writing"
 msgstr ""
@@ -3107,7 +3145,7 @@ msgstr "로봇"
 msgid "Rotate key"
 msgstr "key 교체"
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Rounded square"
 msgstr ""
 
@@ -3311,7 +3349,9 @@ msgstr "설정: 사용량"
 msgid "Setup help"
 msgstr "설정 도움말"
 
+#: src/components/BotAvatarChoices.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Shape"
 msgstr "모양"
 
@@ -3541,6 +3581,7 @@ msgid "Teaching in progress. Stop teaching before sending a new message."
 msgstr "작업을 가르치는 중입니다. 새 메시지를 보내려면 먼저 가르치기를 종료하세요."
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Team"
 msgstr "팀 공용"
 
@@ -3650,7 +3691,7 @@ msgstr "이 구독 로그인 방식은 아직 Milo에서 지원되지 않습니�
 msgid "This week"
 msgstr ""
 
-#: src/pages/shell/avatar-studio-popover.tsx
+#: src/components/BotAvatarChoices.tsx
 msgid "Tile"
 msgstr ""
 
@@ -3659,6 +3700,7 @@ msgid "Time of day"
 msgstr "실행 시각"
 
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "Title"
 msgstr "역할"
 
@@ -3685,6 +3727,10 @@ msgstr "대화 기록"
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg 토큰"
+
+#: src/lib/create-bot-starters.ts
+msgid "Triage my email, draft replies and ask before sending."
+msgstr "이메일을 분류하고 답장 초안을 쓰고 보내기 전에 물어봅니다."
 
 #: src/pages/Onboarding.tsx
 msgid "Try again"
@@ -3904,7 +3950,7 @@ msgstr "이 루틴이 실행될 때마다 무엇을 해야 하나요?"
 msgid "What should we call you?"
 msgstr ""
 
-#: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/create-bot-dialog.tsx
 msgid "What this bot is for"
 msgstr "이 Bot을 언제, 어떤 일에 사용할지 적어주세요"
 

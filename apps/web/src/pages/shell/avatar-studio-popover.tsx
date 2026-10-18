@@ -3,7 +3,6 @@ import { Trans } from "@lingui/react/macro";
 import { botAvatarShapeIndexForIdentity } from "@milo/core";
 import {
   BotAvatar,
-  BotAvatarShapePicker,
   DEFAULT_GROK_BOT_COLOR,
   Dialog,
   DialogContent,
@@ -11,11 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  GROK_BOT_COLORS,
   parseBotAvatar,
 } from "@milo/ui-web";
 import { Check, Pencil, Upload, X } from "lucide-react";
 import { type ClipboardEvent, type DragEvent, useRef, useState } from "react";
+import { BotColorChoices, BotShapeChoices } from "../../components/BotAvatarChoices";
 
 export interface AvatarStudioPopoverProps {
   value: string;
@@ -195,45 +194,21 @@ export function AvatarStudioPopover({
                 <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
                   <Trans>Shape</Trans>
                 </div>
-                <div className="grid grid-cols-4 place-items-center gap-2">
-                  {botAvatarShapeLabels().map((label, shapeIndex) => (
-                    <BotAvatarShapePicker
-                      key={label}
-                      shapeIndex={shapeIndex}
-                      label={label}
-                      color={currentColor}
-                      selected={!parsed.isImage && currentShape === shapeIndex}
-                      onClick={() => selectShape(shapeIndex)}
-                    />
-                  ))}
-                </div>
+                <BotShapeChoices
+                  color={currentColor}
+                  value={parsed.isImage ? null : currentShape}
+                  onChange={selectShape}
+                />
               </div>
 
               <div className="border-t border-border pt-2">
                 <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
                   <Trans>Color</Trans>
                 </div>
-                <div className="grid grid-cols-6 place-items-center gap-2">
-                  {GROK_BOT_COLORS.map((color) => {
-                    const selected =
-                      currentColor.toLowerCase() === color.toLowerCase() && !parsed.isImage;
-                    return (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => selectColor(color)}
-                        aria-label={t`Color ${color}`}
-                        aria-pressed={selected}
-                        className={`size-6 rounded-full border transition-transform hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring ${
-                          selected
-                            ? "scale-105 border-transparent ring-2 ring-foreground ring-offset-2 ring-offset-popover"
-                            : "border-border"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    );
-                  })}
-                </div>
+                <BotColorChoices
+                  value={parsed.isImage ? null : currentColor}
+                  onChange={selectColor}
+                />
               </div>
             </div>
           ) : (
@@ -290,9 +265,4 @@ export function AvatarStudioPopover({
       </Dialog>
     </>
   );
-}
-
-/** Accessible names for the four shapes, in `BOT_AVATAR_SHAPES` order. */
-export function botAvatarShapeLabels(): string[] {
-  return [t`Circle`, t`Rounded square`, t`Dome`, t`Tile`];
 }
