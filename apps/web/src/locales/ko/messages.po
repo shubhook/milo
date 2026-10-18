@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr ""
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "작업 실행 전 확인"
+msgid "Act"
+msgstr "실행"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "승인"
 msgid "Approval boundaries"
 msgstr "승인이 필요한 범위"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "승인"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "승인"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "결제 동작 전에 확인"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "결제하기 전에 확인"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "외부 이메일을 보내기 전에 확인"
+msgid "Ask first"
+msgstr "먼저 묻기"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "수정 후 보내기"
 msgid "Edit Profile"
 msgstr "Bot 정보 수정"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "이메일"
@@ -2222,10 +2223,6 @@ msgstr "모델 목록을 불러오는 중…"
 msgid "Loading preview…"
 msgstr "미리보기를 불러오는 중…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "확인 규칙을 불러오는 중…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr ""
@@ -2437,6 +2434,7 @@ msgstr "모델이 변경되었습니다."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "AI 모델"
 
@@ -2559,6 +2557,7 @@ msgstr "인증 없음"
 msgid "No bot activity yet."
 msgstr "아직 봇 활동이 없습니다."
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr ""
@@ -2660,6 +2659,7 @@ msgstr "실행 중인 작업 없음"
 msgid "Nothing remembered yet"
 msgstr "아직 기억한 내용이 없습니다"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "알림"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "서비스"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "구매"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "업데이트 중…"
 msgid "Upload"
 msgstr "업로드"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "사용량"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "보기"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "채팅 보기"

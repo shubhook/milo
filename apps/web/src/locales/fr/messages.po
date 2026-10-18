@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr "Comptes"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "Confirmations d'action"
+msgid "Act"
+msgstr "Agir"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "Approbation"
 msgid "Approval boundaries"
 msgstr "Limites d'approbation"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "Approbations"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Approuver"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "Demander avant les actions d'achat"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "Demander avant les achats"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "Demander avant d'envoyer un e-mail externe"
+msgid "Ask first"
+msgstr "Demander d’abord"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "Modifier d'abord"
 msgid "Edit Profile"
 msgstr "Modifier le profil"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "E-mail"
@@ -2222,10 +2223,6 @@ msgstr "Chargement du catalogue de modèles…"
 msgid "Loading preview…"
 msgstr "Chargement de l'aperçu…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "Chargement des règles…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr "Chargement des outils…"
@@ -2437,6 +2434,7 @@ msgstr "Modèle mis à jour."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "Modèles"
 
@@ -2559,6 +2557,7 @@ msgstr "Aucune authentification"
 msgid "No bot activity yet."
 msgstr "Aucune activité du bot pour le moment."
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr "Aucun bot"
@@ -2660,6 +2659,7 @@ msgstr "Rien ne tourne encore"
 msgid "Nothing remembered yet"
 msgstr "Rien n'est mémorisé pour le moment"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "Notifications"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Fournisseurs"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "Achats"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "Mise à jour en cours…"
 msgid "Upload"
 msgstr "Télécharger"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "Utilisation"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "Affichage"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "Voir la conversation"

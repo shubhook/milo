@@ -4,6 +4,7 @@ import type { ActionApprovalRule, ActionAutoReviewSettings } from "@milo/contrac
 import { Button, Label, Switch } from "@milo/ui-web";
 import { useEffect, useId, useState } from "react";
 import { rpc } from "../lib/rpc";
+import { SegmentedControl } from "./SegmentedControl";
 
 function describeRule(rule: ActionApprovalRule): string {
   if (rule.effect === "require_approval") {
@@ -24,13 +25,28 @@ function describeRule(rule: ActionApprovalRule): string {
   return t`Allow ${rule.matchValue} without asking`;
 }
 
+type ApprovalCategory = "email" | "purchase";
+type ApprovalLevel = "act" | "ask";
+
+function asksFirst(rule: ActionApprovalRule, category: ApprovalCategory): boolean {
+  return (
+    rule.effect === "require_approval" &&
+    rule.matchKind === "category" &&
+    rule.matchValue === category
+  );
+}
+
+/**
+ * Space-wide approval levels. Bots act by default, so Ask first is a require-approval rule for
+ * the category and Act removes it. Narrower rules from "Always allow" are listed below.
+ */
 export function ApprovalRulesSettings() {
   const { t } = useLingui();
   const autoReviewId = useId();
   const [rules, setRules] = useState<ActionApprovalRule[]>([]);
   const [autoReview, setAutoReview] = useState<ActionAutoReviewSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [savingPreset, setSavingPreset] = useState<"email" | "purchase" | null>(null);
+  const [saving, setSaving] = useState<ApprovalCategory | null>(null);
   const [savingAutoReview, setSavingAutoReview] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,31 +71,29 @@ export function ApprovalRulesSettings() {
     void refresh();
   }, []);
 
-  async function setPreset(matchValue: "email" | "purchase") {
-    if (loading || savingPreset) return;
-    if (
-      rules.some(
-        (rule) =>
-          rule.effect === "require_approval" &&
-          rule.matchKind === "category" &&
-          rule.matchValue === matchValue,
-      )
-    ) {
-      return;
-    }
-    setSavingPreset(matchValue);
+  async function setLevel(category: ApprovalCategory, level: ApprovalLevel) {
+    if (loading || saving) return;
+    const current = rules.filter((rule) => asksFirst(rule, category));
+    if ((level === "ask") === current.length > 0) return;
+    setSaving(category);
     setError(null);
     try {
-      const saved = await rpc.approvalRules.set({
-        effect: "require_approval",
-        matchKind: "category",
-        matchValue,
-      });
-      setRules((current) => [...current, saved]);
+      if (level === "ask") {
+        const saved = await rpc.approvalRules.set({
+          effect: "require_approval",
+          matchKind: "category",
+          matchValue: category,
+        });
+        setRules((list) => [...list, saved]);
+      } else {
+        await Promise.all(current.map((rule) => rpc.approvalRules.remove({ id: rule.id })));
+        setRules((list) => list.filter((rule) => !asksFirst(rule, category)));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t`Could not save rule`);
+      await refresh();
     } finally {
-      setSavingPreset(null);
+      setSaving(null);
     }
   }
 
@@ -106,66 +120,63 @@ export function ApprovalRulesSettings() {
     }
   }
 
+  const categories: { id: ApprovalCategory; label: string }[] = [
+    { id: "email", label: t`Email` },
+    { id: "purchase", label: t`Purchases` },
+  ];
+  const otherRules = rules.filter(
+    (rule) => !categories.some((category) => asksFirst(rule, category.id)),
+  );
+
   return (
-    <div data-testid="action-confirmation-settings" className="pt-5">
-      <h3 className="text-[15px] font-medium text-foreground">
-        <Trans>Action confirmations</Trans>
-      </h3>
-      <div className="mt-4 flex flex-col items-start gap-2">
-        <Button
-          variant="outline"
-          disabled={loading || savingPreset !== null}
-          onClick={() => void setPreset("email")}
+    <div data-testid="action-confirmation-settings">
+      {categories.map((category) => (
+        <div
+          key={category.id}
+          className="flex flex-wrap items-center gap-4 border-b border-border py-3"
         >
-          <Trans>Ask before sending external email</Trans>
-        </Button>
-        <Button
-          variant="outline"
-          disabled={loading || savingPreset !== null}
-          onClick={() => void setPreset("purchase")}
-        >
-          <Trans>Ask before purchases</Trans>
-        </Button>
-      </div>
-      <div className="mt-5 flex items-start gap-3">
-        <Switch
-          id={autoReviewId}
-          data-testid="auto-review-toggle"
-          className="mt-0.5"
-          checked={autoReview?.enabled ?? false}
-          disabled={loading || savingAutoReview || !autoReview}
-          onCheckedChange={(checked) => void toggleAutoReview(checked)}
-        />
-        <div>
-          <Label htmlFor={autoReviewId} className="text-[14px] font-normal text-foreground/75">
+          <span className="min-w-[180px] flex-1 font-medium">{category.label}</span>
+          <SegmentedControl
+            label={category.label}
+            value={rules.some((rule) => asksFirst(rule, category.id)) ? "ask" : "act"}
+            onChange={(level) => void setLevel(category.id, level)}
+            className={loading || saving === category.id ? "pointer-events-none opacity-60" : ""}
+            options={[
+              { value: "act", label: t`Act` },
+              { value: "ask", label: t`Ask first` },
+            ]}
+          />
+        </div>
+      ))}
+      <div className="flex items-center gap-4 border-b border-border py-3">
+        <div className="flex-1">
+          <Label htmlFor={autoReviewId} className="text-body font-medium">
             <Trans>Flag unexpected actions</Trans>
           </Label>
           {autoReview?.enabled && !autoReview.checkerAvailable ? (
-            <p className="mt-1 text-[13px] text-muted-foreground">
+            <p className="mt-1 text-small text-muted-foreground">
               <Trans>Add a model in Settings to use this.</Trans>
             </p>
           ) : null}
         </div>
+        <Switch
+          id={autoReviewId}
+          data-testid="auto-review-toggle"
+          checked={autoReview?.enabled ?? false}
+          disabled={loading || savingAutoReview || !autoReview}
+          onCheckedChange={(checked) => void toggleAutoReview(checked)}
+        />
       </div>
-      {error ? <p className="mt-3 text-[13px] text-destructive">{error}</p> : null}
-      {loading ? (
-        <p className="mt-4 text-[13px] text-muted-foreground">
-          <Trans>Loading rules…</Trans>
-        </p>
-      ) : rules.length > 0 ? (
-        <ul className="mt-4 space-y-2">
-          {rules.map((rule) => (
+      {error ? <p className="mt-3 text-small text-destructive">{error}</p> : null}
+      {otherRules.length > 0 ? (
+        <ul className="m-0 list-none p-0">
+          {otherRules.map((rule) => (
             <li
               key={rule.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-2"
+              className="flex items-center justify-between gap-3 border-b border-border py-2.5"
             >
-              <span className="text-[13.5px] text-foreground/75">{describeRule(rule)}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground"
-                onClick={() => void removeRule(rule.id)}
-              >
+              <span className="text-muted-foreground">{describeRule(rule)}</span>
+              <Button variant="ghost" onClick={() => void removeRule(rule.id)}>
                 <Trans>Remove</Trans>
               </Button>
             </li>

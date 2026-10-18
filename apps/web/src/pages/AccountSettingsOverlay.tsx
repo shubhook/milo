@@ -11,7 +11,6 @@ import {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import { ApprovalRulesSettings } from "../components/ApprovalRulesSettings";
 import { SuccessPop } from "../components/ai/primitives";
 import { ComputersUnavailableHint } from "../components/ComputersUnavailableHint";
 import { DesktopUpdateSection } from "../components/DesktopUpdates";
@@ -89,19 +88,21 @@ export function GeneralSettingsPanels({
   }
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-xl border border-border px-4 py-4">
-        <h3 className="text-[15px] font-medium text-foreground">
+    <div>
+      <section className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3.5">
+        <h3 className="flex-1 text-body font-medium text-foreground">
           <Trans>Account</Trans>
         </h3>
-        <p className="mt-3 text-[14px] text-foreground/75">{name}</p>
-        {email ? <p className="mt-1 text-[13px] text-muted-foreground/70">{email}</p> : null}
+        <div className="min-w-0 text-end">
+          <p className="truncate text-foreground">{name}</p>
+          {email ? <p className="truncate text-small text-muted-foreground">{email}</p> : null}
+        </div>
       </section>
 
       <ChangePasswordSection email={email} />
 
-      <section className="rounded-xl border border-border px-4 py-4">
-        <h3 className="text-[15px] font-medium text-foreground">
+      <section className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3.5">
+        <h3 className="flex-1 text-body font-medium text-foreground">
           <Trans>Appearance</Trans>
         </h3>
         <AppearancePicker
@@ -113,18 +114,15 @@ export function GeneralSettingsPanels({
         />
       </section>
 
-      <section className="rounded-xl border border-border px-4 py-4">
-        <h3 className="text-[15px] font-medium text-foreground">
+      <section className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3.5">
+        <h3 className="flex-1 text-body font-medium text-foreground">
           <Trans>Language</Trans>
         </h3>
         <UiLocalePicker value={locale} onChange={chooseLocale} />
       </section>
 
-      <section
-        className="rounded-xl border border-border px-4 py-4"
-        data-testid="avatar-style-select"
-      >
-        <h3 className="text-[15px] font-medium text-foreground">
+      <section className="border-b border-border py-3.5" data-testid="avatar-style-select">
+        <h3 className="text-body font-medium text-foreground">
           <Trans>Avatars</Trans>
         </h3>
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -161,16 +159,16 @@ export function GeneralSettingsPanels({
         </Button>
       ) : null}
 
-      <details data-testid="advanced-settings" className="group rounded-xl border border-border">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-[14px] text-foreground/75">
-          <span className="block text-[15px] text-foreground">
+      <details data-testid="advanced-settings" className="group border-b border-border">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3.5 text-foreground/75">
+          <span className="block font-medium text-foreground">
             <Trans>Advanced</Trans>
           </span>
           <span aria-hidden="true" className="transition-transform group-open:rotate-90">
             ›
           </span>
         </summary>
-        <div className="border-t border-border px-4 pb-5">
+        <div className="pb-4">
           <div className="flex items-start gap-3 pt-5">
             <Switch
               id={streamRepliesId}
@@ -204,7 +202,6 @@ export function GeneralSettingsPanels({
               <Trans>Show tool activity</Trans>
             </Label>
           </div>
-          <ApprovalRulesSettings />
         </div>
       </details>
     </div>
@@ -317,8 +314,8 @@ function ChangePasswordSection({ email }: { email?: string | null }) {
   }
 
   return (
-    <section className="rounded-xl border border-border px-4 py-4">
-      <h3 className="text-[15px] font-medium text-foreground">
+    <section className="border-b border-border py-3.5">
+      <h3 className="text-body font-medium text-foreground">
         <Trans>Password</Trans>
       </h3>
       <div className="mt-3 grid gap-3">
@@ -406,16 +403,16 @@ function AppearancePicker({
 }) {
   const { t } = useLingui();
   const options: { value: AppearancePreference; label: string }[] = [
-    { value: "system", label: t`System` },
     { value: "light", label: t`Light` },
     { value: "dark", label: t`Dark` },
+    { value: "system", label: t`System` },
   ];
 
   return (
     <fieldset
       aria-label={t`Appearance`}
       data-testid="ui-appearance-select"
-      className="mt-3 grid min-w-0 grid-cols-3 gap-1 rounded-lg bg-muted p-1"
+      className="m-0 inline-flex w-fit gap-0.5 rounded-full border-0 bg-muted p-[3px]"
     >
       {options.map((option) => (
         <Toggle
@@ -423,7 +420,8 @@ function AppearancePicker({
           data-testid={`ui-appearance-${option.value}`}
           pressed={option.value === value}
           onPressedChange={() => onChange(option.value)}
-          className="text-[13px] aria-pressed:bg-background aria-pressed:shadow-sm"
+          size="sm"
+          className="h-7 rounded-full px-3 text-small font-normal text-muted-foreground hover:bg-transparent aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-raised"
         >
           {option.label}
         </Toggle>
@@ -523,7 +521,7 @@ function UiLocalePicker({
   }
 
   return (
-    <div ref={rootRef} className="relative mt-3">
+    <div ref={rootRef} className="relative w-full sm:w-[220px]">
       <button
         ref={triggerRef}
         type="button"

@@ -1,13 +1,27 @@
 import { i18n } from "@lingui/core";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { AgentModel, ModelUsageWindow } from "@milo/contracts";
-import { currentUsageWindow } from "@milo/core";
-import { Badge, Progress, ProgressLabel, ProgressValue } from "@milo/ui-web";
+import type { AgentLogo as AgentLogoName } from "@milo/core";
+import { currentUsageWindow, usageWindowTone } from "@milo/core";
+import { Badge, cn, Progress, ProgressLabel, ProgressValue } from "@milo/ui-web";
 import { useEffect, useState } from "react";
+import { AgentLogo } from "../components/AgentLogo";
 import { rpc } from "../lib/rpc";
 
 const HOUR = 60;
 const DAY = 24 * HOUR;
+
+const PROVIDER_LOGOS: Partial<Record<string, AgentLogoName>> = {
+  "claude-code": "claude",
+  chatgpt: "openai",
+  codex: "openai",
+};
+
+const METER_TONE_CLASS = {
+  normal: "",
+  warning: "[&_[data-slot=progress-indicator]]:bg-warning",
+  destructive: "[&_[data-slot=progress-indicator]]:bg-destructive",
+} as const;
 
 /** Models the agent runtime runs bots on, with each plan's current usage limits. */
 export function AgentModelsPanel() {
@@ -38,37 +52,41 @@ export function AgentModelsPanel() {
   }
   if (!models) return null;
   return (
-    <ul data-testid="agent-models" className="space-y-3">
-      {models.map((model) => (
-        <li
-          key={model.provider}
-          data-testid={`agent-model-${model.provider}`}
-          className="rounded-xl border border-border px-4 py-4"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="text-[15px] font-medium text-foreground">{model.label}</h3>
-              <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{model.model}</p>
+    <ul data-testid="agent-models" className="m-0 list-none p-0">
+      {models.map((model) => {
+        const logo = PROVIDER_LOGOS[model.provider];
+        return (
+          <li
+            key={model.provider}
+            data-testid={`agent-model-${model.provider}`}
+            className="border-b border-border py-3.5 last:border-b-0"
+          >
+            <div className="flex items-center gap-3.5">
+              {logo ? <AgentLogo agent={logo} size={36} /> : null}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-foreground">{model.label}</h3>
+                <p className="truncate text-[12.5px] text-muted-foreground">{model.model}</p>
+              </div>
+              {model.inUse ? (
+                <Badge variant="secondary">
+                  <Trans>In use</Trans>
+                </Badge>
+              ) : null}
             </div>
-            {model.inUse ? (
-              <Badge variant="secondary">
-                <Trans>In use</Trans>
-              </Badge>
-            ) : null}
-          </div>
-          {model.limits.length ? (
-            <div className="mt-4 space-y-4">
-              {model.limits.map((window) => (
-                <UsageWindow key={window.windowMinutes} window={currentUsageWindow(window)} />
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 text-[13px] text-muted-foreground">
-              <Trans>Limits show after the next run.</Trans>
-            </p>
-          )}
-        </li>
-      ))}
+            {model.limits.length ? (
+              <div className={cn("mt-3.5 space-y-3.5", logo && "ps-[50px]")}>
+                {model.limits.map((window) => (
+                  <UsageWindow key={window.windowMinutes} window={currentUsageWindow(window)} />
+                ))}
+              </div>
+            ) : (
+              <p className={cn("mt-2 text-[12.5px] text-muted-foreground", logo && "ps-[50px]")}>
+                <Trans>Limits show after the next run.</Trans>
+              </p>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -76,6 +94,7 @@ export function AgentModelsPanel() {
 function UsageWindow({ window }: { window: ModelUsageWindow }) {
   const { t } = useLingui();
   const used = Math.round(window.usedPercent);
+  const tone = usageWindowTone(window.usedPercent);
   const days = window.windowMinutes / DAY;
   const hours = Math.round(window.windowMinutes / HOUR);
   const label =
@@ -95,9 +114,21 @@ function UsageWindow({ window }: { window: ModelUsageWindow }) {
       )
     : null;
   return (
-    <Progress value={window.usedPercent} className="gap-2">
-      <ProgressLabel className="text-[13.5px] font-normal text-foreground">{label}</ProgressLabel>
-      <ProgressValue className="text-[13px]">{() => t`${used}% used`}</ProgressValue>
+    <Progress
+      value={window.usedPercent}
+      data-tone={tone}
+      className={cn("gap-2", METER_TONE_CLASS[tone])}
+    >
+      <ProgressLabel className="text-small font-normal text-foreground">{label}</ProgressLabel>
+      <ProgressValue
+        className={cn(
+          "text-small",
+          tone === "warning" && "text-warning",
+          tone === "destructive" && "text-destructive",
+        )}
+      >
+        {() => t`${used}% used`}
+      </ProgressValue>
       {resetsAt ? (
         <p className="order-last w-full text-[12.5px] text-muted-foreground">
           <Trans>Resets {resetsAt}</Trans>

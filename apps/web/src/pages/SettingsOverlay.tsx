@@ -1,9 +1,21 @@
 import { useLingui } from "@lingui/react/macro";
 import type { AvatarStyle } from "@milo/contracts";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
-import { Brain, CloudDownload, Gauge, Monitor, Settings, Volume2, XIcon } from "lucide-react";
+import {
+  Bell,
+  Brain,
+  CloudDownload,
+  Gauge,
+  Monitor,
+  Settings,
+  ShieldCheck,
+  Volume2,
+  XIcon,
+} from "lucide-react";
 import { type ComponentType, useEffect, useRef, useState } from "react";
+import { ApprovalRulesSettings } from "../components/ApprovalRulesSettings";
 import { computersAreUnavailable } from "../components/ComputersUnavailableHint";
+import { NotificationSettings } from "../components/NotificationSettings";
 import {
   ComputerSettingsPanel,
   GeneralSettingsPanels,
@@ -15,7 +27,15 @@ import { SpaceMemorySection } from "./KnowledgeSection";
 import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
 
-export type SettingsSection = "general" | "memory" | "voice" | "usage" | "computer" | "updates";
+export type SettingsSection =
+  | "general"
+  | "usage"
+  | "approvals"
+  | "notifications"
+  | "memory"
+  | "voice"
+  | "computer"
+  | "updates";
 
 type NavItem = {
   id: SettingsSection;
@@ -35,6 +55,7 @@ export function SettingsOverlay({
   sandboxProvider,
   onClose,
   onVoiceStatusMaybeChanged,
+  onBotUpdated,
 }: {
   email?: string | null;
   name: string;
@@ -47,6 +68,7 @@ export function SettingsOverlay({
   sandboxProvider?: string | null;
   onClose: () => void;
   onVoiceStatusMaybeChanged?: () => void | Promise<void>;
+  onBotUpdated?: () => void;
 }) {
   const { t } = useLingui();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -68,9 +90,11 @@ export function SettingsOverlay({
 
   const navItems: NavItem[] = [
     { id: "general", label: t`General`, icon: Settings },
+    { id: "usage", label: t`Models`, icon: Gauge },
+    { id: "approvals", label: t`Approvals`, icon: ShieldCheck },
+    { id: "notifications", label: t`Notifications`, icon: Bell },
     { id: "memory", label: t`Memory`, icon: Brain },
     { id: "voice", label: t`Voice`, icon: Volume2 },
-    { id: "usage", label: t`Usage`, icon: Gauge },
     ...(showComputer ? [{ id: "computer" as const, label: t`Computer`, icon: Monitor }] : []),
     { id: "updates", label: t`Updates`, icon: CloudDownload },
   ];
@@ -197,6 +221,10 @@ export function SettingsOverlay({
                     <AgentModelsPanel />
                   </div>
                 </>
+              ) : null}
+              {section === "approvals" ? <ApprovalRulesSettings /> : null}
+              {section === "notifications" ? (
+                <NotificationSettings onBotUpdated={onBotUpdated} />
               ) : null}
               {section === "computer" && showComputer ? <ComputerSettingsPanel /> : null}
               {section === "updates" ? (
