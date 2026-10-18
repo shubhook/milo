@@ -1,8 +1,9 @@
 import { Plural } from "@lingui/react/macro";
 import type { ThreadMessage } from "@milo/contracts";
-import { ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { formatToolActivityDuration, toolStepCount } from "../lib/tool-activity-view";
+import { Shimmer } from "./ai/primitives";
 
 type ToolStep = Extract<ThreadMessage["blocks"][number], { kind: "steps" }>["steps"][number];
 
@@ -34,12 +35,17 @@ export function ToolSteps({
         return (
           <div key={index} className="flex min-w-0 items-center gap-2 leading-5">
             <span
-              className={`text-[12px] ${isCurrent ? "text-warning" : "text-success"}`}
-              style={{ animation: isCurrent ? "rkPulse 1.2s ease-in-out infinite" : undefined }}
+              aria-hidden="true"
+              className="flex size-[15px] shrink-0 items-center justify-center"
             >
-              {isCurrent ? "◷" : "✓"}
+              {isCurrent ? (
+                <span className="size-2 rounded-full bg-foreground motion-safe:animate-pulse" />
+              ) : (
+                <Check size={14} strokeWidth={2.2} className="text-success" />
+              )}
             </span>
             <span
+              data-current-step={isCurrent || undefined}
               className={`min-w-0 flex-1 truncate text-[13px] ${
                 isCurrent ? "text-foreground" : "text-muted-foreground"
               }`}
@@ -93,7 +99,9 @@ export function ToolActivityDisclosure({
           className="transition-transform duration-150 group-open:rotate-90 motion-reduce:transition-none"
         />
         {live ? (
-          <Plural value={stepCount} one="Working… · # tool" other="Working… · # tools" />
+          <Shimmer>
+            <Plural value={stepCount} one="Working… · # tool" other="Working… · # tools" />
+          </Shimmer>
         ) : (
           <>
             <Plural value={stepCount} one="Done · # tool" other="Done · # tools" />

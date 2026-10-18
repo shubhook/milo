@@ -246,8 +246,7 @@ test("configured server owners manage providers from settings", async ({ page },
   await signup(page, `configured-owner-${Date.now()}@rakazo.test`, "password12", "Server Owner");
   await expect(page.getByRole("heading", { name: "Server integrations" })).toBeHidden();
   await completeOnboarding(page);
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");
   const link = settings.getByRole("link", { name: "Server integrations", exact: true });
   await expect(link).toBeVisible();

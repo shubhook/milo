@@ -63,14 +63,14 @@ describe("window chrome", () => {
   it("keeps conversation header controls clickable", () => {
     const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "../pages");
     const shell = readFileSync(path.join(root, "Shell.tsx"), "utf8");
-    expect(shell).toContain('className="app-drag grid grid-cols-[1fr_auto_1fr] items-center');
-    expect(shell).toContain('className="app-no-drag grid h-8 w-8');
-    expect(shell).toContain(
-      'className="app-no-drag flex h-[30px] min-w-0 items-center gap-2 rounded-full',
-    );
+    expect(shell).toContain('className="app-drag flex items-center gap-3 border-b border-border');
+    // Navigation, restore, and computer buttons, plus the name button that opens settings.
     expect(
-      shell.match(/className="app-no-drag grid size-\[30px\] place-items-center/g),
-    ).toHaveLength(1);
+      shell.match(
+        /className="app-no-drag (?:hidden|grid) size-\[34px\] shrink-0 place-items-center/g,
+      ),
+    ).toHaveLength(3);
+    expect(shell).toMatch(/data-testid="bot-settings-trigger"[\s\S]{0,200}?className="app-no-drag/);
   });
 
   it("moves window chrome into the conversation header when the bots sidebar is collapsed", () => {

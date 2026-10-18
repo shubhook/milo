@@ -395,8 +395,8 @@ msgid "Already have an account?"
 msgstr "पहले से खाता है?"
 
 #: src/components/AskCard.tsx
-msgid "Always allow this tool"
-msgstr "इस टूल को हमेशा अनुमति दें"
+msgid "Always allow"
+msgstr "हमेशा अनुमति दें"
 
 #: src/components/AskCard.tsx
 msgid "Always allowed"
@@ -438,6 +438,10 @@ msgstr "API कुंजी हेडर"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Appearance"
 msgstr "रूप"
+
+#: src/components/AskCard.tsx
+msgid "Approval"
+msgstr "स्वीकृति"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Approval boundaries"
@@ -1619,6 +1623,10 @@ msgstr ""
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop update"
 msgstr ""
+
+#: src/components/AskCard.tsx
+msgid "Details"
+msgstr "विवरण"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Direct MCP"
@@ -3928,10 +3936,6 @@ msgstr "काम चल रहा है…"
 #: src/components/computer/TerminalApp.tsx
 msgid "Wrote {path}"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Yesterday"
-msgstr "कल"
 
 #: src/pages/Shell.tsx
 msgid "You"

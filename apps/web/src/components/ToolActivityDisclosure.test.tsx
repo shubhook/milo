@@ -143,8 +143,8 @@ describe("ToolSteps", () => {
     for (const hidden of ["step-0<", "step-1<", "step-2<"]) expect(html).not.toContain(hidden);
     for (let i = 3; i < steps.length; i++) expect(html).toContain(`step-${i}<`);
     // The pulsing marker stays on the latest step after the window shifts the indexes.
-    expect(html).toMatch(/◷<\/span><span[^>]*>step-8</);
-    expect(html.match(/◷/g)).toHaveLength(1);
+    expect(html).toMatch(/data-current-step="true"[^>]*>step-8</);
+    expect(html.match(/data-current-step/g)).toHaveLength(1);
   });
 
   it("uses the singular for one hidden step", () => {

@@ -2855,7 +2855,7 @@ describeJourneys("required product journeys", () => {
     expect(approval).toContain("Create space");
     expect(approval).toContain("Customer support");
     expect(approval).toContain("Cancel");
-    expect(approval).not.toContain("Always allow this tool");
+    expect(approval).not.toContain("Always allow");
     expect(await prisma.spaceMember.count({ where: { userId: me.userId } })).toBe(
       membershipsBefore,
     );
