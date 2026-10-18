@@ -35,7 +35,6 @@ import {
   buildComposerMentionOptions,
   type ComposerMention,
   clampMentionHighlightIndex,
-  cronFromPreset,
   groupBotsForSidebar,
   groupVoiceChats,
   inferAttachmentMimeType,
@@ -104,6 +103,7 @@ import {
   Pencil,
   Plus,
   Puzzle,
+  Repeat,
   Reply,
   Search,
   Settings,
@@ -201,6 +201,7 @@ import {
   writeRightPanelState,
 } from "../lib/right-panel-state";
 import { rosterWorkStatusLabel } from "../lib/roster-status";
+import { saveRoutineDraft } from "../lib/routine-save";
 import { clearSpaceSelection, rpc, selectedSpaceId, selectSpace } from "../lib/rpc";
 import { readSeenRunErrorIds, rememberSeenRunErrorId } from "../lib/run-error-storage";
 import { sharedInflight } from "../lib/shared-inflight";
@@ -247,7 +248,6 @@ import {
   RoutineEditor,
   RoutineListHeader,
   RoutineListRow,
-  routineNeedsOneShotArm,
 } from "./RoutineEditor";
 import type { SettingsSection } from "./SettingsOverlay";
 import { SpaceSearchResults } from "./SpaceSearch";
@@ -3390,6 +3390,17 @@ export function ShellPage() {
               type="button"
               onClick={() => {
                 setMobileSidebarOpen(false);
+                navigate("/app/routines");
+              }}
+              className={SIDEBAR_NAV_ROW_CLASS}
+            >
+              <Repeat size={16} strokeWidth={1.8} aria-hidden="true" />
+              <Trans>Routines</Trans>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileSidebarOpen(false);
                 navigate("/app/artifacts");
               }}
               className={SIDEBAR_NAV_ROW_CLASS}
@@ -3951,73 +3962,19 @@ export function ShellPage() {
                   const targetBotId = active.id;
                   const targetRoutine = editingRoutine;
                   if (targetRoutine && targetRoutine.botId !== targetBotId) return;
-                  if (
-                    !routineDraft.schedules.length &&
-                    !routineDraft.webhookEnabled &&
-                    !routineDraft.githubEnabled
-                  ) {
-                    setRoutineError(t`Add a schedule, webhook, or GitHub trigger`);
-                    return;
-                  }
                   const saveRequest = ++routineSaveRequest.current;
                   routineSavePending.current = true;
                   setSavingRoutine(true);
                   setRoutineError(null);
+                  let saved: Routine;
                   try {
-                    if (
-                      (routineDraft.webhookEnabled || routineDraft.githubEnabled) &&
-                      !active.webhookConfigured &&
-                      !routineWebhookSecret
-                    ) {
-                      await ensureWebhookSecret(targetBotId);
-                    }
-                    const crons = routineDraft.schedules.map(cronFromPreset);
-                    let saved: Routine;
-                    if (targetRoutine) {
-                      const armOneShot = routineNeedsOneShotArm(targetRoutine, crons);
-                      let runAt: string | undefined;
-                      if (armOneShot) {
-                        if (!routineDraft.runAtLocal) {
-                          setRoutineError(t`Add a run time for this one-shot.`);
-                          return;
-                        }
-                        const parsed = new Date(routineDraft.runAtLocal);
-                        if (!Number.isFinite(parsed.getTime()) || parsed.getTime() <= Date.now()) {
-                          setRoutineError(t`Run time must be in the future.`);
-                          return;
-                        }
-                        runAt = parsed.toISOString();
-                      }
-                      saved = await rpc.routines.update({
-                        routineId: targetRoutine.id,
-                        name: routineDraft.name || t`Routine`,
-                        prompt: routineDraft.prompt || t`Check in.`,
-                        crons,
-                        active: armOneShot ? true : routineDraft.active,
-                        webhookEnabled: routineDraft.webhookEnabled,
-                        githubEnabled: routineDraft.githubEnabled,
-                        ...(runAt ? { runAt } : {}),
-                      });
-                    } else {
-                      saved = await rpc.routines.create({
-                        botId: targetBotId,
-                        name: routineDraft.name || t`Routine`,
-                        prompt: routineDraft.prompt || t`Check in.`,
-                        crons,
-                        timezone: localTimezone(),
-                        active: routineDraft.active,
-                        notify: true,
-                        webhookEnabled: routineDraft.webhookEnabled,
-                        githubEnabled: routineDraft.githubEnabled,
-                      });
-                    }
-                    if (
-                      routineSaveRequest.current === saveRequest &&
-                      activeBotId.current === targetBotId
-                    ) {
-                      setEditingRoutine(saved);
-                      setRoutineDraft(draftFromRoutine(saved));
-                    }
+                    saved = await saveRoutineDraft({
+                      botId: targetBotId,
+                      editing: targetRoutine,
+                      draft: routineDraft,
+                      needsWebhookSecret: !active.webhookConfigured && !routineWebhookSecret,
+                      ensureWebhookSecret: () => ensureWebhookSecret(targetBotId),
+                    });
                   } catch (error) {
                     if (
                       routineSaveRequest.current !== saveRequest ||
@@ -4039,6 +3996,8 @@ export function ShellPage() {
                   ) {
                     return;
                   }
+                  setEditingRoutine(saved);
+                  setRoutineDraft(draftFromRoutine(saved));
                   await refreshThread(targetBotId).catch(() => undefined);
                 }}
                 onTestRun={async () => {

@@ -214,6 +214,7 @@ msgid "Actions for space"
 msgstr ""
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Active"
 msgstr "활성"
 
@@ -235,11 +236,11 @@ msgstr "추가"
 msgid "Add a model in Settings to use this."
 msgstr "이 기능을 사용하려면 설정에서 모델을 추가하세요."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a run time for this one-shot."
 msgstr "이 일회성 실행의 시간을 추가하세요."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr ""
 
@@ -605,6 +606,7 @@ msgid "bot"
 msgstr "Bot"
 
 #: src/pages/IntegrationSetup.tsx
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Bot"
@@ -624,6 +626,7 @@ msgid "Bot screen preview"
 msgstr "Bot 화면 미리보기"
 
 #: src/pages/Artifacts.tsx
+#: src/pages/Routines.tsx
 msgid "Bots"
 msgstr ""
 
@@ -708,7 +711,7 @@ msgstr "확인 실패"
 msgid "Check for updates"
 msgstr "업데이트 확인"
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Check in."
 msgstr "확인해 주세요."
 
@@ -1334,6 +1337,7 @@ msgstr "비밀번호를 재설정할 수 없습니다"
 msgid "Could not revoke connection"
 msgstr "연결을 해제하지 못했습니다."
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not run routine"
 msgstr "루틴을 실행할 수 없습니다"
@@ -1355,6 +1359,7 @@ msgstr "자동 검토를 저장할 수 없습니다"
 msgid "Could not save group"
 msgstr "그룹을 저장하지 못했습니다."
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not save routine"
 msgstr "자동 실행을 저장하지 못했습니다."
@@ -1472,6 +1477,7 @@ msgid "Create new Space"
 msgstr "새 스페이스 만들기"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Create Routine"
 msgstr "자동 실행 만들기"
 
@@ -2821,6 +2827,7 @@ msgid "Paste your API key"
 msgstr "API 키를 붙여넣으세요"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Paused"
 msgstr "일시 중지됨"
 
@@ -3163,12 +3170,14 @@ msgstr "key 교체"
 msgid "Rounded square"
 msgstr ""
 
+#: src/lib/routine-save.ts
 #: src/pages/RoutineEditor.tsx
-#: src/pages/Shell.tsx
 msgid "Routine"
 msgstr "자동 실행"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
+#: src/pages/Shell.tsx
 msgid "Routines"
 msgstr "자동 실행"
 
@@ -3184,7 +3193,11 @@ msgstr "실행 시간"
 msgid "Run history"
 msgstr "실행 기록"
 
-#: src/pages/Shell.tsx
+#: src/pages/RoutineEditor.tsx
+msgid "Run now"
+msgstr "지금 실행"
+
+#: src/lib/routine-save.ts
 msgid "Run time must be in the future."
 msgstr "실행 시간은 미래여야 합니다."
 
@@ -3536,6 +3549,7 @@ msgstr "시작하는 중…"
 msgid "Steps"
 msgstr "실행 단계"
 
+#: src/pages/RoutineEditor.tsx
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "중지"
@@ -3618,10 +3632,6 @@ msgstr ""
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
 msgstr "시험 실행"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Test run"
-msgstr "테스트 실행"
 
 #: src/components/SoftwareUpdateSection.tsx
 msgid "The API did not come back. Refresh this page."

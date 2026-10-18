@@ -214,6 +214,7 @@ msgid "Actions for space"
 msgstr ""
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Active"
 msgstr ""
 
@@ -235,11 +236,11 @@ msgstr "Ekle"
 msgid "Add a model in Settings to use this."
 msgstr ""
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a run time for this one-shot."
 msgstr ""
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr ""
 
@@ -605,6 +606,7 @@ msgid "bot"
 msgstr "bot"
 
 #: src/pages/IntegrationSetup.tsx
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Bot"
@@ -624,6 +626,7 @@ msgid "Bot screen preview"
 msgstr "Bot ekranı önizlemesi"
 
 #: src/pages/Artifacts.tsx
+#: src/pages/Routines.tsx
 msgid "Bots"
 msgstr ""
 
@@ -708,7 +711,7 @@ msgstr ""
 msgid "Check for updates"
 msgstr ""
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Check in."
 msgstr "Durum bildir."
 
@@ -1334,6 +1337,7 @@ msgstr "Parola sıfırlanamadı"
 msgid "Could not revoke connection"
 msgstr "Bağlantı iptal edilemedi"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not run routine"
 msgstr ""
@@ -1355,6 +1359,7 @@ msgstr ""
 msgid "Could not save group"
 msgstr "Grup kaydedilemedi"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not save routine"
 msgstr "Rutin kaydedilemedi"
@@ -1472,6 +1477,7 @@ msgid "Create new Space"
 msgstr "Yeni space oluştur"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Create Routine"
 msgstr ""
 
@@ -2821,6 +2827,7 @@ msgid "Paste your API key"
 msgstr "API anahtarını yapıştır"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Paused"
 msgstr ""
 
@@ -3163,12 +3170,14 @@ msgstr ""
 msgid "Rounded square"
 msgstr ""
 
+#: src/lib/routine-save.ts
 #: src/pages/RoutineEditor.tsx
-#: src/pages/Shell.tsx
 msgid "Routine"
 msgstr "Rutin"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
+#: src/pages/Shell.tsx
 msgid "Routines"
 msgstr "Rutinler"
 
@@ -3184,7 +3193,11 @@ msgstr ""
 msgid "Run history"
 msgstr ""
 
-#: src/pages/Shell.tsx
+#: src/pages/RoutineEditor.tsx
+msgid "Run now"
+msgstr "Şimdi çalıştır"
+
+#: src/lib/routine-save.ts
 msgid "Run time must be in the future."
 msgstr ""
 
@@ -3536,6 +3549,7 @@ msgstr "Başlatılıyor…"
 msgid "Steps"
 msgstr "Adımlar"
 
+#: src/pages/RoutineEditor.tsx
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "Durdur"
@@ -3618,10 +3632,6 @@ msgstr ""
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
 msgstr "Dene"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Test run"
-msgstr ""
 
 #: src/components/SoftwareUpdateSection.tsx
 msgid "The API did not come back. Refresh this page."

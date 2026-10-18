@@ -124,7 +124,18 @@ function AlertDialogDescription({
 }
 
 function AlertDialogAction({ className, ...props }: React.ComponentProps<typeof Button>) {
-  return <Button data-slot="alert-dialog-action" className={cn(className)} {...props} />;
+  return (
+    <Button
+      data-slot="alert-dialog-action"
+      className={cn(
+        // A destructive confirm is the one solid red button in the app.
+        props.variant === "destructive" &&
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 function AlertDialogCancel({

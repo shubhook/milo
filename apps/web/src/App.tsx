@@ -32,6 +32,9 @@ const OnboardingPage = lazy(() =>
 const WelcomePage = lazy(() =>
   import("./pages/Welcome").then((module) => ({ default: module.WelcomePage })),
 );
+const RoutinesPage = lazy(() =>
+  import("./pages/Routines").then((module) => ({ default: module.RoutinesPage })),
+);
 const ArtifactsPage = lazy(() =>
   import("./pages/Artifacts").then((module) => ({ default: module.ArtifactsPage })),
 );
@@ -137,6 +140,10 @@ function SessionApp() {
           <Route
             path="/app/g/:groupId"
             element={user ? <ShellPage /> : <Navigate to="/sign-in" replace />}
+          />
+          <Route
+            path="/app/routines"
+            element={user ? <RoutinesPage /> : <Navigate to="/sign-in" replace />}
           />
           <Route
             path="/app/artifacts"

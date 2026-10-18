@@ -214,6 +214,7 @@ msgid "Actions for space"
 msgstr "Действия для пространства"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Active"
 msgstr "Активный"
 
@@ -235,11 +236,11 @@ msgstr "Добавить"
 msgid "Add a model in Settings to use this."
 msgstr "Чтобы использовать это, добавьте модель в настройках."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a run time for this one-shot."
 msgstr "Добавьте время выполнения для разового запуска."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr "Добавьте расписание, вебхук или триггер GitHub."
 
@@ -605,6 +606,7 @@ msgid "bot"
 msgstr "бот"
 
 #: src/pages/IntegrationSetup.tsx
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Bot"
@@ -624,6 +626,7 @@ msgid "Bot screen preview"
 msgstr "Предварительный просмотр экрана бота"
 
 #: src/pages/Artifacts.tsx
+#: src/pages/Routines.tsx
 msgid "Bots"
 msgstr ""
 
@@ -708,7 +711,7 @@ msgstr "Проверка не удалась"
 msgid "Check for updates"
 msgstr "Проверьте наличие обновлений"
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Check in."
 msgstr "Проверить."
 
@@ -1334,6 +1337,7 @@ msgstr "Не удалось сбросить пароль"
 msgid "Could not revoke connection"
 msgstr "Не удалось отменить соединение"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not run routine"
 msgstr "Не удалось запустить задачу"
@@ -1355,6 +1359,7 @@ msgstr "Не удалось сохранить автообзор."
 msgid "Could not save group"
 msgstr "Не удалось сохранить группу"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not save routine"
 msgstr "Не удалось сохранить задачу"
@@ -1472,6 +1477,7 @@ msgid "Create new Space"
 msgstr "Создать новое пространство"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Create Routine"
 msgstr "Создать задачу"
 
@@ -2821,6 +2827,7 @@ msgid "Paste your API key"
 msgstr "Вставьте свой ключ API"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Paused"
 msgstr "Приостановлено"
 
@@ -3163,12 +3170,14 @@ msgstr "Сменить ключ"
 msgid "Rounded square"
 msgstr ""
 
+#: src/lib/routine-save.ts
 #: src/pages/RoutineEditor.tsx
-#: src/pages/Shell.tsx
 msgid "Routine"
 msgstr "Задача"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
+#: src/pages/Shell.tsx
 msgid "Routines"
 msgstr "Задачи"
 
@@ -3184,7 +3193,11 @@ msgstr "Запустить в"
 msgid "Run history"
 msgstr "История запуска"
 
-#: src/pages/Shell.tsx
+#: src/pages/RoutineEditor.tsx
+msgid "Run now"
+msgstr "Запустить сейчас"
+
+#: src/lib/routine-save.ts
 msgid "Run time must be in the future."
 msgstr "Время выполнения должно быть в будущем."
 
@@ -3536,6 +3549,7 @@ msgstr "Запуск…"
 msgid "Steps"
 msgstr "Шаги"
 
+#: src/pages/RoutineEditor.tsx
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "Остановить"
@@ -3618,10 +3632,6 @@ msgstr ""
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
 msgstr "Тест"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Test run"
-msgstr "Тестовый запуск"
 
 #: src/components/SoftwareUpdateSection.tsx
 msgid "The API did not come back. Refresh this page."
