@@ -1,7 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { botAvatarShapeIndexForIdentity } from "@milo/core";
 import {
   BotAvatar,
+  BotAvatarShapePicker,
   DEFAULT_GROK_BOT_COLOR,
   Dialog,
   DialogContent,
@@ -10,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
   GROK_BOT_COLORS,
-  GrokShapePreview,
   parseBotAvatar,
 } from "@milo/ui-web";
 import { Check, Pencil, Upload, X } from "lucide-react";
@@ -40,7 +41,8 @@ export function AvatarStudioPopover({
 
   const parsed = parseBotAvatar(value, identity);
   const currentColor = parsed.color || DEFAULT_GROK_BOT_COLOR;
-  const currentShape = parsed.shapeIndex ?? 0;
+  const currentShape =
+    parsed.shapeIndex ?? botAvatarShapeIndexForIdentity(identity || parsed.color || "agent");
 
   function selectShape(shapeIndex: number) {
     onChange(`${currentColor}::shape_${shapeIndex}`);
@@ -194,10 +196,11 @@ export function AvatarStudioPopover({
                   <Trans>Shape</Trans>
                 </div>
                 <div className="grid grid-cols-4 place-items-center gap-2">
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map((shapeIndex) => (
-                    <GrokShapePreview
-                      key={shapeIndex}
+                  {botAvatarShapeLabels().map((label, shapeIndex) => (
+                    <BotAvatarShapePicker
+                      key={label}
                       shapeIndex={shapeIndex}
+                      label={label}
                       color={currentColor}
                       selected={!parsed.isImage && currentShape === shapeIndex}
                       onClick={() => selectShape(shapeIndex)}
@@ -287,4 +290,9 @@ export function AvatarStudioPopover({
       </Dialog>
     </>
   );
+}
+
+/** Accessible names for the four shapes, in `BOT_AVATAR_SHAPES` order. */
+export function botAvatarShapeLabels(): string[] {
+  return [t`Circle`, t`Rounded square`, t`Dome`, t`Tile`];
 }

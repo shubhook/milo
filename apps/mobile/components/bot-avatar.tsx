@@ -1,10 +1,14 @@
 import type { AvatarStyle } from "@milo/contracts";
+import { parseBotAvatarValue } from "@milo/contracts";
 import {
   ACTIVE_RUN_STATUSES,
   avatarIdentitySeed,
+  botAvatarEyes,
+  botAvatarShape,
+  botAvatarShapeIndexForIdentity,
+  botAvatarStatusTone,
   organicAvatarPath,
-  SHIPPED_BOT_AVATAR_CENTER,
-  SHIPPED_BOT_AVATAR_VIEWBOX,
+  resolvePersonaColorDef,
 } from "@milo/core";
 import { memo, useEffect } from "react";
 import { Image, View } from "react-native";
@@ -18,10 +22,10 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Ellipse, G, Path, Rect } from "react-native-svg";
+import Svg, { G, Path, Rect } from "react-native-svg";
 import { workingAvatarDuration, workingAvatarFrame } from "../lib/avatar-motion";
-import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
 import { useI18n } from "../lib/i18n";
+import { useMobileTokens } from "../lib/native";
 import { useAvatarStyle } from "./avatar-style";
 import { NativeSymbol } from "./native-symbol";
 
@@ -31,6 +35,7 @@ export const BotAvatar = memo(function BotAvatar({
   color,
   size = 54,
   status,
+  unread = false,
   identity,
   variant,
   muted = false,
@@ -38,20 +43,18 @@ export const BotAvatar = memo(function BotAvatar({
   color: string;
   size?: number;
   status?: string;
+  unread?: boolean;
   identity?: string;
   variant?: AvatarStyle;
   muted?: boolean;
 }) {
   const { t } = useI18n();
+  const tokens = useMobileTokens();
   const isWorking = ACTIVE_RUN_STATUSES.some((activeStatus) => activeStatus === status);
   const { avatarStyle } = useAvatarStyle();
-  const parsed = mobileBotAvatarPresentation(color);
+  const parsed = parseBotAvatarValue(color);
   const fillColor = parsed.kind === "shape" || parsed.kind === "color" ? parsed.color : color;
-  const visorW = Math.round(size * 0.68);
-  const visorH = Math.round(size * 0.44);
-  const eyeW = Math.max(3, Math.round(size * 0.11));
-  const eyeH = Math.max(4, Math.round(size * 0.17));
-  const gap = Math.max(3, Math.round(size * 0.11));
+  const tone = botAvatarStatusTone(status);
   const picture =
     parsed.kind === "image" && parsed.imageUrl ? (
       <View
@@ -64,67 +67,42 @@ export const BotAvatar = memo(function BotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
-    ) : parsed.kind === "shape" ? (
-      <ShippedShapeAvatar
-        color={parsed.color}
-        eyeColor={parsed.eyeColor}
-        shapePath={parsed.shapePath}
-        size={size}
-      />
-    ) : (variant ?? avatarStyle) === "organic" ? (
+    ) : parsed.kind !== "shape" && (variant ?? avatarStyle) === "organic" ? (
       <OrganicAvatar color={fillColor} identity={identity} size={size} isWorking={isWorking} />
     ) : (
-      <View
-        style={{
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: fillColor,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View
-          style={{
-            width: visorW,
-            height: visorH,
-            borderRadius: Math.round(visorH * 0.52),
-            backgroundColor: "#0C0C0E",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap,
-          }}
-        >
-          {[0, 1].map((eye) => (
-            <View
-              key={eye}
-              style={{
-                width: eyeW,
-                height: eyeH,
-                borderRadius: Math.max(2, Math.round(eyeW * 0.6)),
-                backgroundColor: "#fff",
-              }}
-            />
-          ))}
-        </View>
-      </View>
+      <ShapeAvatar
+        color={fillColor}
+        shapeIndex={
+          parsed.kind === "shape"
+            ? parsed.shapeIndex
+            : botAvatarShapeIndexForIdentity(identity || fillColor || "agent")
+        }
+        size={size}
+      />
     );
+  const dotSize = Math.max(10, Math.round(size * 0.26));
   return (
     <View style={{ width: size, height: size }}>
       {picture}
-      {isWorking ? (
+      {(tone || unread) && !muted ? (
         <View
-          accessibilityLabel={t("Working")}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
           style={{
             position: "absolute",
-            right: muted ? undefined : 0,
-            left: muted ? 0 : undefined,
-            bottom: 0,
-            width: Math.max(6, Math.round(size * 0.18)),
-            height: Math.max(6, Math.round(size * 0.18)),
-            borderRadius: size,
-            backgroundColor: "#F5A03C",
+            right: -1,
+            bottom: -1,
+            width: dotSize,
+            height: dotSize,
+            borderRadius: dotSize,
+            borderWidth: 2.5,
+            borderColor: tokens.background,
+            backgroundColor:
+              tone === "warning"
+                ? tokens.warning
+                : tone === "destructive"
+                  ? tokens.destructive
+                  : tokens.foreground,
           }}
         />
       ) : null}
@@ -140,8 +118,8 @@ export const BotAvatar = memo(function BotAvatar({
             height: Math.max(14, Math.round(size * 0.34)),
             borderRadius: size,
             borderWidth: 2,
-            borderColor: "#000",
-            backgroundColor: "#242428",
+            borderColor: tokens.background,
+            backgroundColor: tokens.secondary,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -150,7 +128,7 @@ export const BotAvatar = memo(function BotAvatar({
             ios="bell.slash.fill"
             android="notifications-off"
             size={Math.max(8, Math.round(size * 0.17))}
-            color="#ECECEE"
+            color={tokens.secondaryForeground}
           />
         </View>
       ) : null}
@@ -158,26 +136,46 @@ export const BotAvatar = memo(function BotAvatar({
   );
 });
 
-function ShippedShapeAvatar({
+function ShapeAvatar({
   color,
-  eyeColor,
-  shapePath,
+  shapeIndex,
   size,
 }: {
   color: string;
-  eyeColor: string;
-  shapePath: string;
+  shapeIndex: number;
   size: number;
 }) {
-  const center = SHIPPED_BOT_AVATAR_CENTER;
+  const [topLeft, topRight, bottomRight, bottomLeft] = botAvatarShape(shapeIndex).corners;
+  const eyes = botAvatarEyes(size);
+  const colorDef = resolvePersonaColorDef("preview", color);
   return (
-    <Svg width={size} height={size} viewBox={SHIPPED_BOT_AVATAR_VIEWBOX}>
-      <Path d={shapePath} fill={color} />
-      <G fill={eyeColor}>
-        <Ellipse cx={center - 29} cy={center - 8} rx={10} ry={7} />
-        <Ellipse cx={center + 29} cy={center - 8} rx={10} ry={7} />
-      </G>
-    </Svg>
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderTopLeftRadius: topLeft * size,
+        borderTopRightRadius: topRight * size,
+        borderBottomRightRadius: bottomRight * size,
+        borderBottomLeftRadius: bottomLeft * size,
+        backgroundColor: colorDef.hex,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: eyes.gap,
+      }}
+    >
+      {[0, 1].map((eye) => (
+        <View
+          key={eye}
+          style={{
+            width: eyes.width,
+            height: eyes.height,
+            borderRadius: eyes.radius,
+            backgroundColor: colorDef.eyeColor,
+          }}
+        />
+      ))}
+    </View>
   );
 }
 

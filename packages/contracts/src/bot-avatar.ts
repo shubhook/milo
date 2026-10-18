@@ -1,7 +1,7 @@
 import * as z from "zod";
 
-/** Matches the eight shipped mascot shapes in `@milo/core`. */
-export const BOT_AVATAR_SHAPE_COUNT = 8;
+/** Matches the four avatar shapes in `@milo/core`. */
+export const BOT_AVATAR_SHAPE_COUNT = 4;
 
 /**
  * 256x256 webp data URLs from Avatar Studio stay well under this. Cap writes so

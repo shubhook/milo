@@ -2,17 +2,16 @@ import type { GrokColorDef } from "@milo/core";
 import {
   ACTIVE_RUN_STATUSES,
   avatarIdentitySeed,
+  BOT_AVATAR_SHAPES,
+  botAvatarEyes,
+  botAvatarShape,
+  botAvatarShapeIndexForIdentity,
+  botAvatarStatusTone,
   DEFAULT_GROK_BOT_COLOR,
   GROK_BOT_COLORS,
   GROK_COLOR_LIST,
   organicAvatarPath,
   resolvePersonaColorDef,
-  SHIPPED_BOT_AVATAR_CENTER,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
-  SHIPPED_BOT_AVATAR_SHAPES,
-  SHIPPED_BOT_AVATAR_VIEWBOX,
-  shippedBotAvatarShapePath,
-  shippedHash,
 } from "@milo/core";
 import { tokens } from "@milo/ui-tokens";
 import type { CSSProperties } from "react";
@@ -24,30 +23,6 @@ import "./styles.css";
 
 export type { GrokColorDef };
 export { DEFAULT_GROK_BOT_COLOR, GROK_BOT_COLORS, GROK_COLOR_LIST, resolvePersonaColorDef };
-
-export const GROK_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
-export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;
-const VIEWBOX = SHIPPED_BOT_AVATAR_VIEWBOX;
-const CENTER = SHIPPED_BOT_AVATAR_CENTER;
-
-export const GROK_MASCOT_SHAPES = SHIPPED_SHAPE_KEYS.map(
-  (k) => GROK_SHAPES[k] ?? FALLBACK_SHAPE_PATH,
-);
-
-const FALLBACK_SHAPE_PATH = GROK_SHAPES.hex ?? "";
-
-export function resolvePersonaShape(identity: string, explicitShape?: string | null): string {
-  if (explicitShape) {
-    const explicit = GROK_SHAPES[explicitShape];
-    if (explicit) return explicit;
-  }
-  let hash = shippedHash(identity);
-  hash = Math.imul(hash ^ (hash >>> 16), 73244475);
-  hash = Math.imul(hash ^ (hash >>> 13), 3266489909);
-  const shapeIndex = ((hash ^ (hash >>> 16)) >>> 0) % SHIPPED_SHAPE_KEYS.length;
-  const key = SHIPPED_SHAPE_KEYS[shapeIndex] ?? "hex";
-  return GROK_SHAPES[key] ?? FALLBACK_SHAPE_PATH;
-}
 
 export function parseBotAvatar(
   rawColor: string,
@@ -71,17 +46,26 @@ export function parseBotAvatar(
     const shapeIdx = Number.isSafeInteger(parsedShapeIdx) ? parsedShapeIdx : 0;
     return {
       color: parts[0] || "#F97316",
-      shapeIndex: shapeIdx % SHIPPED_SHAPE_KEYS.length,
+      shapeIndex: shapeIdx % BOT_AVATAR_SHAPES.length,
       isImage: false,
     };
   }
   return { color: rawColor, isImage: false };
 }
 
+/** CSS `border-radius` for a shape: corner fractions become percentages. */
+export function botAvatarBorderRadius(shapeIndex: number): string {
+  return botAvatarShape(shapeIndex)
+    .corners.map((corner) => `${corner * 100}%`)
+    .join(" ");
+}
+
 export interface BotAvatarProps {
   color: string;
   size?: number;
   status?: string;
+  /** Adds a dot when nothing more urgent (needs you, failed) is showing. */
+  unread?: boolean;
   identity?: string;
   className?: string;
   variant?: AvatarStyle;
@@ -91,6 +75,7 @@ export const BotAvatar = memo(function BotAvatar({
   color,
   size = 36,
   status,
+  unread = false,
   identity = "",
   className,
   variant,
@@ -107,142 +92,126 @@ export const BotAvatar = memo(function BotAvatar({
     [effectiveId, parsed.color],
   );
 
-  const shapePath = useMemo(() => {
-    if (parsed.shapeIndex !== undefined) {
-      return shippedBotAvatarShapePath(parsed.shapeIndex);
-    }
-    return resolvePersonaShape(effectiveId);
-  }, [parsed.shapeIndex, effectiveId]);
+  const tone = botAvatarStatusTone(status);
+  const dot =
+    tone || unread ? (
+      <span
+        aria-hidden="true"
+        data-avatar-dot={tone ?? "unread"}
+        className={cn(
+          "milo-avatar-dot absolute -end-0.5 -bottom-0.5 rounded-full",
+          tone === "warning"
+            ? "bg-warning"
+            : tone === "destructive"
+              ? "bg-destructive"
+              : "bg-foreground",
+        )}
+        style={{
+          width: Math.max(8, Math.round(size * 0.3)),
+          height: Math.max(8, Math.round(size * 0.3)),
+        }}
+      />
+    ) : null;
+
+  const ring = isWorking ? (
+    <svg
+      className="rakazo-bot-avatar-ring pointer-events-none absolute"
+      style={{ inset: -3, width: size + 6, height: size + 6 }}
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="24"
+        cy="24"
+        r="22"
+        stroke={`url(#${id}-ring)`}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeDasharray="45 80"
+      />
+      <defs>
+        <linearGradient id={`${id}-ring`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={colorDef.light} stopOpacity="1" />
+          <stop offset="100%" stopColor={colorDef.light} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ) : null;
 
   if (parsed.isImage && parsed.imageUrl) {
     return (
-      <div
+      <span
         className={cn(
-          "rakazo-bot-avatar relative overflow-hidden rounded-full flex items-center justify-center select-none bg-secondary shrink-0 border border-border",
+          "rakazo-bot-avatar relative inline-flex shrink-0 select-none items-center justify-center",
           className,
         )}
         data-working={isWorking}
-        style={{
-          width: size,
-          height: size,
-          boxShadow: isWorking
-            ? "0 0 0 2px #3B82F6, 0 0 10px rgba(59,130,246,0.6)"
-            : "0 2px 5px rgba(0,0,0,0.5)",
-        }}
+        style={{ width: size, height: size }}
       >
-        {isWorking ? (
-          <svg
-            className="rakazo-bot-avatar-ring absolute pointer-events-none"
-            style={{
-              inset: -4,
-              width: size + 8,
-              height: size + 8,
-            }}
-            viewBox="0 0 48 48"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle
-              cx="24"
-              cy="24"
-              r="22"
-              stroke="#3B82F6"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-              strokeDasharray="45 80"
-            />
-          </svg>
-        ) : null}
-        <img src={parsed.imageUrl} alt="" className="h-full w-full object-cover" />
-      </div>
+        {ring}
+        <img
+          src={parsed.imageUrl}
+          alt=""
+          className="h-full w-full rounded-full border border-border bg-secondary object-cover"
+        />
+        {dot}
+      </span>
     );
   }
 
   if (parsed.shapeIndex === undefined && (variant ?? preferredVariant) === "organic") {
     return (
-      <OrganicAvatar
-        color={colorDef.hex}
-        identity={effectiveId}
-        size={size}
-        isWorking={isWorking}
-        className={className}
-      />
+      <span
+        className={cn("relative inline-flex shrink-0", className)}
+        style={{ width: size, height: size }}
+      >
+        <OrganicAvatar
+          color={colorDef.hex}
+          identity={effectiveId}
+          size={size}
+          isWorking={isWorking}
+        />
+        {dot}
+      </span>
     );
   }
 
+  const shapeIndex = parsed.shapeIndex ?? botAvatarShapeIndexForIdentity(effectiveId);
+  const eyes = botAvatarEyes(size);
   return (
-    <div
+    <span
       className={cn(
-        "rakazo-bot-avatar grok-avatar-container relative inline-flex items-center justify-center shrink-0 select-none",
+        "rakazo-bot-avatar relative inline-flex shrink-0 select-none items-center justify-center",
         className,
       )}
-      style={{
-        width: size,
-        height: size,
-      }}
+      style={{ width: size, height: size }}
       data-working={isWorking}
+      data-shape={botAvatarShape(shapeIndex).key}
     >
-      {isWorking ? (
-        <svg
-          className="rakazo-bot-avatar-ring absolute pointer-events-none"
-          style={{
-            inset: -3,
-            width: size + 6,
-            height: size + 6,
-            filter: `drop-shadow(0 0 4px ${colorDef.light})`,
-          }}
-          viewBox="0 0 48 48"
-          fill="none"
-          aria-hidden="true"
-        >
-          <circle
-            cx="24"
-            cy="24"
-            r="22"
-            stroke={`url(#${id}-ring)`}
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeDasharray="45 80"
-          />
-          <circle cx="43" cy="24" r="2.4" fill={colorDef.light} />
-          <defs>
-            <linearGradient id={`${id}-ring`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={colorDef.light} stopOpacity="1" />
-              <stop offset="100%" stopColor={colorDef.light} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-      ) : null}
-      <svg
-        viewBox={VIEWBOX}
-        width={size}
-        height={size}
-        aria-hidden="true"
-        className={cn(
-          "overflow-hidden",
-          isWorking ? "animate-pulse motion-reduce:animate-none" : "",
-        )}
+      {ring}
+      <span
+        className="milo-avatar-face flex h-full w-full items-center justify-center"
         style={{
-          filter: isWorking
-            ? `drop-shadow(0 0 6px ${colorDef.light})`
-            : "drop-shadow(0 1px 2px rgba(0,0,0,0.28))",
+          borderRadius: botAvatarBorderRadius(shapeIndex),
+          background: colorDef.hex,
+          gap: eyes.gap,
         }}
       >
-        <defs>
-          <linearGradient id={`grok-ink-${id}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={colorDef.light} />
-            <stop offset="100%" stopColor={colorDef.dark} />
-          </linearGradient>
-        </defs>
-        <g>
-          <path d={shapePath} fill={`url(#grok-ink-${id})`} />
-          <g fill={colorDef.eyeColor} className="grok-character-eyes">
-            <ellipse cx={CENTER - 29} cy={CENTER - 8} rx={10} ry={7} />
-            <ellipse cx={CENTER + 29} cy={CENTER - 8} rx={10} ry={7} />
-          </g>
-        </g>
-      </svg>
-    </div>
+        {[0, 1].map((eye) => (
+          <span
+            key={eye}
+            style={{
+              width: eyes.width,
+              height: eyes.height,
+              borderRadius: eyes.radius,
+              background: colorDef.eyeColor,
+            }}
+          />
+        ))}
+      </span>
+      {dot}
+    </span>
   );
 });
 
@@ -337,41 +306,54 @@ function subscribeToReducedMotion(onChange: () => void): () => void {
   return () => media.removeEventListener("change", onChange);
 }
 
-export function GrokShapePreview({
+export function BotAvatarShapePicker({
   shapeIndex,
+  label,
   color,
   selected,
   onClick,
 }: {
   shapeIndex: number;
+  label: string;
   color: string;
   selected?: boolean;
   onClick?: () => void;
 }) {
-  const key = SHIPPED_SHAPE_KEYS[shapeIndex % SHIPPED_SHAPE_KEYS.length] ?? "hex";
-  const path = shippedBotAvatarShapePath(shapeIndex);
   const colorDef = resolvePersonaColorDef("preview", color);
+  const eyes = botAvatarEyes(28);
 
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={key}
+      aria-label={label}
       aria-pressed={selected ?? false}
       className={cn(
-        "relative flex size-11 items-center justify-center rounded-xl transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
-        selected
-          ? "ring-2 ring-primary ring-offset-2 ring-offset-popover bg-white/10"
-          : "hover:bg-white/5",
+        "flex size-11 items-center justify-center rounded-lg border bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        selected ? "border-foreground ring-1 ring-foreground" : "border-border hover:bg-muted",
       )}
     >
-      <svg viewBox={VIEWBOX} className="size-8 overflow-visible" aria-hidden="true">
-        <path d={path} fill={colorDef.light} />
-        <g fill={colorDef.eyeColor}>
-          <ellipse cx={CENTER - 29} cy={CENTER - 8} rx={10} ry={7} />
-          <ellipse cx={CENTER + 29} cy={CENTER - 8} rx={10} ry={7} />
-        </g>
-      </svg>
+      <span
+        aria-hidden="true"
+        className="flex size-7 items-center justify-center"
+        style={{
+          borderRadius: botAvatarBorderRadius(shapeIndex),
+          background: colorDef.hex,
+          gap: eyes.gap,
+        }}
+      >
+        {[0, 1].map((eye) => (
+          <span
+            key={eye}
+            style={{
+              width: eyes.width,
+              height: eyes.height,
+              borderRadius: eyes.radius,
+              background: colorDef.eyeColor,
+            }}
+          />
+        ))}
+      </span>
     </button>
   );
 }

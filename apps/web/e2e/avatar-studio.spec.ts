@@ -22,6 +22,15 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   await expect(studio.getByTestId("avatar-studio-bot-tab")).toBeVisible();
   await expect(studio.getByText("Shape", { exact: true })).toBeVisible();
   await expect(studio.getByText("Color", { exact: true })).toBeVisible();
+  for (const shape of ["Circle", "Rounded square", "Dome", "Tile"]) {
+    await expect(studio.getByRole("button", { name: shape, exact: true })).toBeVisible();
+  }
+  await studio.getByRole("button", { name: "Dome", exact: true }).click();
+  await expect(studio.getByRole("button", { name: "Dome", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(studio.locator('.rakazo-bot-avatar[data-shape="dome"]').first()).toBeVisible();
 
   await captureScreenshot(page, testInfo, "avatar-studio-bot-tab");
 });
