@@ -370,7 +370,10 @@ test("sign-in, spawn, and stop work in the shell", async ({ page }, testInfo) =>
   await expect(voiceButton).toBeVisible();
   await composer.fill("Use the newer report and keep the answer short.");
   await expect(voiceButton).toHaveCount(0);
+  // Tab order follows the layout: message, then the control row (attach, then send).
   await composer.press("Tab");
+  await expect(page.getByRole("button", { name: "Attach file", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Send", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(

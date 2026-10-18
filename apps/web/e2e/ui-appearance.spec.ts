@@ -95,7 +95,7 @@ test("account settings appearance control switches to light mode", async ({ page
   await captureSidebarSearchSelected(page, testInfo, "sidebar-search-selected-dark");
 });
 
-test("sidebar bot rows hover to the integrations button's tone", async ({ page }, testInfo) => {
+test("sidebar bot rows and nav rows share one hover tone", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `ui-hover-${stamp}@rakazo.test`, "password12", "Hover QA");
   await completeOnboarding(page, testInfo);
@@ -113,6 +113,7 @@ test("sidebar bot rows hover to the integrations button's tone", async ({ page }
   await captureScreenshot(page, testInfo, "sidebar-row-hover");
 
   const integrations = sidebar.getByRole("button", { name: "Integrations", exact: true });
+  await integrations.hover();
   await expect
     .poll(() => integrations.evaluate((el) => getComputedStyle(el).backgroundColor))
     .toBe(chiefBg);

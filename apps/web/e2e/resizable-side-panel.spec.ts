@@ -38,13 +38,13 @@ test("computer rail resizes its preview and remembers width", async ({ page }, t
     .poll(async () => Math.round((await panel.boundingBox())!.width))
     .toBe(preferredWidth);
   await page.setViewportSize({ width: 1000, height: 1000 });
-  await expect(separator).toHaveAttribute("aria-valuemax", "364");
-  await expect.poll(async () => Math.round((await panel.boundingBox())!.width)).toBe(364);
+  await expect(separator).toHaveAttribute("aria-valuemax", "400");
+  await expect.poll(async () => Math.round((await panel.boundingBox())!.width)).toBe(400);
   expect(await page.evaluate(() => localStorage.getItem("rakazo:right-panel-width"))).toBe(
     String(preferredWidth),
   );
   await page.setViewportSize({ width: 1500, height: 1000 });
-  await expect(separator).toHaveAttribute("aria-valuemax", "864");
+  await expect(separator).toHaveAttribute("aria-valuemax", "900");
   await expect
     .poll(async () => Math.round((await panel.boundingBox())!.width))
     .toBe(preferredWidth);

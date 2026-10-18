@@ -28,7 +28,9 @@ async function captureSidebarRoster(
   await captureScreenshot(page, testInfo, name);
 }
 
-test("sidebar roster shows bot title pill below the name", async ({ page }, testInfo) => {
+test("a bot's title shows under its name in the thread header, not in the roster", async ({
+  page,
+}, testInfo) => {
   const stamp = Date.now();
   await signup(page, `roster-title-${stamp}@rakazo.test`, "password12", "Roster Title");
   await completeOnboarding(page);
@@ -46,20 +48,16 @@ test("sidebar roster shows bot title pill below the name", async ({ page }, test
   const sidebar = page.locator("aside").first();
   const row = sidebar.locator(`[data-roster-bot-id="${bot.id}"]`);
   await expect(row).toBeVisible();
+  await expect(row.locator("[data-roster-bot-name]")).toHaveText("Long Research Assistant Name");
+  await expect(row.getByText("Research & outreach lead")).toHaveCount(0);
 
-  const name = row.locator("[data-roster-bot-name]");
-  const title = row.getByText("Research & outreach lead");
+  const name = page.getByTestId("bot-settings-trigger");
+  const status = page.getByTestId("thread-header-status");
   await expect(name).toHaveText("Long Research Assistant Name");
-  await expect(title).toBeVisible();
-
+  await expect(status).toHaveText("Research & outreach lead");
   const nameBox = await name.boundingBox();
-  const titleBox = await title.boundingBox();
-  expect(nameBox).toBeTruthy();
-  expect(titleBox).toBeTruthy();
-  if (nameBox && titleBox) {
-    expect(titleBox.y).toBeGreaterThan(nameBox.y + nameBox.height - 2);
-    expect(nameBox.width).toBeGreaterThan(80);
-  }
+  const statusBox = await status.boundingBox();
+  expect(statusBox!.y).toBeGreaterThan(nameBox!.y + nameBox!.height - 2);
 
-  await captureSidebarRoster(page, testInfo, "sidebar-roster-title-pill");
+  await captureSidebarRoster(page, testInfo, "sidebar-roster-title-header");
 });

@@ -6,7 +6,7 @@ const STORAGE_KEY = "rakazo:right-panel-width";
 const MIN_WIDTH = 320;
 const DEFAULT_WIDTH = 384;
 const ABSOLUTE_MAX = 1000;
-/** Desktop bots sidebar width (`md:w-[316px]` in Shell). */
+/** Desktop bots sidebar width (`md:w-[280px]` in Shell). */
 const BOTS_SIDEBAR_WIDTH = 280;
 const MIN_CHAT_WIDTH = 320;
 
