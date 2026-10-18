@@ -246,13 +246,12 @@ import {
   emptyRoutineDraft,
   type RoutineDraftState,
   RoutineEditor,
-  RoutineListHeader,
-  RoutineListRow,
 } from "./RoutineEditor";
 import type { SettingsSection } from "./SettingsOverlay";
 import { SpaceSearchResults } from "./SpaceSearch";
 import { BotSettings } from "./shell/bot-panel";
 import { BotCreatePicker } from "./shell/bot-picker";
+import { BotActivity, BotProfileHeader } from "./shell/bot-profile";
 import { CommandPalette, isCommandPaletteHotkey } from "./shell/command-palette";
 import { CreateBotDialog, type CreateBotInputDraft } from "./shell/create-bot-dialog";
 import {
@@ -1724,7 +1723,7 @@ export function ShellPage() {
         setEditingRoutine(routine);
         setPanel("routine");
       } else {
-        setPanel("computer");
+        setPanel("activity");
       }
       const next = new URLSearchParams(searchParams);
       next.delete("routine");
@@ -2517,8 +2516,18 @@ export function ShellPage() {
       // Reload starts with panel=null so storage restores. In-session chat switches used to
       // keep computer/settings open; only routine was cleared (handled above). Carry is
       // session-only — do not write the carried panel onto the destination's saved prefs.
-      if (panel === "computer" || panel === "settings" || panel === "group-settings") {
-        const carried = panel === "computer" ? "computer" : inGroup ? "group-settings" : "settings";
+      if (
+        panel === "activity" ||
+        panel === "computer" ||
+        panel === "settings" ||
+        panel === "group-settings"
+      ) {
+        const carried =
+          panel === "activity" || panel === "computer"
+            ? panel
+            : inGroup
+              ? "group-settings"
+              : "settings";
         pendingPanelRestore.current = null;
         if (carried !== panel) setPanelState(carried);
         setRestoredPanelKey(null);
@@ -2539,7 +2548,7 @@ export function ShellPage() {
       const routine = saved.routineId
         ? routines.find((item) => item.id === saved.routineId)
         : undefined;
-      if (saved.routineId && !routine) next = "computer";
+      if (saved.routineId && !routine) next = "activity";
       setEditingRoutine(routine ?? null);
       setRoutineDraft(routine ? draftFromRoutine(routine) : emptyRoutineDraft());
       setRoutineWebhookSecret(null);
@@ -3739,22 +3748,24 @@ export function ShellPage() {
       >
         {panel && panel !== "create" && (active || activeGroup) ? (
           <div className="rk-scroll h-full w-full overflow-y-auto px-5 py-[17px]">
-            {panel !== "routine" && panel !== "create-group" && panel !== "group-settings" ? (
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-[13.5px] text-muted-foreground">
-                  {panel === "settings" ? (
-                    <Trans>Settings</Trans>
-                  ) : active ? (
-                    <Trans>Computer</Trans>
-                  ) : (
-                    <Trans>Group</Trans>
-                  )}
-                </span>
-                <div className="flex gap-1">
-                  {active &&
-                  panel === "computer" &&
-                  !computerOpen &&
-                  computerPanelNeedsMaintenance(computer?.state, booting) ? (
+            {active && (panel === "activity" || panel === "computer" || panel === "settings") ? (
+              <BotProfileHeader
+                bot={active}
+                tab={panel}
+                onTab={setPanel}
+                onClose={() => setPanel(null)}
+                onColorChange={(color) => {
+                  void rpc.bots
+                    .update({ botId: active.id, color })
+                    .then(() => refreshBots())
+                    .catch(() => undefined);
+                }}
+              />
+            ) : null}
+            {panel === "computer" && active ? (
+              <div>
+                {!computerOpen && computerPanelNeedsMaintenance(computer?.state, booting) ? (
+                  <div className="mb-3 flex justify-end">
                     <ComputerMaintenanceActions
                       botId={active.id}
                       computer={computer}
@@ -3762,31 +3773,8 @@ export function ShellPage() {
                         await refreshThread(active.id);
                       }}
                     />
-                  ) : null}
-                  {active ? (
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={panel === "settings" ? t`Show computer` : t`Show settings`}
-                      onClick={() => setPanel(panel === "settings" ? "computer" : "settings")}
-                      className={panel === "settings" ? "text-foreground" : "text-muted-foreground"}
-                    >
-                      <Settings size={16} strokeWidth={1.7} />
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={t`Close panel`}
-                    onClick={() => setPanel(null)}
-                  >
-                    <X size={16} strokeWidth={1.8} />
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-            {panel === "computer" && active ? (
-              <div>
+                  </div>
+                ) : null}
                 <div
                   data-testid="computer-preview"
                   className="group relative aspect-[16/10] overflow-hidden rounded-[14px] bg-background"
@@ -3838,35 +3826,33 @@ export function ShellPage() {
                 <p className="mt-2 truncate text-[13.5px] text-muted-foreground" dir="auto">
                   {t`${active.name}'s screen`}
                 </p>
-                <RoutineListHeader
-                  onCreate={() => {
-                    setRoutineDraft(emptyRoutineDraft());
-                    setRoutineWebhookSecret(null);
-                    setEditingRoutine(null);
-                    setRoutineError(null);
-                    setPanel("routine");
-                  }}
-                />
-                {activeRoutines.map((routine) => {
-                  const routineRunning =
-                    snapshot?.run?.routineId === routine.id && isActive(snapshot.run.status);
-                  return (
-                    <RoutineListRow
-                      key={routine.id}
-                      routine={routine}
-                      running={routineRunning}
-                      onOpen={() => {
-                        setRoutineDraft(draftFromRoutine(routine));
-                        setRoutineWebhookSecret(null);
-                        setEditingRoutine(routine);
-                        setRoutineError(null);
-                        setPanel("routine");
-                      }}
-                      onStop={() => void stopRun()}
-                    />
-                  );
-                })}
               </div>
+            ) : null}
+            {panel === "activity" && active ? (
+              <BotActivity
+                botId={active.id}
+                routines={activeRoutines}
+                runningRoutineId={
+                  snapshot?.run?.routineId && isActive(snapshot.run.status)
+                    ? snapshot.run.routineId
+                    : null
+                }
+                onCreateRoutine={() => {
+                  setRoutineDraft(emptyRoutineDraft());
+                  setRoutineWebhookSecret(null);
+                  setEditingRoutine(null);
+                  setRoutineError(null);
+                  setPanel("routine");
+                }}
+                onOpenRoutine={(routine) => {
+                  setRoutineDraft(draftFromRoutine(routine));
+                  setRoutineWebhookSecret(null);
+                  setEditingRoutine(routine);
+                  setRoutineError(null);
+                  setPanel("routine");
+                }}
+                onStopRoutine={() => void stopRun()}
+              />
             ) : null}
             {panel === "create-group" ? (
               <CreateGroupForm
@@ -3952,7 +3938,7 @@ export function ShellPage() {
                 saving={savingRoutine}
                 running={runningRoutine}
                 error={routineError}
-                onBack={() => setPanel("computer")}
+                onBack={() => setPanel("activity")}
                 onClose={() => setPanel(null)}
                 onEnsureWebhook={async () => {
                   await ensureWebhookSecret(active.id);
@@ -4027,7 +4013,7 @@ export function ShellPage() {
                     setDeleteRoutineTarget(editingRoutine);
                     return;
                   }
-                  setPanel("computer");
+                  setPanel("activity");
                 }}
               />
             ) : null}
@@ -4381,7 +4367,7 @@ export function ShellPage() {
               setEditingRoutine((current) => (current?.id === target.id ? null : current));
               if (activeBotId.current !== target.botId) return;
               await refreshThread(target.botId);
-              if (activeBotId.current === target.botId) setPanel("computer");
+              if (activeBotId.current === target.botId) setPanel("activity");
             }}
           />
         ) : null}

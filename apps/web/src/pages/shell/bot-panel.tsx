@@ -28,7 +28,6 @@ import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { botProfilePatch } from "../../lib/bot-profile-patch";
 import { thinkingLevelLabel } from "../../lib/model-catalog";
 import { rpc } from "../../lib/rpc";
-import { AvatarStudioPopover } from "./avatar-studio-popover";
 import { BotCredentialsSection } from "./bot-credentials";
 
 const ScratchpadSection = lazy(() =>
@@ -114,7 +113,8 @@ export function BotSettings({
   // compare against the description last saved here; otherwise a model or
   // voice change treats that stale text as an edit and overwrites instructions.
   const savedDescriptionRef = useRef(bot.description ?? "");
-  const [color, setColor] = useState(bot.color);
+  // The profile header owns the avatar, so saves here always carry the bot's current one.
+  const color = bot.color;
   const [notifyOnFinish, setNotifyOnFinish] = useState(bot.notifyOnFinish ?? true);
   // Settings > Notifications can change this while the panel stays open, and every save sends it.
   useEffect(() => {
@@ -296,19 +296,7 @@ export function BotSettings({
 
   return (
     <div data-testid="bot-settings">
-      <div className="flex justify-center py-4">
-        <AvatarStudioPopover
-          value={color}
-          identity={bot.id}
-          status={bot.status}
-          size={76}
-          onChange={(newColor) => {
-            setColor(newColor);
-            void enqueueSave({ color: newColor });
-          }}
-        />
-      </div>
-      <label htmlFor={`${ids}-name`} className="mt-4 block text-[13.5px] text-muted-foreground/80">
+      <label htmlFor={`${ids}-name`} className="block text-[13.5px] text-muted-foreground/80">
         <Trans>Name</Trans>
         <Input
           id={`${ids}-name`}

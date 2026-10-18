@@ -109,10 +109,10 @@ export function routineTriggerSummary(routine: Routine): string {
 export function RoutineListHeader({ onCreate }: { onCreate: () => void }) {
   const { t } = useLingui();
   return (
-    <div className="mt-[30px] mb-3 flex items-center justify-between gap-3">
-      <div className="text-sm text-muted-foreground">
+    <div className="mb-1.5 flex items-center justify-between gap-3">
+      <h3 className="text-[12px] font-medium text-muted-foreground">
         <Trans>Routines</Trans>
-      </div>
+      </h3>
       <Button
         variant="secondary"
         size="icon-sm"

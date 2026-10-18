@@ -19,7 +19,8 @@ type ActivityListProps = {
   onOpenRun: (run: RunActivityRow) => void;
 };
 
-export function ActivityList({ onOpenRun }: ActivityListProps) {
+/** Active and recent runs across the space, polled every 15 seconds. */
+export function useRunActivity() {
   const [activeRuns, setActiveRuns] = useState<RunActivityRow[]>([]);
   const [recentRuns, setRecentRuns] = useState<RunActivityRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,12 @@ export function ActivityList({ onOpenRun }: ActivityListProps) {
       if (timer !== undefined) window.clearTimeout(timer);
     };
   }, []);
+
+  return { activeRuns, recentRuns, loading };
+}
+
+export function ActivityList({ onOpenRun }: ActivityListProps) {
+  const { activeRuns, recentRuns, loading } = useRunActivity();
 
   if (loading) {
     return (

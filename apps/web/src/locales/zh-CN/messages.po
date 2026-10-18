@@ -224,6 +224,7 @@ msgstr "当前模型"
 
 #: src/components/computer/TerminalApp.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Activity"
 msgstr "动态"
 
@@ -821,7 +822,7 @@ msgstr "关闭模型设置"
 msgid "Close navigation"
 msgstr "关闭导航"
 
-#: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Close panel"
 msgstr "关闭面板"
 
@@ -877,6 +878,7 @@ msgstr "完成"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/bot-profile.tsx
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "电脑"
@@ -2665,6 +2667,7 @@ msgid "Notifications"
 msgstr "通知"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Now"
 msgstr "现在"
 
@@ -2910,6 +2913,7 @@ msgid "Reasoning effort"
 msgstr "推理强度"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Recent"
 msgstr "最近"
 
@@ -3367,6 +3371,7 @@ msgstr "服务器 URL"
 #: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Settings"
 msgstr "设置"
 
@@ -3405,10 +3410,6 @@ msgstr "Shell"
 msgid "Show bots"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Show computer"
-msgstr ""
-
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr ""
@@ -3420,10 +3421,6 @@ msgstr "显示更多"
 #: src/pages/Auth.tsx
 msgid "Show password"
 msgstr "显示密码"
-
-#: src/pages/Shell.tsx
-msgid "Show settings"
-msgstr "显示设置"
 
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"
