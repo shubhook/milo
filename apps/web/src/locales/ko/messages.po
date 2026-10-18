@@ -73,11 +73,19 @@ msgstr "{0}회 실행 · 토큰 {1}개"
 msgid "{0}'s screen"
 msgstr "{0}의 화면"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s {period} limit is used up."
+msgstr "{agent}의 {period} 한도를 모두 사용했습니다."
+
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s weekly limit is used up."
+msgstr "{agent}의 주간 한도를 모두 사용했습니다."
+
 #: src/pages/Shell.tsx
 msgid "{botName}’s computer"
 msgstr "{botName}의 컴퓨터"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{days}-day"
 msgstr ""
 
@@ -90,7 +98,7 @@ msgstr "{days}일 전"
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
 msgstr ""
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{hours}-hour"
 msgstr ""
 
@@ -3119,6 +3127,7 @@ msgstr "비밀번호 재설정"
 msgid "Reset your password"
 msgstr "비밀번호를 재설정하세요"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/AgentModelsPanel.tsx
 msgid "Resets {resetsAt}"
 msgstr ""
@@ -3876,6 +3885,10 @@ msgstr "{hostLabel} 사용"
 msgid "Use a found model"
 msgstr "찾은 모델 중에서 선택"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "Use ChatGPT"
+msgstr "ChatGPT 사용"
+
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."
 msgstr ""
@@ -3930,6 +3943,7 @@ msgstr "음성"
 msgid "Voice chat"
 msgstr "음성 대화"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
 msgid "Waiting for ChatGPT…"
@@ -3960,7 +3974,7 @@ msgstr ""
 msgid "Weekdays"
 msgstr "주중"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "Weekly"
 msgstr ""
 

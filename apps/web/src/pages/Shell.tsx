@@ -159,6 +159,7 @@ import { SkillDraftCard } from "../components/teach/SkillDraftCard";
 import { TeachCaptureOverlay } from "../components/teach/TeachCaptureOverlay";
 import { TeachComputerOverlayControl } from "../components/teach/TeachComputerOverlay";
 import { TeachRecordingChrome, TeachStopButton } from "../components/teach/TeachRecordingChrome";
+import { UsageLimitNotice } from "../components/UsageLimitNotice";
 import { readActivityMode, writeActivityMode } from "../lib/activity-mode";
 import type { ArtifactTarget } from "../lib/artifact-open";
 import { authClient } from "../lib/auth";
@@ -3676,6 +3677,7 @@ export function ShellPage() {
             disabled={Boolean(recordingSkill)}
             pendingAttachments={activePendingAttachments}
             attachmentNotice={attachmentNotice}
+            showUsageLimit={!inGroup}
             sendError={sendError}
             runError={displayedRunError}
             runErrorId={displayedRunErrorId}
@@ -5157,6 +5159,7 @@ const Composer = memo(function Composer({
   disabled,
   pendingAttachments,
   attachmentNotice,
+  showUsageLimit,
   sendError,
   runError,
   runErrorId,
@@ -5183,6 +5186,8 @@ const Composer = memo(function Composer({
   disabled?: boolean;
   pendingAttachments: PendingAttachment[];
   attachmentNotice: string | null;
+  /** Plan limits belong to the person, so group chats leave the notice to each bot's chat. */
+  showUsageLimit: boolean;
   sendError: string | null;
   runError: string | null;
   runErrorId: string | null;
@@ -5515,6 +5520,7 @@ const Composer = memo(function Composer({
       <div role="status" data-testid="composer-announcement" className="sr-only">
         {replyAnnouncement}
       </div>
+      {showUsageLimit ? <UsageLimitNotice refreshKey={running} /> : null}
       {sendError || runError ? (
         <div
           ref={runErrorRef}
