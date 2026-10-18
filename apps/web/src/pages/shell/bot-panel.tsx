@@ -116,6 +116,10 @@ export function BotSettings({
   const savedDescriptionRef = useRef(bot.description ?? "");
   const [color, setColor] = useState(bot.color);
   const [notifyOnFinish, setNotifyOnFinish] = useState(bot.notifyOnFinish ?? true);
+  // Settings > Notifications can change this while the panel stays open, and every save sends it.
+  useEffect(() => {
+    setNotifyOnFinish(bot.notifyOnFinish ?? true);
+  }, [bot.notifyOnFinish]);
   const [computerMode, setComputerMode] = useState(bot.computerMode);
   const [autoSpeak, setAutoSpeak] = useState(bot.autoSpeak);
   const [voiceId, setVoiceId] = useState(bot.voiceId ?? "");

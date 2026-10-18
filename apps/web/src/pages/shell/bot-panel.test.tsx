@@ -68,7 +68,7 @@ import { BotSettings } from "./bot-panel";
 
 const longInstructions = "I".repeat(4_000);
 
-function bot(description = "Billing"): Bot {
+function bot(description = "Billing", notifyOnFinish = true): Bot {
   return {
     id: "bot-1",
     spaceId: "space-1",
@@ -77,7 +77,7 @@ function bot(description = "Billing"): Bot {
     description,
     instructions: longInstructions,
     color: "ink",
-    notifyOnFinish: true,
+    notifyOnFinish,
     pinned: false,
     sectionId: null,
     archivedAt: null,
@@ -105,11 +105,11 @@ const onSave = vi.fn(
   async (_patch: Parameters<ComponentProps<typeof BotSettings>["onSave"]>[0]) => undefined,
 );
 
-async function render(description = "Billing") {
+async function render(description = "Billing", notifyOnFinish = true) {
   await act(async () => {
     root.render(
       <BotSettings
-        bot={bot(description)}
+        bot={bot(description, notifyOnFinish)}
         onSkillsChange={() => undefined}
         onSave={onSave}
         onExport={async () => undefined}
@@ -218,5 +218,15 @@ describe("BotSettings description saves", () => {
       description: "Invoices",
       instructions: "Invoices",
     });
+  });
+});
+
+describe("BotSettings notifications", () => {
+  it("saves the bot's current notify setting after it changes elsewhere", async () => {
+    await render();
+    // Settings > Notifications turned it off while this panel stayed open.
+    await render("Billing", false);
+    await clickSave();
+    expect(onSave.mock.calls[0]?.[0]).toMatchObject({ notifyOnFinish: false });
   });
 });
