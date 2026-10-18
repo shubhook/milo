@@ -91,7 +91,7 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
     "Finds reliable sources and turns them into concise briefs.",
   );
   const settings = page.getByTestId("bot-settings");
-  await settings.getByTestId("avatar-studio-trigger").click();
+  await page.getByTestId("side-panel").getByTestId("avatar-studio-trigger").click();
   await expect(studio).toBeVisible();
   await expect(studio.getByRole("button", { name: "Color #EAB308" })).toHaveClass(/ring-2/);
   await studio.getByRole("button", { name: "Done", exact: true }).click();

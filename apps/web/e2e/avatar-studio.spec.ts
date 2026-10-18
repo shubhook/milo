@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { captureScreenshot, completeOnboarding, signup } from "./helpers";
 
-test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo) => {
+test("the bot profile opens Avatar Studio on the Bot tab", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `avatar-studio-${stamp}@rakazo.test`, "password12", "Avatar Studio");
   await completeOnboarding(page);
@@ -12,7 +12,7 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   const settings = page.getByTestId("bot-settings");
   await expect(settings).toBeVisible();
 
-  await settings.getByTestId("avatar-studio-trigger").click();
+  await page.getByTestId("side-panel").getByTestId("avatar-studio-trigger").click();
   const studio = page.getByTestId("avatar-studio");
   await expect(studio).toBeVisible();
   await expect(studio.getByText("Avatar Studio", { exact: true })).toBeVisible();
