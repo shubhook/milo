@@ -9,6 +9,7 @@ import {
 } from "./attachments.js";
 import { BotSecretMetadata, BotSecretPutInput, StoredBotSecretName } from "./bot-secrets.js";
 import {
+  ActionApprovalEffect,
   ActionApprovalRuleSchema,
   ActionAutoReviewSettingsSchema,
   AgentModelSchema,
@@ -711,7 +712,7 @@ export const appContract = {
     set: oc
       .input(
         z.object({
-          effect: z.enum(["always_allow", "require_approval"]),
+          effect: ActionApprovalEffect,
           matchKind: z.enum(["tool", "connector", "category"]),
           matchValue: z.string().min(1),
         }),

@@ -164,15 +164,18 @@ function ruleSpecificity(rule: ActionApprovalRule): number {
   }
 }
 
-export type ActionApprovalSource = "require_approval" | "always_allow" | "default";
+export type ActionApprovalSource = "hand_off" | "require_approval" | "always_allow" | "default";
 
 export type ActionApprovalResolved = {
-  decision: "ask" | "allow";
+  decision: "hand" | "ask" | "allow";
   source: ActionApprovalSource;
   matchingRules: ActionApprovalRule[];
 };
 
-/** Deterministic rule resolution. Always-allow and require-approval both beat the default. */
+/**
+ * Deterministic rule resolution. Any rule beats the default; among the most specific matches,
+ * hand-off beats require-approval, which beats always-allow.
+ */
 export function resolveActionApprovalDetail(input: {
   toolName: string;
   connectorKind?: string;
@@ -189,6 +192,9 @@ export function resolveActionApprovalDetail(input: {
 
   const highestSpecificity = Math.max(...matchingRules.map(ruleSpecificity));
   const winners = matchingRules.filter((rule) => ruleSpecificity(rule) === highestSpecificity);
+  if (winners.some((rule) => rule.effect === "hand_off")) {
+    return { decision: "hand", source: "hand_off", matchingRules };
+  }
   if (winners.some((rule) => rule.effect === "require_approval")) {
     return { decision: "ask", source: "require_approval", matchingRules };
   }
@@ -200,7 +206,7 @@ export function resolveActionApproval(input: {
   connectorKind?: string;
   readOnly?: boolean;
   rules: ActionApprovalRule[];
-}): "ask" | "allow" {
+}): "hand" | "ask" | "allow" {
   return resolveActionApprovalDetail(input).decision;
 }
 
@@ -217,7 +223,8 @@ export function planActionGate(input: {
   consequential: boolean;
   autoReviewEnabled: boolean;
   checkerConfigured: boolean;
-}): "ask" | "allow" | "judge" {
+}): "hand" | "ask" | "allow" | "judge" {
+  if (input.resolved.decision === "hand") return "hand";
   if (input.resolved.decision === "ask") return "ask";
   if (input.consequential && input.autoReviewEnabled && input.checkerConfigured) return "judge";
   return "allow";
@@ -254,3 +261,9 @@ export function isApprovalAskBlock(block: {
     [...actionIds].every((id) => id === "allow" || id === "always" || id === "deny")
   );
 }
+
+/** What a handed-off tool call returns to the model instead of running. */
+export const HAND_OFF_TOOL_RESULT =
+  "The person does this kind of action themselves, so it was not performed. Do not retry it or " +
+  "work around it. Reply with everything you prepared for it (for example the full draft or the " +
+  "items and totals) so they can do it.";

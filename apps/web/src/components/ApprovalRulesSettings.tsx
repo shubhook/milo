@@ -7,6 +7,8 @@ import { rpc } from "../lib/rpc";
 import { SegmentedControl } from "./SegmentedControl";
 
 function describeRule(rule: ActionApprovalRule): string {
+  // The settings rows cover category hand-offs; others come only from the API.
+  if (rule.effect === "hand_off") return t`Hand ${rule.matchValue} to me`;
   if (rule.effect === "require_approval") {
     if (rule.matchKind === "category") {
       if (rule.matchValue === "email") return t`Ask before email actions`;
@@ -26,19 +28,29 @@ function describeRule(rule: ActionApprovalRule): string {
 }
 
 type ApprovalCategory = "email" | "purchase";
-type ApprovalLevel = "act" | "ask";
+type ApprovalLevel = "act" | "ask" | "hand";
 
-function asksFirst(rule: ActionApprovalRule, category: ApprovalCategory): boolean {
+const LEVEL_EFFECTS = { ask: "require_approval", hand: "hand_off" } as const;
+
+/** A category rule that sets a level above Act: Ask first or Hand to me. */
+function levelRule(rule: ActionApprovalRule, category: ApprovalCategory): boolean {
   return (
-    rule.effect === "require_approval" &&
+    (rule.effect === "require_approval" || rule.effect === "hand_off") &&
     rule.matchKind === "category" &&
     rule.matchValue === category
   );
 }
 
+function categoryLevel(rules: ActionApprovalRule[], category: ApprovalCategory): ApprovalLevel {
+  const set = rules.filter((rule) => levelRule(rule, category));
+  if (set.some((rule) => rule.effect === "hand_off")) return "hand";
+  return set.length > 0 ? "ask" : "act";
+}
+
 /**
  * Space-wide approval levels. Bots act by default, so Ask first is a require-approval rule for
- * the category and Act removes it. Narrower rules from "Always allow" are listed below.
+ * the category, Hand to me a hand-off rule, and Act removes both. Narrower rules from
+ * "Always allow" are listed below.
  */
 export function ApprovalRulesSettings() {
   const { t } = useLingui();
@@ -72,23 +84,24 @@ export function ApprovalRulesSettings() {
   }, []);
 
   async function setLevel(category: ApprovalCategory, level: ApprovalLevel) {
-    if (loading || saving) return;
-    const current = rules.filter((rule) => asksFirst(rule, category));
-    if ((level === "ask") === current.length > 0) return;
+    if (loading || saving || categoryLevel(rules, category) === level) return;
+    const current = rules.filter((rule) => levelRule(rule, category));
     setSaving(category);
     setError(null);
     try {
-      if (level === "ask") {
-        const saved = await rpc.approvalRules.set({
-          effect: "require_approval",
-          matchKind: "category",
-          matchValue: category,
-        });
-        setRules((list) => [...list, saved]);
-      } else {
-        await Promise.all(current.map((rule) => rpc.approvalRules.remove({ id: rule.id })));
-        setRules((list) => list.filter((rule) => !asksFirst(rule, category)));
-      }
+      await Promise.all(current.map((rule) => rpc.approvalRules.remove({ id: rule.id })));
+      const saved =
+        level === "act"
+          ? null
+          : await rpc.approvalRules.set({
+              effect: LEVEL_EFFECTS[level],
+              matchKind: "category",
+              matchValue: category,
+            });
+      setRules((list) => [
+        ...list.filter((rule) => !levelRule(rule, category)),
+        ...(saved ? [saved] : []),
+      ]);
     } catch (err) {
       setError(err instanceof Error ? err.message : t`Could not save rule`);
       await refresh();
@@ -125,7 +138,7 @@ export function ApprovalRulesSettings() {
     { id: "purchase", label: t`Purchases` },
   ];
   const otherRules = rules.filter(
-    (rule) => !categories.some((category) => asksFirst(rule, category.id)),
+    (rule) => !categories.some((category) => levelRule(rule, category.id)),
   );
 
   return (
@@ -138,12 +151,13 @@ export function ApprovalRulesSettings() {
           <span className="min-w-[180px] flex-1 font-medium">{category.label}</span>
           <SegmentedControl
             label={category.label}
-            value={rules.some((rule) => asksFirst(rule, category.id)) ? "ask" : "act"}
+            value={categoryLevel(rules, category.id)}
             onChange={(level) => void setLevel(category.id, level)}
             className={loading || saving === category.id ? "pointer-events-none opacity-60" : ""}
             options={[
               { value: "act", label: t`Act` },
               { value: "ask", label: t`Ask first` },
+              { value: "hand", label: t`Hand to me` },
             ]}
           />
         </div>

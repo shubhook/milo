@@ -90,6 +90,32 @@ describe("resolveActionApprovalDetail", () => {
     expect(resolveActionApprovalDetail(base).decision).toBe("allow");
     expect(resolveActionApprovalDetail({ ...base, readOnly: false }).decision).toBe("ask");
   });
+
+  it("hands off ahead of asking or allowing at the same specificity", () => {
+    const toolName = "gmail_send_email";
+    const rule = (effect: "always_allow" | "require_approval" | "hand_off") => ({
+      effect,
+      matchKind: "category" as const,
+      matchValue: "email",
+    });
+    const handed = resolveActionApprovalDetail({
+      toolName,
+      connectorKind: "gmail",
+      rules: [rule("always_allow"), rule("require_approval"), rule("hand_off")],
+    });
+    expect(handed).toMatchObject({ decision: "hand", source: "hand_off" });
+    // A narrower allow still wins over a category hand-off, as with Ask first.
+    expect(
+      resolveActionApprovalDetail({
+        toolName,
+        connectorKind: "gmail",
+        rules: [
+          rule("hand_off"),
+          { effect: "always_allow", matchKind: "tool", matchValue: toolName },
+        ],
+      }).decision,
+    ).toBe("allow");
+  });
 });
 
 describe("unattendedTriggerToolRequiresApproval", () => {
@@ -295,6 +321,17 @@ describe("planActionGate", () => {
       { effect: "always_allow" as const, matchKind: "connector" as const, matchValue: "gmail" },
     ],
   };
+
+  it("hands off before asking or judging", () => {
+    expect(
+      planActionGate({
+        resolved: { decision: "hand", source: "hand_off", matchingRules: [] },
+        consequential,
+        autoReviewEnabled: true,
+        checkerConfigured: true,
+      }),
+    ).toBe("hand");
+  });
 
   it("lets require_approval win without judging", () => {
     expect(

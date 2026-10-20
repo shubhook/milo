@@ -121,6 +121,7 @@ import {
 } from "@milo/adapters";
 import type { Auth } from "@milo/auth";
 import type {
+  ActionApprovalEffect,
   Actor,
   AgentModel,
   Bot,
@@ -4937,7 +4938,7 @@ export function createRouter(deps: RouterDeps) {
         });
         return rows.map((row) => ({
           id: row.id,
-          effect: row.effect as "always_allow" | "require_approval",
+          effect: row.effect as ActionApprovalEffect,
           matchKind: row.matchKind as "tool" | "connector" | "category",
           matchValue: row.matchValue,
           createdAt: row.createdAt.toISOString(),
@@ -4965,7 +4966,7 @@ export function createRouter(deps: RouterDeps) {
         });
         return {
           id: row.id,
-          effect: row.effect as "always_allow" | "require_approval",
+          effect: row.effect as ActionApprovalEffect,
           matchKind: row.matchKind as "tool" | "connector" | "category",
           matchValue: row.matchValue,
           createdAt: row.createdAt.toISOString(),

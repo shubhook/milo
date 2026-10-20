@@ -1985,6 +1985,15 @@ msgstr "Grup ayarları"
 msgid "Groups"
 msgstr ""
 
+#. placeholder {0}: rule.matchValue
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand {0} to me"
+msgstr "{0} işlemlerini bana bırak"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand to me"
+msgstr "Bana bırak"
+
 #: src/components/call/CallCard.tsx
 msgid "Hang up"
 msgstr "Aramayı sonlandır"

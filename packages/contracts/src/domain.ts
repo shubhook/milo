@@ -499,9 +499,13 @@ export const ConnectionCatalogItemSchema = z.object({
 });
 export type ConnectionCatalogItem = z.infer<typeof ConnectionCatalogItemSchema>;
 
+/** Act, Ask first, or Hand to me: the bot never performs it and gives the person what it prepared. */
+export const ActionApprovalEffect = z.enum(["always_allow", "require_approval", "hand_off"]);
+export type ActionApprovalEffect = z.infer<typeof ActionApprovalEffect>;
+
 export const ActionApprovalRuleSchema = z.object({
   id: Id,
-  effect: z.enum(["always_allow", "require_approval"]),
+  effect: ActionApprovalEffect,
   matchKind: z.enum(["tool", "connector", "category"]),
   matchValue: z.string(),
   createdAt: z.string(),
