@@ -42,8 +42,15 @@ export function AgentModelsPanel() {
   }
   if (!models) {
     return (
-      <p className="text-[14px] text-muted-foreground">
+      <p data-testid="agent-models-loading" className="text-[14px] text-muted-foreground">
         <Trans>Loading…</Trans>
+      </p>
+    );
+  }
+  if (models.length === 0) {
+    return (
+      <p data-testid="agent-models" className="text-[14px] text-muted-foreground">
+        <Trans>Limits show after the next run.</Trans>
       </p>
     );
   }

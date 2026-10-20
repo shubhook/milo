@@ -184,7 +184,7 @@ export function SettingsOverlay({
                   ref={usageRef}
                   tabIndex={-1}
                   data-testid="usage-settings"
-                  className="outline-none"
+                  className="min-h-8 outline-none"
                 >
                   <AgentModelsPanel />
                 </div>

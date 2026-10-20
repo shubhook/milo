@@ -40,6 +40,13 @@ test("settings shell is Usage, General and Allow list in a browser", async ({ pa
   await expect(settings).toHaveAttribute("data-settings-section", "usage");
   await expect(settings.getByRole("heading", { name: "Usage", exact: true })).toBeVisible();
   await expect(settings.getByTestId("usage-settings")).toBeVisible();
+  // Fresh accounts may have no plan meters yet; the panel still renders a body.
+  await expect(
+    settings
+      .getByTestId("agent-models")
+      .or(settings.getByTestId("agent-models-loading"))
+      .or(settings.getByRole("alert")),
+  ).toBeVisible();
   await expect(settings.getByTestId("model-settings")).toHaveCount(0);
   await expect(settings.getByText("Model spend uses your provider keys.")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "settings-shell-usage");
@@ -61,6 +68,12 @@ test("settings shell is Usage, General and Allow list in a browser", async ({ pa
   await openUserSettings(page, "usage");
   await expect(page.getByTestId("user-settings")).toHaveAttribute("data-settings-section", "usage");
   await expect(page.getByTestId("usage-settings")).toBeVisible();
+  await expect(
+    page
+      .getByTestId("agent-models")
+      .or(page.getByTestId("agent-models-loading"))
+      .or(page.getByRole("alert")),
+  ).toBeVisible();
 });
 
 test("usage lists the agent's models with their plan limits", async ({ page }, testInfo) => {
