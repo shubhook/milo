@@ -36,6 +36,8 @@
   --color-link: var(--link);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-destructive-surface: var(--destructive-surface);
   --color-overlay: var(--overlay);
   --color-scrollbar: var(--scrollbar);
   --color-scrollbar-hover: var(--scrollbar-hover);
@@ -44,6 +46,14 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
+  --shadow-raised: var(--elevation-raised);
+  --shadow-lift: var(--elevation-lift);
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+  --text-small: var(--font-size-small);
+  --text-body: var(--font-size-body);
+  --text-section: var(--font-size-section);
+  --text-title: var(--font-size-title);
 }
 
 @layer base {
