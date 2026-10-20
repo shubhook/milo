@@ -53,12 +53,12 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
 
   const transcript = page.getByTestId("transcript");
 
-  // Onboarding posts Chief's intro; use that bot bubble for hover layout checks.
-  // Scope to the transcript: the sidebar preview repeats the same text.
-  const botText = transcript.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./);
-  await expect(botText).toBeVisible({ timeout: 20_000 });
-  const botRow = transcript.locator(`[data-message-id]`).filter({ has: botText }).first();
-  await expect(botRow).toBeVisible();
+  // Intro bubble for hover checks. Page-relative `has` (not transcript-scoped)
+  // so filter does not nest transcript inside each row; sidebar has no message-id.
+  const botRow = transcript.locator(`[data-message-id]`).filter({
+    has: page.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./),
+  }).first();
+  await expect(botRow).toBeVisible({ timeout: 20_000 });
   await expectRailAtRest(page, botRow);
   await captureScreenshot(page, testInfo, "message-actions-rest-desktop");
 
@@ -363,9 +363,10 @@ test.describe("touch message actions", () => {
       await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches),
     ).toBe(false);
     const transcript = page.getByTestId("transcript");
-    const botText = transcript.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./);
-    await expect(botText).toBeVisible({ timeout: 20_000 });
-    const row = transcript.locator("[data-message-id]").filter({ has: botText }).first();
+    const row = transcript.locator("[data-message-id]").filter({
+      has: page.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./),
+    }).first();
+    await expect(row).toBeVisible({ timeout: 20_000 });
     const rail = row.getByTestId("message-hover-rail");
     await expect(rail).toHaveCSS("opacity", "1");
     await expect(rail.getByRole("button", { name: "Reply", exact: true })).toBeVisible();
