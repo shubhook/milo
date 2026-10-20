@@ -141,10 +141,12 @@ export function inferScript(
   if (lower.includes("milo refine bot profile")) {
     const name = /^Name:\s*(.+)$/im.exec(prompt)?.[1]?.trim() || "Bot";
     const description =
-      /^Description:\s*([\s\S]*?)\n---/m.exec(prompt)?.[1]?.trim().replace(/^\(none\)$/, "") || "";
+      /^Description:\s*([\s\S]*?)\n---/m
+        .exec(prompt)?.[1]
+        ?.trim()
+        .replace(/^\(none\)$/, "") || "";
     const title = (description.split(/[.!\n]/)[0] ?? "").trim().slice(0, 80) || name;
-    const instructions =
-      description || `You are ${name}. Help with whatever is asked.`;
+    const instructions = description || `You are ${name}. Help with whatever is asked.`;
     return [
       {
         assistant: JSON.stringify({ title, instructions }),

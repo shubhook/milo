@@ -34,11 +34,7 @@ export function fallbackRefine(name: string, description: string): RefineBotOutp
   };
 }
 
-export function parseRefineReply(
-  text: string,
-  name: string,
-  description: string,
-): RefineBotOutput {
+export function parseRefineReply(text: string, name: string, description: string): RefineBotOutput {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) return fallbackRefine(name, description);
   try {

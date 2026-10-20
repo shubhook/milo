@@ -1,8 +1,4 @@
-import {
-  BOT_DESCRIPTION_MAX_LENGTH,
-  BOT_NAME_MAX_LENGTH,
-  type AgentStatus,
-} from "@milo/contracts";
+import { type AgentStatus, BOT_DESCRIPTION_MAX_LENGTH, BOT_NAME_MAX_LENGTH } from "@milo/contracts";
 import { BOT_PALETTE_COLORS } from "@milo/core";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";

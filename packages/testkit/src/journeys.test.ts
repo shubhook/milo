@@ -1380,6 +1380,11 @@ describeJourneys("required product journeys", () => {
       notifyOnFinish: false,
     });
     const thread = await prisma.thread.findUniqueOrThrow({ where: { botId: bot.id } });
+    // bots.create posts the intro message + event; concurrent writes continue after that.
+    const seededEvents = await prisma.event.count({ where: { threadId: thread.id } });
+    const seededMessages = await prisma.message.count({ where: { threadId: thread.id } });
+    expect(seededEvents).toBeGreaterThan(0);
+    expect(seededMessages).toBeGreaterThan(0);
 
     await Promise.all(
       Array.from({ length: 40 }, (_, index) =>
@@ -1406,8 +1411,12 @@ describeJourneys("required product journeys", () => {
       prisma.event.findMany({ where: { threadId: thread.id }, orderBy: { seq: "asc" } }),
       prisma.message.findMany({ where: { threadId: thread.id }, orderBy: { seq: "asc" } }),
     ]);
-    expect(events.map((row) => row.seq)).toEqual(Array.from({ length: 40 }, (_, i) => i));
-    expect(messages.map((row) => row.seq)).toEqual(Array.from({ length: 40 }, (_, i) => i));
+    expect(events.map((row) => row.seq)).toEqual(
+      Array.from({ length: seededEvents + 40 }, (_, i) => i),
+    );
+    expect(messages.map((row) => row.seq)).toEqual(
+      Array.from({ length: seededMessages + 40 }, (_, i) => i),
+    );
   });
 
   it("6: fake and desktop executors run the same graphical task", async () => {

@@ -15,8 +15,8 @@ import {
 } from "@milo/ui-web";
 import { X } from "lucide-react";
 import { useEffect, useId, useState } from "react";
-import { BotColorChoices, BotShapeChoices } from "../../components/BotAvatarChoices";
 import { Shimmer } from "../../components/ai/primitives";
+import { BotColorChoices, BotShapeChoices } from "../../components/BotAvatarChoices";
 import { SegmentedControl } from "../../components/SegmentedControl";
 import { createBotStarters } from "../../lib/create-bot-starters";
 import { rpc } from "../../lib/rpc";
