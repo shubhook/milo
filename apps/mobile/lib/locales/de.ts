@@ -1,4 +1,9 @@
 export const DE_MESSAGES: Record<string, string> = {
+  // app/(tabs)
+  "All bots": "Alle Bots",
+  Artifacts: "Artefakte",
+  Bots: "Bots",
+  Routines: "Routinen",
   // shared/const
   "Chat Settings": "Chat-Einstellungen",
   "Configure a plugin catalog on the server to connect apps.":
@@ -50,7 +55,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "Sign up for Milo": "Bei Milo registrieren",
   "Use a custom server": "Eigenen Server verwenden",
   "Use default server": "Standardserver verwenden",
-  // app/index.tsx
+  // app/(tabs)/index.tsx
   Activity: "Aktivität",
   "Collapse {name}": "{name} einklappen",
   "Could not create bot": "Bot konnte nicht erstellt werden",
@@ -428,7 +433,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "This device": "Dieses Gerät",
   "Your phone's built-in voice. Free, no account needed":
     "Die eingebaute Stimme deines Telefons. Kostenlos, kein Konto nötig",
-  // app/account.tsx
+  // app/(tabs)/account/index.tsx
   "Agent messages": "Agent-Nachrichten",
   "Alerts from routines": "Meldungen von Routinen",
   Appearance: "Erscheinungsbild",

@@ -94,14 +94,13 @@ export default function Layout() {
                   contentStyle: { backgroundColor: String(native.page) },
                 }}
               >
-                <Stack.Screen name="index" options={{ headerShown: false, title: "Milo" }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Milo" }} />
                 <Stack.Screen name="sign-in" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="integration-setup"
                   options={{ title: t("Server integrations") }}
                 />
                 <Stack.Screen name="ai-data-sharing" options={{ title: "AI data sharing" }} />
-                <Stack.Screen name="account" options={{ title: t("Account") }} />
                 <Stack.Screen
                   name="change-password"
                   options={{

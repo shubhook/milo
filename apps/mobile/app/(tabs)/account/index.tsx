@@ -15,9 +15,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAvatarStyle } from "../components/avatar-style";
-import { BotAvatar } from "../components/bot-avatar";
-import type { MobileBot, MobileMe } from "../lib/api";
+import { useAvatarStyle } from "../../../components/avatar-style";
+import { BotAvatar } from "../../../components/bot-avatar";
+import type { MobileBot, MobileMe } from "../../../lib/api";
 import {
   currentApiBase,
   deleteAccount,
@@ -25,17 +25,17 @@ import {
   rpc,
   selectedSpaceId,
   signOut,
-} from "../lib/api";
-import { formatUpdateLabel, getAppVersionInfo } from "../lib/app-version";
+} from "../../../lib/api";
+import { formatUpdateLabel, getAppVersionInfo } from "../../../lib/app-version";
 import {
   getCachedAppearancePreference,
   mobileTokens,
   setAppearancePreference,
-} from "../lib/appearance";
-import { explicitSignInRoute } from "../lib/auth-routing";
-import { confirmDeleteBot } from "../lib/bot-lifecycle";
-import { setUiLocale, useI18n } from "../lib/i18n";
-import type { LiveNotificationSettings } from "../lib/live-notifications";
+} from "../../../lib/appearance";
+import { explicitSignInRoute } from "../../../lib/auth-routing";
+import { confirmDeleteBot } from "../../../lib/bot-lifecycle";
+import { setUiLocale, useI18n } from "../../../lib/i18n";
+import type { LiveNotificationSettings } from "../../../lib/live-notifications";
 import {
   canPostPromotedNotifications,
   DEFAULT_LIVE_NOTIFICATION_SETTINGS,
@@ -43,17 +43,17 @@ import {
   openLiveNotificationSettings,
   openPromotedNotificationSettings,
   setLiveNotificationSettings,
-} from "../lib/live-notifications";
-import { presentMessageActionSheet } from "../lib/message-action-sheet";
-import { native, useResolvedAppearance, useThemedStyles } from "../lib/native";
-import { registerPushToken } from "../lib/push";
+} from "../../../lib/live-notifications";
+import { presentMessageActionSheet } from "../../../lib/message-action-sheet";
+import { native, useResolvedAppearance, useThemedStyles } from "../../../lib/native";
+import { registerPushToken } from "../../../lib/push";
 import {
   getCachedResponseStreamingEnabled,
   setResponseStreamingPreference,
   subscribeResponseStreaming,
-} from "../lib/response-streaming";
-import type { AccountUiLocale } from "../lib/ui-locale";
-import { ACCOUNT_UI_LOCALES, UI_LOCALE_LABELS } from "../lib/ui-locale";
+} from "../../../lib/response-streaming";
+import type { AccountUiLocale } from "../../../lib/ui-locale";
+import { ACCOUNT_UI_LOCALES, UI_LOCALE_LABELS } from "../../../lib/ui-locale";
 
 /** Render account settings, including the entry point for voice configuration. */
 export default function Account() {
