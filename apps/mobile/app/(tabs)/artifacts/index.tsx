@@ -64,14 +64,24 @@ export default function ArtifactsTab() {
   );
 
   function open(item: ArtifactSummary) {
-    const target = item.botId ? { botId: item.botId } : item.groupId ? { groupId: item.groupId } : null;
+    const target = item.botId
+      ? { botId: item.botId }
+      : item.groupId
+        ? { groupId: item.groupId }
+        : null;
     if (!target) return;
     void openMobileArtifact(target, item.id, item.name, item.mimeType).catch((err: unknown) =>
       Alert.alert(item.name, err instanceof Error ? err.message : String(err)),
     );
   }
 
-  const chip = (key: string, label: string, active: boolean, onPress: () => void, bot?: MobileBot) => (
+  const chip = (
+    key: string,
+    label: string,
+    active: boolean,
+    onPress: () => void,
+    bot?: MobileBot,
+  ) => (
     <Pressable
       key={key}
       accessibilityRole="button"
@@ -120,9 +130,7 @@ export default function ArtifactsTab() {
               chip(bot.id, bot.name, botId === bot.id, () => setBotId(bot.id), bot),
             )}
           </ScrollView>
-          {error ? (
-            <Text style={[styles.note, { color: tokens.destructive }]}>{error}</Text>
-          ) : null}
+          {error ? <Text style={[styles.note, { color: tokens.destructive }]}>{error}</Text> : null}
         </>
       }
       ListEmptyComponent={
