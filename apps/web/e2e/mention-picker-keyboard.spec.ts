@@ -1,11 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import {
-  captureScreenshot,
-  completeOnboarding,
-  createNamedBot,
-  openNewGroup,
-  signup,
-} from "./helpers";
+import { captureScreenshot, completeOnboarding, createNamedBot, rpc, signup } from "./helpers";
 
 async function createBot(page: Page, name: string) {
   return createNamedBot(page, name);
@@ -23,13 +17,11 @@ test("mention picker completes with Enter and Tab", async ({ page }, testInfo) =
   expect(researcherId).toBeTruthy();
   expect(writerId).toBeTruthy();
 
-  await openNewGroup(page);
-  await page.locator("label:has-text('Name') input").fill("Mention keys team");
-  const panel = page.getByTestId("side-panel");
-  await panel.getByRole("button", { name: "Researcher" }).click();
-  await panel.getByRole("button", { name: "Research Writer" }).click();
-  await page.getByRole("button", { name: "Create group", exact: true }).click();
-  await page.waitForURL(/\/app\/g\/[^/]+$/);
+  const group = await rpc<{ id: string }>(page, "groups/create", {
+    name: "Mention keys team",
+    botIds: [researcherId, writerId],
+  });
+  await page.goto(`/app/g/${group.id}`);
 
   const composer = page.getByRole("combobox", { name: "Message Mention keys team" });
   await expect(composer).toBeVisible();

@@ -47,6 +47,7 @@ import {
   mentionChipKey,
   NEEDS_YOU_SECTION_KEY,
   nestRosterByParent,
+  PRODUCT_SURFACES,
   plainTextFromMarkdown,
   projectMessageReactions,
   reorderBotTo,
@@ -291,6 +292,15 @@ const PluginsOverlay = lazy(() =>
 const McpServersOverlay = lazy(() =>
   import("./McpServersOverlay").then((module) => ({ default: module.McpServersOverlay })),
 );
+const RoutinesPage = lazy(() =>
+  import("./Routines").then((module) => ({ default: module.RoutinesPage })),
+);
+const ArtifactsPage = lazy(() =>
+  import("./Artifacts").then((module) => ({ default: module.ArtifactsPage })),
+);
+
+/** A space-wide page shown in the main area instead of a chat. */
+export type ShellView = "routines" | "artifacts";
 
 type PendingAttachment = {
   id: string;
@@ -332,6 +342,7 @@ function voiceStatusRefreshTimeout(): Promise<never> {
 
 const SIDEBAR_NAV_ROW_CLASS =
   "flex min-h-9 w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-start text-muted-foreground hover:bg-foreground/5 hover:text-foreground";
+const SIDEBAR_NAV_ROW_CURRENT_CLASS = "bg-foreground/5 text-foreground";
 
 function collapsedSidebarSectionsStorageKey(userId: string | null | undefined): string | null {
   if (!userId) return null;
@@ -382,7 +393,7 @@ function readCollapsedRosterParents(userId: string | null | undefined): Set<stri
   return readCollapsedIdSet(collapsedRosterParentsStorageKey(userId));
 }
 
-export function ShellPage() {
+export function ShellPage({ view }: { view?: ShellView } = {}) {
   const { t } = useLingui();
   const { botId, groupId } = useParams();
   const navigate = useNavigate();
@@ -715,7 +726,7 @@ export function ShellPage() {
   const autoSpokenBotId = useRef<string | null>(null);
 
   const inGroup = Boolean(groupId);
-  const active = inGroup ? undefined : (bots.find((b) => b.id === botId) ?? bots[0]);
+  const active = inGroup || view ? undefined : (bots.find((b) => b.id === botId) ?? bots[0]);
   // Bots other than the open chat alert from roster refreshes, since only the open chat streams.
   const rosterStatuses = useRef<Map<string, string> | null>(null);
   const openBotId = active?.id ?? null;
@@ -782,6 +793,8 @@ export function ShellPage() {
   routeBotId.current = botId;
   const routeGroupId = useRef<string | undefined>(groupId);
   routeGroupId.current = groupId;
+  const routeView = useRef(view);
+  routeView.current = view;
   const activeBotId = useRef<string | undefined>(inGroup ? undefined : active?.id);
   activeBotId.current = inGroup ? undefined : active?.id;
   const activeGroupId = useRef<string | undefined>(groupId);
@@ -958,6 +971,7 @@ export function ShellPage() {
           }
           return;
         }
+        if (routeView.current) return;
         const currentBotId = routeBotId.current;
         if (!currentBotId || !list.some((bot) => bot.id === currentBotId)) {
           navigate(firstThreadRoute(list, groupList), { replace: true });
@@ -1173,6 +1187,7 @@ export function ShellPage() {
           }
           return;
         }
+        if (routeView.current) return;
         const selectedBotId = bootstrap.thread?.botId ?? bootstrap.bots[0]?.id;
         if (selectedBotId && selectedBotId !== botId) {
           navigate(`/app/${selectedBotId}`, { replace: true });
@@ -2886,57 +2901,73 @@ export function ShellPage() {
               >
                 <PanelLeftClose size={17} strokeWidth={1.8} aria-hidden="true" />
               </button>
-              <Popover open={createMenuOpen} onOpenChange={setCreateMenuOpen}>
-                <PopoverTrigger
+              {PRODUCT_SURFACES.groups || PRODUCT_SURFACES.spaces ? (
+                <Popover open={createMenuOpen} onOpenChange={setCreateMenuOpen}>
+                  <PopoverTrigger
+                    className="app-no-drag flex size-[34px] items-center justify-center rounded-[10px] text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                    title={t`Create`}
+                    aria-label={t`Create`}
+                    data-testid="create-menu-trigger"
+                  >
+                    <Plus size={18} strokeWidth={1.8} aria-hidden="true" />
+                  </PopoverTrigger>
+                  {/* Unmount with the state change so the panel it opens never coexists with the menu. */}
+                  {createMenuOpen ? (
+                    <PopoverContent
+                      align="end"
+                      className="app-no-drag w-auto gap-0 overflow-hidden p-0 data-closed:animate-none"
+                    >
+                      <BotCreatePicker
+                        bots={bots}
+                        onCreateBot={() => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          setPanel("create");
+                        }}
+                        onOpenBot={(id) => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          navigate(`/app/${id}`);
+                        }}
+                        onCreateGroup={() => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          setPanel("create-group");
+                        }}
+                        onCreateSpace={() => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          setNewSpaceOpen(true);
+                        }}
+                        onShowGroupInfo={() => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          setPickerInfoTopic("group");
+                        }}
+                        onShowSpaceInfo={() => {
+                          setCreateMenuOpen(false);
+                          setMobileSidebarOpen(false);
+                          setPickerInfoTopic("space");
+                        }}
+                      />
+                    </PopoverContent>
+                  ) : null}
+                </Popover>
+              ) : (
+                <button
+                  type="button"
                   className="app-no-drag flex size-[34px] items-center justify-center rounded-[10px] text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-                  title={t`Create`}
-                  aria-label={t`Create`}
+                  title={t`New bot`}
+                  aria-label={t`New bot`}
                   data-testid="create-menu-trigger"
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    setPanel("create");
+                  }}
                 >
                   <Plus size={18} strokeWidth={1.8} aria-hidden="true" />
-                </PopoverTrigger>
-                {/* Unmount with the state change so the panel it opens never coexists with the menu. */}
-                {createMenuOpen ? (
-                  <PopoverContent
-                    align="end"
-                    className="app-no-drag w-auto gap-0 overflow-hidden p-0 data-closed:animate-none"
-                  >
-                    <BotCreatePicker
-                      bots={bots}
-                      onCreateBot={() => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        setPanel("create");
-                      }}
-                      onOpenBot={(id) => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        navigate(`/app/${id}`);
-                      }}
-                      onCreateGroup={() => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        setPanel("create-group");
-                      }}
-                      onCreateSpace={() => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        setNewSpaceOpen(true);
-                      }}
-                      onShowGroupInfo={() => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        setPickerInfoTopic("group");
-                      }}
-                      onShowSpaceInfo={() => {
-                        setCreateMenuOpen(false);
-                        setMobileSidebarOpen(false);
-                        setPickerInfoTopic("space");
-                      }}
-                    />
-                  </PopoverContent>
-                ) : null}
-              </Popover>
+                </button>
+              )}
             </div>
           </div>
           <InputGroup
@@ -3456,7 +3487,8 @@ export function ShellPage() {
                 setMobileSidebarOpen(false);
                 navigate("/app/routines");
               }}
-              className={SIDEBAR_NAV_ROW_CLASS}
+              aria-current={view === "routines" ? "page" : undefined}
+              className={`${SIDEBAR_NAV_ROW_CLASS} ${view === "routines" ? SIDEBAR_NAV_ROW_CURRENT_CLASS : ""}`}
             >
               <Repeat size={16} strokeWidth={1.8} aria-hidden="true" />
               <Trans>Routines</Trans>
@@ -3467,19 +3499,22 @@ export function ShellPage() {
                 setMobileSidebarOpen(false);
                 navigate("/app/artifacts");
               }}
-              className={SIDEBAR_NAV_ROW_CLASS}
+              aria-current={view === "artifacts" ? "page" : undefined}
+              className={`${SIDEBAR_NAV_ROW_CLASS} ${view === "artifacts" ? SIDEBAR_NAV_ROW_CURRENT_CLASS : ""}`}
             >
               <FolderOpen size={16} strokeWidth={1.8} aria-hidden="true" />
               <Trans>Artifacts</Trans>
             </button>
-            <button
-              type="button"
-              onClick={() => setPluginsOpen(true)}
-              className={SIDEBAR_NAV_ROW_CLASS}
-            >
-              <LayoutGrid size={16} strokeWidth={1.8} aria-hidden="true" />
-              <Trans>Integrations</Trans>
-            </button>
+            {PRODUCT_SURFACES.integrations ? (
+              <button
+                type="button"
+                onClick={() => setPluginsOpen(true)}
+                className={SIDEBAR_NAV_ROW_CLASS}
+              >
+                <LayoutGrid size={16} strokeWidth={1.8} aria-hidden="true" />
+                <Trans>Integrations</Trans>
+              </button>
+            ) : null}
             <button
               type="button"
               data-testid="sidebar-settings"
@@ -3489,58 +3524,60 @@ export function ShellPage() {
               <Settings size={16} strokeWidth={1.8} aria-hidden="true" />
               <Trans>Settings</Trans>
             </button>
-            <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-              <PopoverTrigger
-                data-testid="user-menu-trigger"
-                aria-label={userName}
-                title={userName}
-                className={`${SIDEBAR_NAV_ROW_CLASS} mt-1`}
-              >
-                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-[10.5px] font-semibold text-primary-foreground">
-                  {initials}
-                </span>
-                <span className="min-w-0 truncate text-foreground" dir="auto">
-                  {userName}
-                </span>
-              </PopoverTrigger>
-              {menuOpen ? (
-                <PopoverContent
-                  side="top"
-                  align="start"
-                  className="w-[calc(280px-1.25rem)] max-w-[calc(100vw-3rem)] gap-0 p-1 data-closed:animate-none"
+            {PRODUCT_SURFACES.accountMenu ? (
+              <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+                <PopoverTrigger
+                  data-testid="user-menu-trigger"
+                  aria-label={userName}
+                  title={userName}
+                  className={`${SIDEBAR_NAV_ROW_CLASS} mt-1`}
                 >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start font-normal"
-                    aria-label={t`Usage`}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      void rpc.usage
-                        .summary()
-                        .then(setUsage)
-                        .catch(() => undefined);
-                      openSettings("usage");
-                    }}
+                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-[10.5px] font-semibold text-primary-foreground">
+                    {initials}
+                  </span>
+                  <span className="min-w-0 truncate text-foreground" dir="auto">
+                    {userName}
+                  </span>
+                </PopoverTrigger>
+                {menuOpen ? (
+                  <PopoverContent
+                    side="top"
+                    align="start"
+                    className="w-[calc(280px-1.25rem)] max-w-[calc(100vw-3rem)] gap-0 p-1 data-closed:animate-none"
                   >
-                    <Gauge className="text-muted-foreground" strokeWidth={1.75} />
-                    <Trans>Usage</Trans>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start font-normal"
-                    onClick={() =>
-                      void authClient.signOut().then(() => {
-                        clearSpaceSelection();
-                        navigate("/");
-                      })
-                    }
-                  >
-                    <LogOut className="text-muted-foreground" strokeWidth={1.75} />
-                    <Trans>Log out</Trans>
-                  </Button>
-                </PopoverContent>
-              ) : null}
-            </Popover>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start font-normal"
+                      aria-label={t`Usage`}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        void rpc.usage
+                          .summary()
+                          .then(setUsage)
+                          .catch(() => undefined);
+                        openSettings("usage");
+                      }}
+                    >
+                      <Gauge className="text-muted-foreground" strokeWidth={1.75} />
+                      <Trans>Usage</Trans>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start font-normal"
+                      onClick={() =>
+                        void authClient.signOut().then(() => {
+                          clearSpaceSelection();
+                          navigate("/");
+                        })
+                      }
+                    >
+                      <LogOut className="text-muted-foreground" strokeWidth={1.75} />
+                      <Trans>Log out</Trans>
+                    </Button>
+                  </PopoverContent>
+                ) : null}
+              </Popover>
+            ) : null}
           </nav>
         </div>
       </aside>
@@ -3591,198 +3628,206 @@ export function ShellPage() {
         />
       )}
 
-      <main
-        aria-hidden={mobileSidebarOpen || undefined}
-        inert={mobileSidebarOpen}
-        className="flex min-w-0 flex-1 flex-col bg-background"
-      >
-        <div className="app-drag flex items-center gap-3 border-b border-border px-3 py-3 md:px-5">
-          {/* Collapsed bots sidebar: this header is the leading edge for window chrome. */}
-          {botsSidebarCollapsed && desktopBridge() ? <WindowChrome /> : null}
-          <button
-            type="button"
-            aria-label={t`Open navigation`}
-            onClick={() => setMobileSidebarOpen(true)}
-            className="app-no-drag grid size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+      {view ? (
+        <main
+          aria-hidden={mobileSidebarOpen || undefined}
+          inert={mobileSidebarOpen}
+          data-testid="shell-view"
+          className="flex min-w-0 flex-1 flex-col bg-background"
+        >
+          <div
+            className={`app-drag flex items-center gap-3 border-b border-border px-3 py-3 ${
+              botsSidebarCollapsed ? "md:px-5" : "md:hidden"
+            }`}
           >
-            <Menu size={19} strokeWidth={1.7} />
-          </button>
-          {botsSidebarCollapsed ? (
-            <button
-              type="button"
-              data-testid="restore-bots-sidebar"
-              aria-label={t`Show bots`}
-              title={t`Show bots`}
-              onClick={() => setBotsSidebarCollapsedPref(false)}
-              className="app-no-drag hidden size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground md:grid"
-            >
-              <PanelLeftOpen size={19} strokeWidth={1.7} aria-hidden="true" />
-            </button>
-          ) : null}
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            {inGroup ? (
-              <GroupAvatar
-                members={activeSnapshot?.members ?? activeGroup?.members ?? []}
-                size={38}
-              />
-            ) : active ? (
-              <BotAvatar color={active.color} identity={active.id} size={38} />
-            ) : null}
-            <div className="flex min-w-0 flex-col">
-              <button
-                type="button"
-                data-testid="bot-settings-trigger"
-                onClick={() => setPanel(inGroup ? "group-settings" : "settings")}
-                className="app-no-drag max-w-full self-start truncate rounded-md text-start text-[15px] font-semibold text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring"
-                dir="auto"
-              >
-                {inGroup
-                  ? (activeGroup?.name ?? activeSnapshot?.groupName ?? t`Group`)
-                  : (active?.name ?? t`Select a bot`)}
-              </button>
-              {headerStatus ? (
-                <span
-                  data-testid="thread-header-status"
-                  className="truncate text-small text-muted-foreground"
+            <MainHeaderLeading
+              botsSidebarCollapsed={botsSidebarCollapsed}
+              onOpenNavigation={() => setMobileSidebarOpen(true)}
+              onShowBots={() => setBotsSidebarCollapsedPref(false)}
+            />
+          </div>
+          <Suspense fallback={null}>
+            {view === "routines" ? <RoutinesPage /> : <ArtifactsPage />}
+          </Suspense>
+        </main>
+      ) : (
+        <main
+          aria-hidden={mobileSidebarOpen || undefined}
+          inert={mobileSidebarOpen}
+          className="flex min-w-0 flex-1 flex-col bg-background"
+        >
+          <div className="app-drag flex items-center gap-3 border-b border-border px-3 py-3 md:px-5">
+            {/* Collapsed bots sidebar: this header is the leading edge for window chrome. */}
+            <MainHeaderLeading
+              botsSidebarCollapsed={botsSidebarCollapsed}
+              onOpenNavigation={() => setMobileSidebarOpen(true)}
+              onShowBots={() => setBotsSidebarCollapsedPref(false)}
+            />
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {inGroup ? (
+                <GroupAvatar
+                  members={activeSnapshot?.members ?? activeGroup?.members ?? []}
+                  size={38}
+                />
+              ) : active ? (
+                <BotAvatar color={active.color} identity={active.id} size={38} />
+              ) : null}
+              <div className="flex min-w-0 flex-col">
+                <button
+                  type="button"
+                  data-testid="bot-settings-trigger"
+                  onClick={() => setPanel(inGroup ? "group-settings" : "settings")}
+                  className="app-no-drag max-w-full self-start truncate rounded-md text-start text-[15px] font-semibold text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring"
                   dir="auto"
                 >
-                  {headerWorking ? <Shimmer>{headerStatus}</Shimmer> : headerStatus}
-                </span>
-              ) : null}
+                  {inGroup
+                    ? (activeGroup?.name ?? activeSnapshot?.groupName ?? t`Group`)
+                    : (active?.name ?? t`Select a bot`)}
+                </button>
+                {headerStatus ? (
+                  <span
+                    data-testid="thread-header-status"
+                    className="truncate text-small text-muted-foreground"
+                    dir="auto"
+                  >
+                    {headerWorking ? <Shimmer>{headerStatus}</Shimmer> : headerStatus}
+                  </span>
+                ) : null}
+              </div>
             </div>
+            {!inGroup && active ? (
+              <button
+                type="button"
+                title={t`Agent computer`}
+                onClick={() => {
+                  const next = panel === "computer" ? null : "computer";
+                  setPanel(next);
+                  if (next === "computer" && active) {
+                    // Refresh run/computer so Take control isn't stuck on a stale busyBotName.
+                    void refreshThread(active.id).catch(() => undefined);
+                  }
+                }}
+                data-active={panel === "computer" ? "" : undefined}
+                className="app-no-drag grid size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground data-active:bg-muted data-active:text-foreground"
+              >
+                <Monitor size={18} strokeWidth={1.8} />
+              </button>
+            ) : null}
           </div>
-          {!inGroup && active ? (
-            <button
-              type="button"
-              title={t`Agent computer`}
-              onClick={() => {
-                const next = panel === "computer" ? null : "computer";
-                setPanel(next);
-                if (next === "computer" && active) {
-                  // Refresh run/computer so Take control isn't stuck on a stale busyBotName.
-                  void refreshThread(active.id).catch(() => undefined);
+          {!active && !activeGroup && initialBotsLoaded ? (
+            <div className="grid flex-1 place-items-center">
+              <Button onClick={() => setPanel("create")}>
+                <Plus size={16} aria-hidden="true" />
+                <Trans>Create new Bot</Trans>
+              </Button>
+            </div>
+          ) : (
+            <Transcript
+              key={activeSnapshot?.threadId}
+              scrollRef={messageScroll}
+              scrollRequest={scrollRequest}
+              onScrollRequestHandled={clearScrollRequest}
+              artifactTarget={transcriptArtifactTarget}
+              messages={transcriptMessages}
+              showToolActivity={showToolActivity}
+              olderCursor={activeSnapshot?.olderCursor ?? null}
+              loadingOlder={loadingOlder}
+              answerableAskMessageId={answerableAskMessageId}
+              running={transcriptRunning}
+              workingBots={workingBots}
+              onLoadOlder={loadOlder}
+              onOpenBot={openBot}
+              onAnswer={answerMessage}
+              onReply={(message) => {
+                setReplyTarget(message);
+                setReplyQuote(null);
+              }}
+              onQuote={(message, quote) => {
+                setReplyTarget(message);
+                setReplyQuote(quote);
+              }}
+              onReact={reactToMessage}
+              onJumpToMessage={jumpToReplyMessage}
+              onOpenPeerMessages={(peer) => {
+                setPeerConversation(peer);
+              }}
+              memberName={resolveTranscriptMemberName}
+              peerBot={resolveTranscriptBot}
+              onRefresh={refreshActiveThread}
+              onBotChanged={refreshBots}
+              onAddRoutine={addSkillRoutine}
+              voiceReady={Boolean(voiceStatus?.ready)}
+              speakingMessageId={speakingMessageId}
+              onSpeak={speakMessage}
+              onOpenComputer={onOpenComputer}
+            />
+          )}
+          {recordingSkill ? (
+            <div className="px-6 pb-2 text-center text-[13px] text-destructive">
+              <Trans>Teaching in progress. Stop teaching before sending a new message.</Trans>
+            </div>
+          ) : null}
+          {active || activeGroup ? (
+            <Composer
+              key={inGroup ? `group:${groupId}` : `bot:${active?.id}`}
+              activeName={inGroup ? (activeGroup?.name ?? activeSnapshot?.groupName) : active?.name}
+              running={composerRunning}
+              disabled={Boolean(recordingSkill)}
+              pendingAttachments={activePendingAttachments}
+              attachmentNotice={attachmentNotice}
+              showUsageLimit={!inGroup}
+              sendError={sendError}
+              onDismissError={dismissComposerError}
+              sending={sending}
+              fileInputRef={fileInputRef}
+              onAttachmentPick={onAttachmentPick}
+              onRemoveAttachment={removeAttachment}
+              onSend={sendMessage}
+              onStop={stopRun}
+              onVoice={
+                !inGroup && active
+                  ? () => {
+                      if (!voiceStatus?.ready) {
+                        openSettings("voice");
+                        return;
+                      }
+                      startCall({
+                        botId: active.id,
+                        botName: active.name,
+                        botColor: active.color,
+                        transcribe: Boolean(voiceStatus?.transcribe),
+                      });
+                    }
+                  : undefined
+              }
+              replyTarget={activeReplyTarget}
+              replyQuote={activeReplyQuote}
+              replyTargetName={replyTargetName}
+              onClearReply={clearReply}
+              mentionTargets={composerMentionTargets}
+              agentSkills={agentSkills}
+              onSlashOpen={refreshAgentSkills}
+              onSlashAction={(action) => {
+                if (action === "chat-settings") {
+                  setPanel(inGroup ? "group-settings" : "settings");
+                  return;
+                }
+                if (action === "settings-general") {
+                  openSettings("general");
+                  return;
+                }
+                if (action === "settings-usage") {
+                  void rpc.usage
+                    .summary()
+                    .then(setUsage)
+                    .catch(() => undefined);
+                  openSettings("usage");
                 }
               }}
-              data-active={panel === "computer" ? "" : undefined}
-              className="app-no-drag grid size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground data-active:bg-muted data-active:text-foreground"
-            >
-              <Monitor size={18} strokeWidth={1.8} />
-            </button>
+            />
           ) : null}
-        </div>
-        {!active && !activeGroup && initialBotsLoaded ? (
-          <div className="grid flex-1 place-items-center">
-            <Button onClick={() => setPanel("create")}>
-              <Plus size={16} aria-hidden="true" />
-              <Trans>Create new Bot</Trans>
-            </Button>
-          </div>
-        ) : (
-          <Transcript
-            key={activeSnapshot?.threadId}
-            scrollRef={messageScroll}
-            scrollRequest={scrollRequest}
-            onScrollRequestHandled={clearScrollRequest}
-            artifactTarget={transcriptArtifactTarget}
-            messages={transcriptMessages}
-            showToolActivity={showToolActivity}
-            olderCursor={activeSnapshot?.olderCursor ?? null}
-            loadingOlder={loadingOlder}
-            answerableAskMessageId={answerableAskMessageId}
-            running={transcriptRunning}
-            workingBots={workingBots}
-            onLoadOlder={loadOlder}
-            onOpenBot={openBot}
-            onAnswer={answerMessage}
-            onReply={(message) => {
-              setReplyTarget(message);
-              setReplyQuote(null);
-            }}
-            onQuote={(message, quote) => {
-              setReplyTarget(message);
-              setReplyQuote(quote);
-            }}
-            onReact={reactToMessage}
-            onJumpToMessage={jumpToReplyMessage}
-            onOpenPeerMessages={(peer) => {
-              setPeerConversation(peer);
-            }}
-            memberName={resolveTranscriptMemberName}
-            peerBot={resolveTranscriptBot}
-            onRefresh={refreshActiveThread}
-            onBotChanged={refreshBots}
-            onAddRoutine={addSkillRoutine}
-            voiceReady={Boolean(voiceStatus?.ready)}
-            speakingMessageId={speakingMessageId}
-            onSpeak={speakMessage}
-            onOpenComputer={onOpenComputer}
-          />
-        )}
-        {recordingSkill ? (
-          <div className="px-6 pb-2 text-center text-[13px] text-destructive">
-            <Trans>Teaching in progress. Stop teaching before sending a new message.</Trans>
-          </div>
-        ) : null}
-        {active || activeGroup ? (
-          <Composer
-            key={inGroup ? `group:${groupId}` : `bot:${active?.id}`}
-            activeName={inGroup ? (activeGroup?.name ?? activeSnapshot?.groupName) : active?.name}
-            running={composerRunning}
-            disabled={Boolean(recordingSkill)}
-            pendingAttachments={activePendingAttachments}
-            attachmentNotice={attachmentNotice}
-            showUsageLimit={!inGroup}
-            sendError={sendError}
-            onDismissError={dismissComposerError}
-            sending={sending}
-            fileInputRef={fileInputRef}
-            onAttachmentPick={onAttachmentPick}
-            onRemoveAttachment={removeAttachment}
-            onSend={sendMessage}
-            onStop={stopRun}
-            onVoice={
-              !inGroup && active
-                ? () => {
-                    if (!voiceStatus?.ready) {
-                      openSettings("voice");
-                      return;
-                    }
-                    startCall({
-                      botId: active.id,
-                      botName: active.name,
-                      botColor: active.color,
-                      transcribe: Boolean(voiceStatus?.transcribe),
-                    });
-                  }
-                : undefined
-            }
-            replyTarget={activeReplyTarget}
-            replyQuote={activeReplyQuote}
-            replyTargetName={replyTargetName}
-            onClearReply={clearReply}
-            mentionTargets={composerMentionTargets}
-            agentSkills={agentSkills}
-            onSlashOpen={refreshAgentSkills}
-            onSlashAction={(action) => {
-              if (action === "chat-settings") {
-                setPanel(inGroup ? "group-settings" : "settings");
-                return;
-              }
-              if (action === "settings-general") {
-                openSettings("general");
-                return;
-              }
-              if (action === "settings-usage") {
-                void rpc.usage
-                  .summary()
-                  .then(setUsage)
-                  .catch(() => undefined);
-                openSettings("usage");
-              }
-            }}
-          />
-        ) : null}
-      </main>
+        </main>
+      )}
 
       <CallCard onSettings={() => openSettings("voice")} />
 
@@ -6641,4 +6686,42 @@ function computerLabel(mode: ComputerStatus["mode"] | undefined, botName: string
 
 function newClientNonce(): string {
   return newClientId();
+}
+
+/** Window chrome, the phone menu button and Show bots, leading every main-area header. */
+function MainHeaderLeading({
+  botsSidebarCollapsed,
+  onOpenNavigation,
+  onShowBots,
+}: {
+  botsSidebarCollapsed: boolean;
+  onOpenNavigation: () => void;
+  onShowBots: () => void;
+}) {
+  const { t } = useLingui();
+  return (
+    <>
+      {botsSidebarCollapsed && desktopBridge() ? <WindowChrome /> : null}
+      <button
+        type="button"
+        aria-label={t`Open navigation`}
+        onClick={onOpenNavigation}
+        className="app-no-drag grid size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+      >
+        <Menu size={19} strokeWidth={1.7} />
+      </button>
+      {botsSidebarCollapsed ? (
+        <button
+          type="button"
+          data-testid="restore-bots-sidebar"
+          aria-label={t`Show bots`}
+          title={t`Show bots`}
+          onClick={onShowBots}
+          className="app-no-drag hidden size-[34px] shrink-0 place-items-center rounded-[10px] text-muted-foreground hover:bg-muted hover:text-foreground md:grid"
+        >
+          <PanelLeftOpen size={19} strokeWidth={1.7} aria-hidden="true" />
+        </button>
+      ) : null}
+    </>
+  );
 }

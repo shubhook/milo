@@ -342,6 +342,11 @@ test("routines page lists every bot's routines beside the editor", async ({ page
   await page.getByRole("button", { name: "Routines", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/routines$/);
   await expect(page.getByRole("heading", { name: "Routines", exact: true })).toBeVisible();
+  await expect(page.getByTestId("bots-sidebar")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Routines", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
   const row = page.getByTestId("routine-page-row").filter({ hasText: "Morning digest" });
   await expect(row).toBeVisible();
   await expect(row).toContainText("Active");

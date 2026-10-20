@@ -1,5 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot } from "@milo/contracts";
+import { PRODUCT_SURFACES } from "@milo/core";
 import {
   BotAvatar,
   Command,
@@ -89,62 +90,66 @@ export function BotCreatePicker({
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup>
-            <CommandItem
-              value="create-group"
-              data-testid="create-new-group"
-              onSelect={() => onCreateGroup()}
-              className="gap-2"
-            >
-              <Users size={16} strokeWidth={1.8} aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate">
-                <Trans>Create new Group</Trans>
-              </span>
-              <button
-                type="button"
-                data-testid="picker-info-group"
-                aria-label={t`About groups`}
-                title={t`About groups`}
-                onPointerDown={(event) => event.stopPropagation()}
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  onShowGroupInfo();
-                }}
-                onKeyDown={(event) => event.stopPropagation()}
-                className="-mr-2 shrink-0 rounded p-1 text-muted-foreground/70 opacity-0 transition-opacity duration-150 group-focus-within/command-item:opacity-100 group-hover/command-item:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-ring"
+            {PRODUCT_SURFACES.groups ? (
+              <CommandItem
+                value="create-group"
+                data-testid="create-new-group"
+                onSelect={() => onCreateGroup()}
+                className="gap-2"
               >
-                <Info size={14} strokeWidth={1.8} aria-hidden="true" />
-              </button>
-            </CommandItem>
-            <CommandItem
-              value="create-space"
-              data-testid="create-new-space"
-              onSelect={() => onCreateSpace()}
-              className="gap-2"
-            >
-              <Lock size={14} strokeWidth={1.8} aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate">
-                <Trans>Create new Space</Trans>
-              </span>
-              <button
-                type="button"
-                data-testid="picker-info-space"
-                aria-label={t`About spaces`}
-                title={t`About spaces`}
-                onPointerDown={(event) => event.stopPropagation()}
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  onShowSpaceInfo();
-                }}
-                onKeyDown={(event) => event.stopPropagation()}
-                className="-mr-2 shrink-0 rounded p-1 text-muted-foreground/70 opacity-0 transition-opacity duration-150 group-focus-within/command-item:opacity-100 group-hover/command-item:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-ring"
+                <Users size={16} strokeWidth={1.8} aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">
+                  <Trans>Create new Group</Trans>
+                </span>
+                <button
+                  type="button"
+                  data-testid="picker-info-group"
+                  aria-label={t`About groups`}
+                  title={t`About groups`}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    onShowGroupInfo();
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  className="-mr-2 shrink-0 rounded p-1 text-muted-foreground/70 opacity-0 transition-opacity duration-150 group-focus-within/command-item:opacity-100 group-hover/command-item:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  <Info size={14} strokeWidth={1.8} aria-hidden="true" />
+                </button>
+              </CommandItem>
+            ) : null}
+            {PRODUCT_SURFACES.spaces ? (
+              <CommandItem
+                value="create-space"
+                data-testid="create-new-space"
+                onSelect={() => onCreateSpace()}
+                className="gap-2"
               >
-                <Info size={14} strokeWidth={1.8} aria-hidden="true" />
-              </button>
-            </CommandItem>
+                <Lock size={14} strokeWidth={1.8} aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">
+                  <Trans>Create new Space</Trans>
+                </span>
+                <button
+                  type="button"
+                  data-testid="picker-info-space"
+                  aria-label={t`About spaces`}
+                  title={t`About spaces`}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    onShowSpaceInfo();
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  className="-mr-2 shrink-0 rounded p-1 text-muted-foreground/70 opacity-0 transition-opacity duration-150 group-focus-within/command-item:opacity-100 group-hover/command-item:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  <Info size={14} strokeWidth={1.8} aria-hidden="true" />
+                </button>
+              </CommandItem>
+            ) : null}
           </CommandGroup>
         </CommandList>
       </Command>

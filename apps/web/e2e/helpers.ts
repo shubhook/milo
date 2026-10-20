@@ -90,7 +90,6 @@ export async function captureScreenshot(page: Page, testInfo: TestInfo, name: st
 
 export async function openNewBot(page: Page) {
   await page.getByTestId("create-menu-trigger").click();
-  await page.getByTestId("create-new-bot").click();
   await expect(page.getByTestId("create-bot-form")).toBeVisible();
 }
 
@@ -104,7 +103,7 @@ export async function openNewSpace(page: Page) {
   await page.getByTestId("create-new-space").click();
 }
 
-/** Open the create form from the + picker, submit, and wait for the new chat. */
+/** Open the create form from +, submit, and wait for the new chat. */
 export async function createBotFromPicker(
   page: Page,
   options: {

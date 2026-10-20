@@ -32,12 +32,6 @@ const OnboardingPage = lazy(() =>
 const WelcomePage = lazy(() =>
   import("./pages/Welcome").then((module) => ({ default: module.WelcomePage })),
 );
-const RoutinesPage = lazy(() =>
-  import("./pages/Routines").then((module) => ({ default: module.RoutinesPage })),
-);
-const ArtifactsPage = lazy(() =>
-  import("./pages/Artifacts").then((module) => ({ default: module.ArtifactsPage })),
-);
 
 export function App() {
   if (window.location.pathname === LOCAL_SETTINGS_PAGE) return <LocalSettingsPage />;
@@ -143,15 +137,15 @@ function SessionApp() {
           />
           <Route
             path="/app/routines"
-            element={user ? <RoutinesPage /> : <Navigate to="/sign-in" replace />}
+            element={user ? <ShellPage view="routines" /> : <Navigate to="/sign-in" replace />}
           />
           <Route
             path="/app/artifacts"
-            element={user ? <ArtifactsPage /> : <Navigate to="/sign-in" replace />}
+            element={user ? <ShellPage view="artifacts" /> : <Navigate to="/sign-in" replace />}
           />
           <Route
             path="/app/artifacts/:artifactId"
-            element={user ? <ArtifactsPage /> : <Navigate to="/sign-in" replace />}
+            element={user ? <ShellPage view="artifacts" /> : <Navigate to="/sign-in" replace />}
           />
           <Route
             path="/app/:botId"

@@ -112,9 +112,9 @@ test("sidebar bot rows and nav rows share one hover tone", async ({ page }, test
   const chiefBg = await readChiefBg();
   await captureScreenshot(page, testInfo, "sidebar-row-hover");
 
-  const integrations = sidebar.getByRole("button", { name: "Integrations", exact: true });
-  await integrations.hover();
+  const routines = sidebar.getByRole("button", { name: "Routines", exact: true });
+  await routines.hover();
   await expect
-    .poll(() => integrations.evaluate((el) => getComputedStyle(el).backgroundColor))
+    .poll(() => routines.evaluate((el) => getComputedStyle(el).backgroundColor))
     .toBe(chiefBg);
 });
