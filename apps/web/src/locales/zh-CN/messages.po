@@ -2515,7 +2515,7 @@ msgstr "需要接管"
 
 #: src/pages/Shell.tsx
 msgid "Needs you"
-msgstr ""
+msgstr "需要你处理"
 
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"

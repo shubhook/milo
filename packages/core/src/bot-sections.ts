@@ -5,20 +5,30 @@ export type BotListSection<T> = {
 };
 
 type Section = { id: string; name: string };
-type SectionedBot = { pinned: boolean; sectionId: string | null };
+type SectionedBot = {
+  pinned: boolean;
+  sectionId: string | null;
+  /** Waiting on the person or stopped on a failure; listed first until that clears. */
+  needsYou?: boolean;
+};
+
+export const NEEDS_YOU_SECTION_KEY = "needs-you";
 
 export function groupBotsForSidebar<T extends SectionedBot>(
   bots: readonly T[],
   sections: readonly Section[],
 ): BotListSection<T>[] {
   const knownSectionIds = new Set(sections.map((section) => section.id));
+  const needsYou: T[] = [];
   const pinned: T[] = [];
   const sectionMembers = new Map<string, T[]>();
   const unassigned: T[] = [];
   const grouped: BotListSection<T>[] = [];
 
   for (const bot of bots) {
-    if (bot.pinned) {
+    if (bot.needsYou) {
+      needsYou.push(bot);
+    } else if (bot.pinned) {
       pinned.push(bot);
     } else if (bot.sectionId && knownSectionIds.has(bot.sectionId)) {
       const members = sectionMembers.get(bot.sectionId) ?? [];
@@ -29,6 +39,9 @@ export function groupBotsForSidebar<T extends SectionedBot>(
     }
   }
 
+  if (needsYou.length > 0) {
+    grouped.push({ key: NEEDS_YOU_SECTION_KEY, title: "Needs you", bots: needsYou });
+  }
   if (pinned.length > 0) {
     grouped.push({ key: "pinned", title: "Pinned", bots: pinned });
   }

@@ -1,4 +1,6 @@
 export const RU_MESSAGES: Record<string, string> = {
+  // lib/inbox-spaces.ts
+  "Needs you": "Ждёт вас",
   // components/usage-limit-notice.tsx
   "{agent}'s {period} limit is used up.": "Лимит {agent} на {period} исчерпан.",
   "{agent}'s weekly limit is used up.": "Недельный лимит {agent} исчерпан.",

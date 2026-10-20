@@ -1,4 +1,6 @@
 export const ZH_MESSAGES: Record<string, string> = {
+  // lib/inbox-spaces.ts
+  "Needs you": "需要你处理",
   // components/usage-limit-notice.tsx
   "{agent}'s {period} limit is used up.": "{agent} 的 {period} 额度已用完。",
   "{agent}'s weekly limit is used up.": "{agent} 的每周额度已用完。",
