@@ -635,11 +635,6 @@ msgstr "बॉट स्क्रीन"
 msgid "Bot screen preview"
 msgstr "बॉट स्क्रीन प्रीव्यू"
 
-#: src/pages/Artifacts.tsx
-#: src/pages/Routines.tsx
-msgid "Bots"
-msgstr ""
-
 #: src/pages/Shell.tsx
 msgid "Bots are working"
 msgstr "बॉट काम कर रहे हैं"
@@ -2528,6 +2523,7 @@ msgstr "नियंत्रण लेना ज़रूरी"
 msgid "Needs you"
 msgstr "आपकी ज़रूरत है"
 
+#: src/pages/Shell.tsx
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"
 msgstr "नया बॉट"

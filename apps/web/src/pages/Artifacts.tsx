@@ -20,7 +20,6 @@ import {
   NativeSelectOption,
 } from "@milo/ui-web";
 import {
-  ChevronLeft,
   Download,
   LayoutGrid,
   List,
@@ -41,11 +40,9 @@ import { SandboxedHtmlViewer } from "../components/SandboxedHtmlViewer";
 import { SegmentedControl } from "../components/SegmentedControl";
 import { decodeArtifactBase64, downloadArtifactBytes } from "../lib/artifact-open";
 import { takeInitialBootstrap } from "../lib/bootstrap";
-import { desktopBridge } from "../lib/desktop";
 import { formatRelativeTime } from "../lib/relative-time";
 import { rpc } from "../lib/rpc";
 import { useObjectUrl } from "../lib/use-object-url";
-import { WindowChrome } from "./WindowChrome";
 
 type ViewMode = "grid" | "list";
 type DateFilter = "all" | "today" | "week" | "month";
@@ -217,19 +214,7 @@ export function ArtifactsPage() {
   const openSummary = artifactId ? (items?.find((item) => item.id === artifactId) ?? null) : null;
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-background text-foreground">
-      <header className="app-drag flex items-center gap-2 border-b border-border px-4 py-3 md:px-6">
-        {/* This route is the window's leading edge, so Electron window controls sit in the header. */}
-        {desktopBridge() ? <WindowChrome /> : null}
-        <Link
-          to="/app"
-          className="app-no-drag flex shrink-0 items-center gap-0.5 rounded-lg py-1 pe-1.5 text-small font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <ChevronLeft size={16} strokeWidth={1.9} aria-hidden="true" />
-          <Trans>Bots</Trans>
-        </Link>
-      </header>
-
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground">
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {!maximized || !artifactId ? (
           <main className="rk-scroll min-h-0 min-w-0 flex-1 overflow-y-auto">

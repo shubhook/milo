@@ -6,7 +6,7 @@ import {
   type SpaceBot,
   type SpaceGroup,
 } from "@milo/contracts";
-import { ACTIVE_RUN_STATUSES } from "@milo/core";
+import { ACTIVE_RUN_STATUSES, PRODUCT_SURFACES } from "@milo/core";
 import { botColors } from "@milo/ui-tokens";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -497,13 +497,23 @@ export default function Home() {
             <NativeSymbol ios="magnifyingglass" android="search" size={17} />
           </CircleButton>
           <CircleButton
-            accessibilityLabel={t("Create")}
+            accessibilityLabel={
+              PRODUCT_SURFACES.groups || PRODUCT_SURFACES.spaces ? t("Create") : t("New bot")
+            }
             onPress={() => {
               if (spaceActionRef.current.busy || spaceActionRef.current.recoveryId) return;
+              if (!PRODUCT_SURFACES.groups && !PRODUCT_SURFACES.spaces) {
+                void createQuickBot();
+                return;
+              }
               Alert.alert(t("Create"), undefined, [
                 { text: t("New bot"), onPress: () => void createQuickBot() },
-                { text: t("New group"), onPress: () => router.push("/new-group") },
-                { text: t("New space"), onPress: () => router.push("/new-space") },
+                ...(PRODUCT_SURFACES.groups
+                  ? [{ text: t("New group"), onPress: () => router.push("/new-group") }]
+                  : []),
+                ...(PRODUCT_SURFACES.spaces
+                  ? [{ text: t("New space"), onPress: () => router.push("/new-space") }]
+                  : []),
                 { text: t("Cancel"), style: "cancel" },
               ]);
             }}

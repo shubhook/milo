@@ -1,10 +1,8 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Routine } from "@milo/contracts";
 import { BotAvatar, Button, cn } from "@milo/ui-web";
-import { ChevronLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { desktopBridge } from "../lib/desktop";
 import { localTimezone } from "../lib/local-timezone";
 import { RoutineDraftError, saveRoutineDraft } from "../lib/routine-save";
 import { rpc } from "../lib/rpc";
@@ -16,7 +14,6 @@ import {
   routineTriggerSummary,
 } from "./RoutineEditor";
 import { DeleteItemDialog } from "./shell/dialogs";
-import { WindowChrome } from "./WindowChrome";
 
 const RUN_POLL_MS = 2_000;
 
@@ -148,17 +145,7 @@ export function RoutinesPage() {
   const sorted = [...(routines ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-background text-foreground">
-      <header className="app-drag flex items-center gap-2 border-b border-border px-4 py-3 md:px-6">
-        {desktopBridge() ? <WindowChrome /> : null}
-        <Link
-          to="/app"
-          className="app-no-drag flex shrink-0 items-center gap-0.5 rounded-lg py-1 pe-1.5 text-small font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <ChevronLeft size={16} strokeWidth={1.9} aria-hidden="true" />
-          <Trans>Bots</Trans>
-        </Link>
-      </header>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground">
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <section
           aria-label={t`Routines`}

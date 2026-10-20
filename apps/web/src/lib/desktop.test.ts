@@ -79,11 +79,13 @@ describe("window chrome", () => {
     expect(shell).toContain("{botsSidebarCollapsed && desktopBridge() ? <WindowChrome /> : null}");
   });
 
-  it("puts Electron window chrome on the artifacts page, which has no sidebar", () => {
+  it("leaves window chrome to the shell, which hosts Routines and Artifacts", () => {
     const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "../pages");
-    const artifacts = readFileSync(path.join(root, "Artifacts.tsx"), "utf8");
-    expect(artifacts).not.toContain("AppRail");
-    expect(artifacts).toContain("{desktopBridge() ? <WindowChrome /> : null}");
+    for (const page of ["Artifacts.tsx", "Routines.tsx"]) {
+      const source = readFileSync(path.join(root, page), "utf8");
+      expect(source).not.toContain("AppRail");
+      expect(source).not.toContain("<WindowChrome");
+    }
   });
 });
 

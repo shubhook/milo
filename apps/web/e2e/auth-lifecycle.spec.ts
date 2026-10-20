@@ -1,5 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+
+/** The sidebar has no account menu, so sign out through the auth API and reload. */
+async function signOut(page: Page) {
+  await page.evaluate(async () => {
+    await fetch("/api/auth/sign-out", {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    });
+  });
+  await page.goto("/sign-in");
+}
 
 test("restricted signup waits for mailbox verification", async ({ page }, testInfo) => {
   await page.route("**/api/auth/get-session**", (route) => route.fulfill({ json: null }));
@@ -50,28 +63,9 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   const protectedBotPath = new URL(page.url()).pathname;
   await expect(page.getByPlaceholder("Message Chief")).toBeVisible();
 
-  await page.getByRole("button", { name: new RegExp(userName, "i") }).click();
-  await expect(page.getByRole("button", { name: "Settings", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Usage", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Log out" })).toBeVisible();
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Models", exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Memory", exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Voice", exact: true }),
-  ).toHaveCount(0);
-  await captureScreenshot(page, testInfo, "36-account-menu");
+  await expect(page.getByTestId("user-menu-trigger")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Log out" }).click();
+  await signOut(page);
   await expect(page.getByRole("heading", { name: "Sign in to Milo" })).toBeVisible();
   await page.goto("/");
   await expect(page.locator('[data-rakazo-surface="welcome"]')).toBeVisible();
@@ -114,7 +108,6 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await expect(composer).toHaveAttribute("name", "chat-message");
   await expect(composer).toHaveAttribute("autocomplete", "off");
   await expect(composer).toHaveAttribute("aria-label", "Message Chief");
-  await expect(page.getByRole("button", { name: new RegExp(userName, "i") })).toBeVisible();
 
   await composer.fill("line one");
   const heightBeforeNewline = await composer.evaluate((el) => el.getBoundingClientRect().height);
@@ -162,8 +155,7 @@ test("recovers an email password from the sign-in screen", async ({ page }, test
   await expect(settings.getByRole("button", { name: "Change password" })).toHaveCount(0);
   await settings.getByRole("button", { name: "Close user settings" }).click();
 
-  await page.getByRole("button", { name: new RegExp(userName, "i") }).click();
-  await page.getByRole("button", { name: "Log out" }).click();
+  await signOut(page);
   await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
   await page.getByRole("link", { name: "Forgot password?" }).click();
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();

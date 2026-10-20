@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
 
-test("opens Artifacts from the account menu and lists created files", async ({
-  page,
-}, testInfo) => {
+test("opens Artifacts beside the sidebar and lists created files", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `artifacts-tab-${stamp}@rakazo.test`, "password12", "Artifacts Tab");
   await completeOnboarding(page);
@@ -15,7 +13,8 @@ test("opens Artifacts from the account menu and lists created files", async ({
   const sidebar = page.getByTestId("bots-sidebar");
   await expect(sidebar).toBeVisible();
   expect((await sidebar.boundingBox())?.x).toBe(0);
-  await expect(sidebar.getByRole("button", { name: "Integrations" })).toBeVisible();
+  await expect(sidebar.getByRole("button", { name: "Integrations" })).toHaveCount(0);
+  await expect(page.getByTestId("user-menu-trigger")).toHaveCount(0);
   const artifactsItem = sidebar.getByRole("button", { name: "Artifacts", exact: true });
   const settingsItem = sidebar.getByRole("button", { name: "Settings", exact: true });
   await expect(artifactsItem).toBeVisible();
@@ -28,6 +27,8 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await artifactsItem.click();
   await expect(page).toHaveURL(/\/app\/artifacts$/);
   await expect(page.getByRole("heading", { name: "Artifacts", exact: true })).toBeVisible();
+  await expect(sidebar).toBeVisible();
+  await expect(artifactsItem).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("searchbox", { name: "Search artifacts…" })).toBeVisible();
   await expect(page.getByText("No artifacts found.")).toBeVisible();
   await captureScreenshot(page, testInfo, "artifacts-empty");
@@ -73,7 +74,9 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/artifacts$/);
 
-  await page.getByRole("link", { name: "Bots" }).click();
+  const bots = await rpc<{ id: string; name: string }[]>(page, "bots/list", {});
+  const chiefName = bots.find((bot) => bot.id === chiefId)?.name ?? "";
+  await sidebar.getByText(chiefName, { exact: true }).first().click();
   await expect(page).toHaveURL(/\/app\/(?!artifacts(?:\/|$))[^/]+$/);
   await expect(page.getByTestId("transcript")).toBeVisible();
 

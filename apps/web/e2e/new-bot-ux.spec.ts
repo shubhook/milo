@@ -8,9 +8,7 @@ import {
   signup,
 } from "./helpers";
 
-test("create opens form, then empty chat; picker lists bots; sidebar collapses", async ({
-  page,
-}, testInfo) => {
+test("+ opens the form, then an empty chat; sidebar collapses", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `new-bot-ux-${stamp}@rakazo.test`, "password12", "New Bot UX");
   await completeOnboarding(page);
@@ -18,14 +16,7 @@ test("create opens form, then empty chat; picker lists bots; sidebar collapses",
   await page.waitForURL(/\/app\/[^/]+$/);
 
   await page.getByTestId("create-menu-trigger").click();
-  const picker = page.getByTestId("bot-create-picker");
-  await expect(picker).toBeVisible();
-  await expect(picker.getByPlaceholder("Search")).toBeVisible();
-  await expect(picker.getByTestId("create-new-bot")).toBeVisible();
-  await expect(picker.getByText("Chief", { exact: true })).toBeVisible();
-  await captureScreenshot(page, testInfo, "plus-picker-bots");
-
-  await picker.getByTestId("create-new-bot").click();
+  await expect(page.getByTestId("bot-create-picker")).toHaveCount(0);
   const form = page.getByTestId("create-bot-form");
   await expect(form).toBeVisible();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
@@ -82,45 +73,6 @@ test("create opens form, then empty chat; picker lists bots; sidebar collapses",
   await page.mouse.up();
   await expect(page.getByTestId("bots-sidebar")).toHaveAttribute("data-collapsed", "false");
   await captureScreenshot(page, testInfo, "bots-sidebar-expanded");
-});
-
-test("picker rows explain groups and spaces", async ({ page }, testInfo) => {
-  const stamp = Date.now();
-  await signup(page, `picker-info-${stamp}@rakazo.test`, "password12", "Picker Info");
-  await completeOnboarding(page);
-  await page.goto("/app");
-  await page.waitForURL(/\/app\/[^/]+$/);
-
-  await page.getByTestId("create-menu-trigger").click();
-  const picker = page.getByTestId("bot-create-picker");
-  await expect(picker).toBeVisible();
-
-  await picker.getByTestId("create-new-group").hover();
-  const groupInfo = picker.getByTestId("picker-info-group");
-  await expect.poll(() => groupInfo.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
-  await captureScreenshot(page, testInfo, "picker-group-info-hover");
-  await groupInfo.click();
-  const dialog = page.getByTestId("picker-info-dialog");
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText("Groups", { exact: true })).toBeVisible();
-  await expect(dialog).toContainText("same thread");
-  await expect(page.getByTestId("side-panel")).not.toHaveAttribute("data-panel", "create-group");
-  await captureScreenshot(page, testInfo, "picker-group-info-dialog");
-  await dialog.getByRole("button", { name: "Close" }).click();
-  await expect(dialog).toBeHidden();
-
-  await page.getByTestId("create-menu-trigger").click();
-  const spaceInfo = picker.getByTestId("picker-info-space");
-  await expect.poll(() => spaceInfo.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
-  await picker.getByTestId("create-new-space").hover();
-  await expect.poll(() => spaceInfo.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
-  await spaceInfo.click();
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText("Spaces", { exact: true })).toBeVisible();
-  await expect(dialog).toContainText("own bots and groups");
-  await captureScreenshot(page, testInfo, "picker-space-info-dialog");
-  await page.keyboard.press("Escape");
-  await expect(dialog).toBeHidden();
 });
 
 test("later bot waits before showing the focus card; sending cancels it", async ({ page }) => {
