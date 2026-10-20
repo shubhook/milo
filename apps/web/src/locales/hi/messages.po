@@ -224,6 +224,7 @@ msgstr "सक्रिय मॉडल"
 
 #: src/components/computer/TerminalApp.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Activity"
 msgstr "गतिविधि"
 
@@ -821,7 +822,7 @@ msgstr "मॉडल सेटिंग्स बंद करें"
 msgid "Close navigation"
 msgstr "नेविगेशन बंद करें"
 
-#: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Close panel"
 msgstr "पैनल बंद करें"
 
@@ -877,6 +878,7 @@ msgstr "पूर्ण"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/bot-profile.tsx
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "कंप्यूटर"
@@ -2665,6 +2667,7 @@ msgid "Notifications"
 msgstr "सूचनाएं"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Now"
 msgstr "अभी"
 
@@ -2910,6 +2913,7 @@ msgid "Reasoning effort"
 msgstr "रीज़निंग प्रयास"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Recent"
 msgstr "हाल के"
 
@@ -3367,6 +3371,7 @@ msgstr "सर्वर URL"
 #: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Settings"
 msgstr "सेटिंग्स"
 
@@ -3405,10 +3410,6 @@ msgstr "शेल"
 msgid "Show bots"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Show computer"
-msgstr ""
-
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr ""
@@ -3420,10 +3421,6 @@ msgstr "और दिखाएँ"
 #: src/pages/Auth.tsx
 msgid "Show password"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Show settings"
-msgstr "सेटिंग्स दिखाएं"
 
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"

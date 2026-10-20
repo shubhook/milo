@@ -224,6 +224,7 @@ msgstr "Etkin model"
 
 #: src/components/computer/TerminalApp.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Activity"
 msgstr "Etkinlik"
 
@@ -821,7 +822,7 @@ msgstr "Model ayarlarını kapat"
 msgid "Close navigation"
 msgstr "Gezinmeyi kapat"
 
-#: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Close panel"
 msgstr "Paneli kapat"
 
@@ -877,6 +878,7 @@ msgstr "Tamamlandı"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/bot-profile.tsx
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "Bilgisayar"
@@ -2665,6 +2667,7 @@ msgid "Notifications"
 msgstr "Bildirimler"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Now"
 msgstr "Şimdi"
 
@@ -2910,6 +2913,7 @@ msgid "Reasoning effort"
 msgstr "Akıl yürütme düzeyi"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Recent"
 msgstr "Son"
 
@@ -3367,6 +3371,7 @@ msgstr "Sunucu URL'si"
 #: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Settings"
 msgstr "Ayarlar"
 
@@ -3405,10 +3410,6 @@ msgstr "Kabuk"
 msgid "Show bots"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Show computer"
-msgstr ""
-
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr ""
@@ -3420,10 +3421,6 @@ msgstr "Daha fazla göster"
 #: src/pages/Auth.tsx
 msgid "Show password"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Show settings"
-msgstr "Ayarları göster"
 
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"

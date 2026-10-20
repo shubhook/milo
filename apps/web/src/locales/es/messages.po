@@ -224,6 +224,7 @@ msgstr "Modelo activo"
 
 #: src/components/computer/TerminalApp.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Activity"
 msgstr "Actividad"
 
@@ -821,7 +822,7 @@ msgstr "Cerrar configuración de modelos"
 msgid "Close navigation"
 msgstr "Cerrar navegación"
 
-#: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Close panel"
 msgstr "Cerrar panel"
 
@@ -877,6 +878,7 @@ msgstr "Completado"
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-panel.tsx
+#: src/pages/shell/bot-profile.tsx
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "Computer"
 msgstr "Computadora"
@@ -2665,6 +2667,7 @@ msgid "Notifications"
 msgstr "Notificaciones"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Now"
 msgstr "Ahora"
 
@@ -2910,6 +2913,7 @@ msgid "Reasoning effort"
 msgstr "Esfuerzo de razonamiento"
 
 #: src/pages/ActivityList.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Recent"
 msgstr "Recientes"
 
@@ -3367,6 +3371,7 @@ msgstr "URL del servidor"
 #: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
+#: src/pages/shell/bot-profile.tsx
 msgid "Settings"
 msgstr "Configuración"
 
@@ -3405,10 +3410,6 @@ msgstr "Shell"
 msgid "Show bots"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Show computer"
-msgstr ""
-
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr ""
@@ -3420,10 +3421,6 @@ msgstr "Mostrar más"
 #: src/pages/Auth.tsx
 msgid "Show password"
 msgstr "Mostrar contraseña"
-
-#: src/pages/Shell.tsx
-msgid "Show settings"
-msgstr "Mostrar configuración"
 
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"

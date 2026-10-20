@@ -91,7 +91,7 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
     "Finds reliable sources and turns them into concise briefs.",
   );
   const settings = page.getByTestId("bot-settings");
-  await settings.getByTestId("avatar-studio-trigger").click();
+  await page.getByTestId("side-panel").getByTestId("avatar-studio-trigger").click();
   await expect(studio).toBeVisible();
   await expect(studio.getByRole("button", { name: "Color #EAB308" })).toHaveClass(/ring-2/);
   await studio.getByRole("button", { name: "Done", exact: true }).click();
@@ -112,10 +112,10 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   await expect(modelSelect).toBeVisible();
   await expect(modelSelect).toContainText("Space default");
   await captureScreenshot(page, testInfo, "27a-bot-settings-model");
-  await page.getByRole("button", { name: "Show computer" }).click();
+  await page.getByRole("tab", { name: "Computer" }).click();
   const sidePanel = page.getByTestId("side-panel");
   await expect(sidePanel).toHaveAttribute("data-panel", "computer");
-  await expect(page.getByRole("button", { name: "Show settings" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Settings" })).toBeVisible();
   // Overlay may flash during boot or never appear (already ready/asleep/stopped). Assert panel
   // chrome, then wait until any overlay has cleared — avoid Locator.or() strict-mode multi-hits.
   const bootOverlay = page.getByText(/Booting up .* computer/);
@@ -129,7 +129,12 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   await expect(sidePanel.getByRole("button", { name: "Take control" })).toHaveCount(0);
   await expect(sidePanel.getByTestId("computer-more-button")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "27b-computer-panel");
-  await page.getByRole("button", { name: "Show settings" }).click();
+  await page.getByRole("tab", { name: "Activity" }).click();
+  await expect(sidePanel).toHaveAttribute("data-panel", "activity");
+  await expect(sidePanel.getByTestId("bot-activity")).toBeVisible();
+  await expect(sidePanel.getByRole("button", { name: "Create Routine" })).toBeVisible();
+  await captureScreenshot(page, testInfo, "27c-profile-activity");
+  await page.getByRole("tab", { name: "Settings" }).click();
 
   await nameInput.fill("Atlas");
   await titleInput.fill("Research lead");
