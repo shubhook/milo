@@ -3,19 +3,15 @@ import { Button } from "@milo/ui-web";
 import { useEffect, useState } from "react";
 import { IntegrationSetup } from "../components/integrations/IntegrationSetup";
 import { rpc } from "../lib/rpc";
-import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 
 export function LocalSettingsPage() {
-  const [section, setSection] = useState<"models" | "integrations" | null>(null);
+  const [integrations, setIntegrations] = useState(false);
   const [ready, setReady] = useState(false);
-  const [modelManaged, setModelManaged] = useState(false);
   const [error, setError] = useState(false);
   useEffect(() => {
-    void Promise.all([rpc.integrationSetup.get(), rpc.me()])
-      .then(([, me]) => {
-        setModelManaged(me.modelManaged);
-        setReady(true);
-      })
+    void rpc.integrationSetup
+      .get()
+      .then(() => setReady(true))
       .catch(() => setError(true));
   }, []);
   return (
@@ -35,22 +31,11 @@ export function LocalSettingsPage() {
         {ready ? (
           <>
             <nav className="flex gap-2">
-              {modelManaged ? null : (
-                <Button variant="outline" onClick={() => setSection("models")}>
-                  <Trans>Models</Trans>
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={() => setSection(section === "integrations" ? null : "integrations")}
-              >
+              <Button variant="outline" onClick={() => setIntegrations((open) => !open)}>
                 <Trans>Server integrations</Trans>
               </Button>
             </nav>
-            {section === "models" ? (
-              <ModelSettingsOverlay onClose={() => setSection(null)} localOwner />
-            ) : null}
-            {section === "integrations" ? <IntegrationSetup serverSetup managedOnly /> : null}
+            {integrations ? <IntegrationSetup serverSetup managedOnly /> : null}
           </>
         ) : null}
       </div>

@@ -1,43 +1,32 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import type { AvatarStyle } from "@milo/contracts";
-import { BotAvatar, Button, Field, FieldLabel, Input, Label, Switch, Toggle } from "@milo/ui-web";
+import type { AvatarStyle, Connection, ConnectionCatalogItem } from "@milo/contracts";
+import { buildFeaturedConnectorTiles } from "@milo/core";
+import { BotAvatar, Button, Label, Switch, Toggle } from "@milo/ui-web";
 import { ChevronDown } from "lucide-react";
-import {
-  type KeyboardEvent as ReactKeyboardEvent,
-  type RefObject,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
-import { Link } from "react-router-dom";
-import { SuccessPop } from "../components/ai/primitives";
-import { ComputersUnavailableHint } from "../components/ComputersUnavailableHint";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AgentLogo } from "../components/AgentLogo";
+import { Shimmer } from "../components/ai/primitives";
 import { DesktopUpdateSection } from "../components/DesktopUpdates";
-import { SoftwareUpdateSection } from "../components/SoftwareUpdateSection";
 import { authClient } from "../lib/auth";
+import { connectCatalogApp } from "../lib/connect-app";
 import { getActiveUiLocale, setUiLocale } from "../lib/i18n";
-import {
-  getResponseStreamingPreference,
-  setResponseStreamingPreference,
-} from "../lib/response-streaming";
+import { clearSpaceSelection, rpc } from "../lib/rpc";
 import {
   getToolActivityPreference,
   setToolActivityPreference,
 } from "../lib/tool-activity-preference";
-import {
-  type AppearancePreference,
-  getUiAppearancePreference,
-  setUiAppearance,
-} from "../lib/ui-appearance";
-import { UI_LOCALE_LABELS, UI_LOCALES, type UiLocale } from "../lib/ui-locale";
+import type { AppearancePreference } from "../lib/ui-appearance";
+import { getUiAppearancePreference, setUiAppearance } from "../lib/ui-appearance";
+import type { UiLocale } from "../lib/ui-locale";
+import { UI_LOCALE_LABELS, UI_LOCALES } from "../lib/ui-locale";
 
 export type SettingsGeneralProps = {
   email?: string | null;
   name: string;
   avatarStyle: AvatarStyle;
   onAvatarStyleChange: (style: AvatarStyle) => Promise<void>;
-  isDeploymentOwner?: boolean;
 };
 
 export function GeneralSettingsPanels({
@@ -45,24 +34,34 @@ export function GeneralSettingsPanels({
   name,
   avatarStyle,
   onAvatarStyleChange,
-  isDeploymentOwner = false,
 }: SettingsGeneralProps) {
   const { t } = useLingui();
+  const navigate = useNavigate();
   const [locale, setLocale] = useState<UiLocale>(() => getActiveUiLocale());
   const localeRequestRef = useRef(0);
   const [appearance, setAppearance] = useState<AppearancePreference>(() =>
     getUiAppearancePreference(),
   );
-  const [streamReplies, setStreamReplies] = useState(
-    () => getResponseStreamingPreference() === "on",
-  );
-  const streamRepliesId = useId();
+  const [chatgpt, setChatgpt] = useState(false);
   const [showToolActivity, setShowToolActivity] = useState(
     () => getToolActivityPreference() === "on",
   );
   const showToolActivityId = useId();
   const [avatarPending, setAvatarPending] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    rpc.models
+      .credentials()
+      .then((rows) => {
+        if (active) setChatgpt(rows.some((row) => row.provider === "chatgpt"));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function chooseLocale(next: UiLocale) {
     if (next === locale) return;
@@ -99,7 +98,18 @@ export function GeneralSettingsPanels({
         </div>
       </section>
 
-      <ChangePasswordSection email={email} />
+      {chatgpt ? (
+        <section
+          data-testid="chatgpt-account"
+          className="flex items-center gap-3 border-b border-border py-3.5"
+        >
+          <AgentLogo agent="openai" size={24} />
+          <h3 className="flex-1 text-body font-medium text-foreground">ChatGPT</h3>
+          <span className="text-small text-muted-foreground">
+            <Trans>Connected</Trans>
+          </span>
+        </section>
+      ) : null}
 
       <section className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3.5">
         <h3 className="flex-1 text-body font-medium text-foreground">
@@ -153,245 +163,182 @@ export function GeneralSettingsPanels({
         ) : null}
       </section>
 
-      {isDeploymentOwner ? (
-        <Button variant="outline" render={<Link to="/integrations/setup" />}>
-          <Trans>Server integrations</Trans>
+      <ConnectedAppsSection />
+
+      <div className="flex items-start gap-3 border-b border-border py-3.5">
+        <Switch
+          id={showToolActivityId}
+          data-testid="tool-activity-toggle"
+          className="mt-0.5"
+          checked={showToolActivity}
+          onCheckedChange={(checked) => {
+            setShowToolActivity(checked);
+            setToolActivityPreference(checked ? "on" : "off");
+          }}
+        />
+        <Label htmlFor={showToolActivityId} className="text-[14px] font-normal text-foreground/75">
+          <Trans>Show tool activity</Trans>
+        </Label>
+      </div>
+
+      <div className="pt-5">
+        <Button
+          variant="outline"
+          data-testid="sign-out"
+          onClick={() =>
+            void authClient.signOut().then(() => {
+              clearSpaceSelection();
+              navigate("/");
+            })
+          }
+        >
+          <Trans>Log out</Trans>
         </Button>
-      ) : null}
-
-      <details data-testid="advanced-settings" className="group border-b border-border">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3.5 text-foreground/75">
-          <span className="block font-medium text-foreground">
-            <Trans>Advanced</Trans>
-          </span>
-          <span aria-hidden="true" className="transition-transform group-open:rotate-90">
-            ›
-          </span>
-        </summary>
-        <div className="pb-4">
-          <div className="flex items-start gap-3 pt-5">
-            <Switch
-              id={streamRepliesId}
-              data-testid="response-streaming-toggle"
-              className="mt-0.5"
-              checked={streamReplies}
-              onCheckedChange={(checked) => {
-                setStreamReplies(checked);
-                setResponseStreamingPreference(checked ? "on" : "off");
-              }}
-            />
-            <Label htmlFor={streamRepliesId} className="text-[14px] font-normal text-foreground/75">
-              <Trans>Stream replies</Trans>
-            </Label>
-          </div>
-          <div className="flex items-start gap-3 pt-4">
-            <Switch
-              id={showToolActivityId}
-              data-testid="tool-activity-toggle"
-              className="mt-0.5"
-              checked={showToolActivity}
-              onCheckedChange={(checked) => {
-                setShowToolActivity(checked);
-                setToolActivityPreference(checked ? "on" : "off");
-              }}
-            />
-            <Label
-              htmlFor={showToolActivityId}
-              className="text-[14px] font-normal text-foreground/75"
-            >
-              <Trans>Show tool activity</Trans>
-            </Label>
-          </div>
-        </div>
-      </details>
+      </div>
     </div>
   );
 }
 
-export function UsageSettingsPanel({
-  usage,
-  panelRef,
-  ownKeys = true,
-}: {
-  usage?: { runs: number; inputTokens: number; outputTokens: number } | null;
-  panelRef?: RefObject<HTMLDivElement | null>;
-  /** Spend goes to the person's provider keys rather than an agent's plan. */
-  ownKeys?: boolean;
-}) {
-  // Nothing to say yet: keep only the focus target so the plan cards lead.
-  if (!usage && !ownKeys) {
-    return (
-      <div ref={panelRef} tabIndex={-1} data-testid="usage-settings" className="outline-none" />
-    );
-  }
-  return (
-    <div
-      ref={panelRef}
-      tabIndex={-1}
-      data-testid="usage-settings"
-      className="rounded-xl border border-border px-4 py-4 outline-none"
-    >
-      {usage ? (
-        <p className="text-[14px] text-foreground/75">
-          <Trans>
-            {usage.runs} runs · {usage.inputTokens + usage.outputTokens} tokens
-          </Trans>
-        </p>
-      ) : null}
-      {ownKeys ? (
-        <p className={`text-[12.5px] text-muted-foreground/80 ${usage ? "mt-2" : ""}`}>
-          <Trans>Model spend uses your provider keys.</Trans>
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-export function ComputerSettingsPanel() {
-  return (
-    <div
-      data-testid="computers-setup-settings"
-      className="rounded-xl border border-border px-4 py-4"
-    >
-      <h3 className="text-[15px] font-medium text-foreground">
-        <Trans>Computers</Trans>
-      </h3>
-      <ComputersUnavailableHint className="mt-3 text-[13px] leading-relaxed text-muted-foreground" />
-    </div>
-  );
-}
-
-export function UpdatesSettingsPanel({
-  isDeploymentOwner = false,
-}: {
-  isDeploymentOwner?: boolean;
-}) {
-  return (
-    <div className="space-y-5">
-      <DesktopUpdateSection />
-      <SoftwareUpdateSection isDeploymentOwner={isDeploymentOwner} />
-    </div>
-  );
-}
-
-function ChangePasswordSection({ email }: { email?: string | null }) {
+/** The featured catalog apps plus any other connected app, each with Connect or Disconnect. */
+function ConnectedAppsSection() {
   const { t } = useLingui();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [pending, setPending] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [catalog, setCatalog] = useState<ConnectionCatalogItem[] | null>(null);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const attempt = useRef<AbortController | null>(null);
 
-  async function changePassword() {
-    if (pending) return;
-    if (newPassword !== confirmation) {
-      setError(t`Passwords do not match`);
-      return;
-    }
-    setPending(true);
-    setSaved(false);
+  async function refresh() {
+    const [nextCatalog, nextConnections] = await Promise.all([
+      rpc.connections.catalog({}),
+      rpc.connections.list(),
+    ]);
+    setCatalog(nextCatalog);
+    setConnections(nextConnections);
+  }
+
+  useEffect(() => {
+    void refresh().catch(() => setCatalog([]));
+    return () => attempt.current?.abort();
+  }, []);
+
+  if (!catalog?.length) return null;
+  const featured = buildFeaturedConnectorTiles(catalog).flatMap((tile) =>
+    tile.item ? [{ label: tile.label, item: tile.item }] : [],
+  );
+  const apps = [
+    ...featured,
+    ...catalog
+      .filter((item) => item.connected && !featured.some((app) => app.item === item))
+      .map((item) => ({ label: item.name, item })),
+  ];
+
+  async function connect(label: string, item: ConnectionCatalogItem) {
+    attempt.current?.abort();
+    const controller = new AbortController();
+    attempt.current = controller;
+    setPending(item.slug);
     setError(null);
     try {
-      const result = await authClient.changePassword({
-        currentPassword,
-        newPassword,
-        revokeOtherSessions: true,
-      });
-      if (result.error) {
-        setError(result.error.message ?? t`Could not change password`);
-        return;
+      const outcome = await connectCatalogApp(item, label, controller.signal);
+      if (outcome === "pending") setError(t`Connection to ${label} is still pending.`);
+      await refresh();
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        setError(err instanceof Error ? err.message : t`Could not connect`);
       }
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmation("");
-      setSaved(true);
-    } catch {
-      setError(t`Could not reach the server`);
     } finally {
-      setPending(false);
+      if (attempt.current === controller) {
+        attempt.current = null;
+        setPending(null);
+      }
+    }
+  }
+
+  async function disconnect(item: ConnectionCatalogItem) {
+    setPending(item.slug);
+    setError(null);
+    try {
+      for (const row of appConnections(connections, item)) {
+        await rpc.connections.revoke({ connectionId: row.id });
+      }
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t`Could not revoke connection`);
+    } finally {
+      setPending(null);
     }
   }
 
   return (
-    <section className="border-b border-border py-3.5">
+    <section data-testid="connected-apps" className="border-b border-border py-3.5">
       <h3 className="text-body font-medium text-foreground">
-        <Trans>Password</Trans>
+        <Trans>Apps</Trans>
       </h3>
-      <div className="mt-3 grid gap-3">
-        <input
-          type="text"
-          name="username"
-          autoComplete="username"
-          value={email ?? ""}
-          readOnly
-          tabIndex={-1}
-          aria-hidden="true"
-          className="sr-only"
-        />
-        <SettingsPasswordInput
-          label={t`Current password`}
-          autoComplete="current-password"
-          value={currentPassword}
-          onChange={setCurrentPassword}
-        />
-        <SettingsPasswordInput
-          label={t`New password`}
-          autoComplete="new-password"
-          value={newPassword}
-          onChange={setNewPassword}
-        />
-        <SettingsPasswordInput
-          label={t`Confirm password`}
-          autoComplete="new-password"
-          value={confirmation}
-          onChange={setConfirmation}
-        />
-      </div>
+      <ul className="m-0 mt-2 list-none p-0">
+        {apps.map(({ label, item }) => (
+          <li
+            key={`${item.connectorId}:${item.slug}`}
+            data-testid={`connected-app-${item.slug}`}
+            className="flex items-center gap-3 py-2"
+          >
+            <span
+              aria-hidden="true"
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground"
+            >
+              {item.logo ? (
+                <img src={item.logo} alt="" className="size-4.5 object-contain" />
+              ) : (
+                label.charAt(0)
+              )}
+            </span>
+            <span className="flex-1 text-foreground">{label}</span>
+            {pending === item.slug ? (
+              <Shimmer>
+                <Trans>Connecting…</Trans>
+              </Shimmer>
+            ) : item.connected ? (
+              <Button
+                variant="ghost"
+                disabled={pending !== null}
+                aria-label={t`Disconnect ${label}`}
+                onClick={() => void disconnect(item)}
+              >
+                <Trans>Disconnect</Trans>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                disabled={pending !== null}
+                aria-label={t`Connect ${label}`}
+                onClick={() => void connect(label, item)}
+              >
+                <Trans>Connect</Trans>
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
       {error ? (
-        <p role="alert" className="mt-3 text-[12.5px] text-destructive">
+        <p role="alert" className="mt-2 text-small text-destructive">
           {error}
         </p>
       ) : null}
-      <div className="mt-4 flex items-center gap-3">
-        <Button
-          className="rounded-full"
-          disabled={pending || currentPassword.length < 8 || newPassword.length < 8}
-          onClick={() => void changePassword()}
-        >
-          {pending ? <Trans>Changing…</Trans> : <Trans>Change password</Trans>}
-        </Button>
-        {saved ? <SuccessPop label={t`Password updated`} /> : null}
-      </div>
     </section>
   );
 }
 
-function SettingsPasswordInput({
-  label,
-  autoComplete,
-  value,
-  onChange,
-}: {
-  label: string;
-  autoComplete: "current-password" | "new-password";
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const id = useId();
-  return (
-    <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input
-        id={id}
-        type="password"
-        autoComplete={autoComplete}
-        minLength={8}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </Field>
+function appConnections(connections: Connection[], item: ConnectionCatalogItem) {
+  return connections.filter(
+    (row) =>
+      row.connectorId === item.connectorId &&
+      row.provider === item.slug &&
+      (row.status === "connected" || row.status === "pending"),
   );
+}
+
+export function UpdatesSettingsPanel() {
+  return <DesktopUpdateSection />;
 }
 
 function AppearancePicker({
