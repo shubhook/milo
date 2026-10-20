@@ -681,7 +681,6 @@ export const RU_MESSAGES: Record<string, string> = {
   "Allow list": "Список разрешений",
   Apps: "Приложения",
   "Ask first": "Сначала спросить",
-  ChatGPT: "ChatGPT",
   "Could not load approval rules": "Не удалось загрузить правила одобрения.",
   "Could not save rule": "Не удалось сохранить правило.",
   General: "Общие",

@@ -679,7 +679,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Allow list": "Freigabeliste",
   Apps: "Apps",
   "Ask first": "Erst fragen",
-  ChatGPT: "ChatGPT",
   "Could not load approval rules": "Bestätigungsregeln konnten nicht geladen werden",
   "Could not save rule": "Regel konnte nicht gespeichert werden",
   General: "Allgemein",
