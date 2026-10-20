@@ -57,17 +57,6 @@ body {
   }
 }
 
-/* The open bot's identity color, set on <main>. Group chats fall back to the neutral tokens.
-   Dark keeps the tint on a raised surface so eye-colored text does not land on black. */
-.bot-accent-bubble {
-  background: color-mix(in oklab, var(--bot-accent, var(--chat-user)) 82%, black);
-  color: var(--bot-accent-foreground, var(--chat-user-foreground));
-}
-[data-theme="dark"] .bot-accent-bubble {
-  background: color-mix(in oklab, var(--bot-accent, var(--chat-user)) 34%, var(--card));
-  color: var(--foreground);
-}
-.bot-accent-fill {
-  background: var(--bot-accent, var(--primary));
-  color: var(--bot-accent-foreground, var(--primary-foreground));
+.sidebar-surface {
+  --avatar-surface: var(--sidebar);
 }

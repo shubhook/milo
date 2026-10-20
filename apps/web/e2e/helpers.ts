@@ -120,8 +120,7 @@ export async function openUserSettings(
   page: Page,
   section?: "general" | "memory" | "voice" | "usage" | "computer" | "updates",
 ) {
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
   if (section && section !== "general") {

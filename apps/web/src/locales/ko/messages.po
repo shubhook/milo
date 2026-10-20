@@ -395,8 +395,8 @@ msgid "Already have an account?"
 msgstr "이미 계정이 있나요?"
 
 #: src/components/AskCard.tsx
-msgid "Always allow this tool"
-msgstr "이 도구 항상 허용"
+msgid "Always allow"
+msgstr "항상 허용"
 
 #: src/components/AskCard.tsx
 msgid "Always allowed"
@@ -438,6 +438,10 @@ msgstr "API 키 헤더"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Appearance"
 msgstr "모양"
+
+#: src/components/AskCard.tsx
+msgid "Approval"
+msgstr "승인"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Approval boundaries"
@@ -1619,6 +1623,10 @@ msgstr ""
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop update"
 msgstr ""
+
+#: src/components/AskCard.tsx
+msgid "Details"
+msgstr "세부 정보"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Direct MCP"
@@ -3928,10 +3936,6 @@ msgstr "처리 중…"
 #: src/components/computer/TerminalApp.tsx
 msgid "Wrote {path}"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Yesterday"
-msgstr "어제"
 
 #: src/pages/Shell.tsx
 msgid "You"

@@ -15,18 +15,15 @@ test("opens Artifacts from the account menu and lists created files", async ({
   const sidebar = page.getByTestId("bots-sidebar");
   await expect(sidebar).toBeVisible();
   expect((await sidebar.boundingBox())?.x).toBe(0);
-  await expect(sidebar.getByRole("link", { name: "Artifacts" })).toHaveCount(0);
-  await expect(sidebar.getByRole("button", { name: "Artifacts", exact: true })).toHaveCount(0);
   await expect(sidebar.getByRole("button", { name: "Integrations" })).toBeVisible();
-  await page.getByTestId("user-menu-trigger").click();
-  const artifactsItem = page.getByRole("button", { name: "Artifacts", exact: true });
-  const settingsItem = page.getByRole("button", { name: "Settings", exact: true });
+  const artifactsItem = sidebar.getByRole("button", { name: "Artifacts", exact: true });
+  const settingsItem = sidebar.getByRole("button", { name: "Settings", exact: true });
   await expect(artifactsItem).toBeVisible();
   await expect(settingsItem).toBeVisible();
   expect((await artifactsItem.boundingBox())?.y).toBeLessThan(
     (await settingsItem.boundingBox())?.y ?? 0,
   );
-  await captureScreenshot(page, testInfo, "account-menu-artifacts");
+  await captureScreenshot(page, testInfo, "sidebar-nav-artifacts");
 
   await artifactsItem.click();
   await expect(page).toHaveURL(/\/app\/artifacts$/);
@@ -74,13 +71,7 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await expect(page.getByTestId("app-rail")).toHaveCount(0);
   await page.getByRole("button", { name: "Open navigation" }).click();
   const mobileSidebar = page.getByTestId("bots-sidebar");
-  await expect(mobileSidebar.getByRole("link", { name: "Artifacts" })).toHaveCount(0);
-  await expect(mobileSidebar.getByRole("button", { name: "Artifacts", exact: true })).toHaveCount(
-    0,
-  );
-  await mobileSidebar.getByTestId("user-menu-trigger").click();
-  const mobileArtifacts = page.getByRole("button", { name: "Artifacts", exact: true });
-  await expect(mobileArtifacts).toBeVisible();
-  await expect(page.getByRole("button", { name: "Settings", exact: true })).toBeVisible();
-  await captureScreenshot(page, testInfo, "account-menu-artifacts-mobile");
+  await expect(mobileSidebar.getByRole("button", { name: "Artifacts", exact: true })).toBeVisible();
+  await expect(mobileSidebar.getByRole("button", { name: "Settings", exact: true })).toBeVisible();
+  await captureScreenshot(page, testInfo, "sidebar-nav-artifacts-mobile");
 });

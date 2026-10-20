@@ -395,8 +395,8 @@ msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
 #: src/components/AskCard.tsx
-msgid "Always allow this tool"
-msgstr "Toujours autoriser cet outil"
+msgid "Always allow"
+msgstr "Toujours autoriser"
 
 #: src/components/AskCard.tsx
 msgid "Always allowed"
@@ -438,6 +438,10 @@ msgstr "En-tête de clé API"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Appearance"
 msgstr "Apparence"
+
+#: src/components/AskCard.tsx
+msgid "Approval"
+msgstr "Approbation"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Approval boundaries"
@@ -1619,6 +1623,10 @@ msgstr "Application de bureau"
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop update"
 msgstr "Mise à jour du bureau"
+
+#: src/components/AskCard.tsx
+msgid "Details"
+msgstr "Détails"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Direct MCP"
@@ -3928,10 +3936,6 @@ msgstr "En cours…"
 #: src/components/computer/TerminalApp.tsx
 msgid "Wrote {path}"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Yesterday"
-msgstr "Hier"
 
 #: src/pages/Shell.tsx
 msgid "You"

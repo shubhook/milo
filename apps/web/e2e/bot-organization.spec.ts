@@ -176,49 +176,25 @@ test("bots can be reordered by drag or keyboard and keep that order", async ({ p
   await expect.poll(order).toEqual([beta.id, alpha.id, chiefId]);
 });
 
-test("chat composer controls are vertically centered", async ({ page }) => {
+test("chat composer puts the message above one row of controls", async ({ page }) => {
   const stamp = Date.now();
   await signup(page, `composer-layout-${stamp}@rakazo.test`, "password12", "Composer Layout");
   await completeOnboarding(page);
 
-  const centers = await page.getByTestId("composer-bar").evaluate((composer) =>
-    ["Attach file", "Message Chief", "Voice", "Send"].map((label) => {
-      const element = composer.querySelector<HTMLElement>(`[aria-label="${label}"]`);
-      if (!element) throw new Error(`Missing composer control: ${label}`);
-      const box = element.getBoundingClientRect();
-      return box.top + box.height / 2;
-    }),
+  const boxes = await page.getByTestId("composer-bar").evaluate((composer) =>
+    Object.fromEntries(
+      ["Attach file", "Message Chief", "Voice", "Send"].map((label) => {
+        const element = composer.querySelector<HTMLElement>(`[aria-label="${label}"]`);
+        if (!element) throw new Error(`Missing composer control: ${label}`);
+        const box = element.getBoundingClientRect();
+        return [label, { top: box.top, bottom: box.bottom, center: box.top + box.height / 2 }];
+      }),
+    ),
   );
 
-  expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(1);
-
-  const alignment = await page.evaluate(() => {
-    const box = (element: Element | null) => {
-      if (!element) return null;
-      const rect = element.getBoundingClientRect();
-      return { top: rect.top, bottom: rect.bottom };
-    };
-    return {
-      avatar: box(document.querySelector("[data-testid='user-menu-trigger']")),
-      integrations: box(
-        [...document.querySelectorAll("aside button")].find(
-          (button) => button.textContent?.trim() === "Integrations",
-        ) ?? null,
-      ),
-      composer: box(document.querySelector("[data-testid='composer-bar']")),
-    };
-  });
-  expect(alignment.avatar).toBeTruthy();
-  expect(alignment.integrations).toBeTruthy();
-  expect(alignment.composer).toBeTruthy();
-  if (alignment.avatar && alignment.integrations && alignment.composer) {
-    expect(Math.abs(alignment.avatar.top - alignment.composer.top)).toBeLessThanOrEqual(1);
-    expect(Math.abs(alignment.avatar.bottom - alignment.composer.bottom)).toBeLessThanOrEqual(1);
-    expect(Math.abs(alignment.integrations.top - alignment.composer.top)).toBeLessThanOrEqual(1);
-    expect(Math.abs(alignment.integrations.bottom - alignment.composer.bottom)).toBeLessThanOrEqual(
-      1,
-    );
-  }
+  const controls = ["Attach file", "Voice", "Send"].map((label) => boxes[label]!.center);
+  expect(Math.max(...controls) - Math.min(...controls)).toBeLessThanOrEqual(1);
+  expect(boxes["Message Chief"]!.bottom).toBeLessThanOrEqual(boxes["Attach file"]!.top);
 });
 
 test("group chats share every context-menu action", async ({ page }, testInfo) => {

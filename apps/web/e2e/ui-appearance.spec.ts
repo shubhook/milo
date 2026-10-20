@@ -49,8 +49,7 @@ test("account settings appearance control switches to light mode", async ({ page
   await signup(page, `ui-appearance-${stamp}@rakazo.test`, "password12", "Appearance QA");
   await completeOnboarding(page, testInfo);
 
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
   await expect(settings.getByRole("heading", { name: "Appearance", exact: true })).toBeVisible();
@@ -86,8 +85,7 @@ test("account settings appearance control switches to light mode", async ({ page
   await expect(inlinePath).toHaveCSS("font-family", /^"Geist Mono Variable"/);
   await captureScreenshot(page, testInfo, "inline-code-light");
 
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByTestId("sidebar-settings").click();
   await expect(settings).toBeVisible();
   await settings.getByTestId("ui-appearance-dark").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -97,7 +95,7 @@ test("account settings appearance control switches to light mode", async ({ page
   await captureSidebarSearchSelected(page, testInfo, "sidebar-search-selected-dark");
 });
 
-test("sidebar bot rows hover to the integrations button's tone", async ({ page }, testInfo) => {
+test("sidebar bot rows and nav rows share one hover tone", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `ui-hover-${stamp}@rakazo.test`, "password12", "Hover QA");
   await completeOnboarding(page, testInfo);
@@ -115,6 +113,7 @@ test("sidebar bot rows hover to the integrations button's tone", async ({ page }
   await captureScreenshot(page, testInfo, "sidebar-row-hover");
 
   const integrations = sidebar.getByRole("button", { name: "Integrations", exact: true });
+  await integrations.hover();
   await expect
     .poll(() => integrations.evaluate((el) => getComputedStyle(el).backgroundColor))
     .toBe(chiefBg);

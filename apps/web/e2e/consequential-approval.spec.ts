@@ -58,7 +58,7 @@ test("actions run by default while optional confirmations live in advanced user 
 
   await requestDestinationWrite(page, "write this to the destination crm as a note again");
   const allowOnce = page.getByRole("button", { name: "Allow once", exact: true });
-  const alwaysAllow = page.getByRole("button", { name: "Always allow this tool", exact: true });
+  const alwaysAllow = page.getByRole("button", { name: "Always allow", exact: true });
   const deny = page.getByRole("button", { name: "Deny", exact: true });
   await expect(alwaysAllow).toBeVisible();
   await expect(deny).toBeVisible();
@@ -68,13 +68,12 @@ test("actions run by default while optional confirmations live in advanced user 
   expect(allowBox).toBeTruthy();
   expect(alwaysBox).toBeTruthy();
   expect(denyBox).toBeTruthy();
-  expect(alwaysBox!.y).toBeGreaterThan(allowBox!.y + allowBox!.height - 2);
-  expect(denyBox!.y).toBeGreaterThan(alwaysBox!.y + alwaysBox!.height - 2);
-  expect(Math.abs(allowBox!.x - alwaysBox!.x)).toBeLessThan(2);
-  const optionList = allowOnce.locator("xpath=ancestor::div[contains(@class,'space-y-1.5')][1]");
-  const listBox = await optionList.boundingBox();
-  expect(listBox).toBeTruthy();
-  expect(Math.abs(allowBox!.width - listBox!.width)).toBeLessThan(2);
+  // One row: Allow once, then Always allow, then Deny.
+  expect(Math.abs(alwaysBox!.y - allowBox!.y)).toBeLessThan(2);
+  expect(Math.abs(denyBox!.y - allowBox!.y)).toBeLessThan(2);
+  expect(alwaysBox!.x).toBeGreaterThan(allowBox!.x + allowBox!.width - 2);
+  expect(denyBox!.x).toBeGreaterThan(alwaysBox!.x + alwaysBox!.width - 2);
+  await expect(page.getByTestId("approval-card").last()).toBeVisible();
   await captureScreenshot(page, testInfo, "53-action-confirmation-pending");
 
   await page.getByRole("button", { name: "Deny", exact: true }).click();
@@ -91,7 +90,7 @@ test("actions run by default while optional confirmations live in advanced user 
   await captureScreenshot(page, testInfo, "55-action-confirmation-allowed-once");
 
   await requestDestinationWrite(page, "write this to the destination crm one final time");
-  await page.getByRole("button", { name: "Always allow this tool", exact: true }).click();
+  await page.getByRole("button", { name: "Always allow", exact: true }).click();
   await expect(page.getByText("Always allowed", { exact: true })).toBeVisible();
   await waitForRunIdle(page);
   await expectComposerReady(page);

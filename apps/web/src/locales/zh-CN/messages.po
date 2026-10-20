@@ -395,8 +395,8 @@ msgid "Already have an account?"
 msgstr "已有账户？"
 
 #: src/components/AskCard.tsx
-msgid "Always allow this tool"
-msgstr "始终允许此工具"
+msgid "Always allow"
+msgstr "始终允许"
 
 #: src/components/AskCard.tsx
 msgid "Always allowed"
@@ -438,6 +438,10 @@ msgstr "API 密钥请求头"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Appearance"
 msgstr "外观"
+
+#: src/components/AskCard.tsx
+msgid "Approval"
+msgstr "审批"
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Approval boundaries"
@@ -1619,6 +1623,10 @@ msgstr ""
 #: src/components/DesktopUpdates.tsx
 msgid "Desktop update"
 msgstr ""
+
+#: src/components/AskCard.tsx
+msgid "Details"
+msgstr "详情"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Direct MCP"
@@ -3928,10 +3936,6 @@ msgstr "处理中…"
 #: src/components/computer/TerminalApp.tsx
 msgid "Wrote {path}"
 msgstr ""
-
-#: src/pages/Shell.tsx
-msgid "Yesterday"
-msgstr "昨天"
 
 #: src/pages/Shell.tsx
 msgid "You"

@@ -3,7 +3,8 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { ChatMarkdown } from "@milo/chat-ui/web";
 import type { ThreadMessage } from "@milo/contracts";
 import { isApprovalAskBlock, isSecretAskBlock, selectedAskActionLabel } from "@milo/core";
-import { Button, Input } from "@milo/ui-web";
+import { Button, cn, Input } from "@milo/ui-web";
+import { Check, ChevronRight, ShieldAlert, X } from "lucide-react";
 import { useState } from "react";
 
 export type AskBlock = Extract<ThreadMessage["blocks"][number], { kind: "ask" }>;
@@ -34,7 +35,7 @@ function approvalActionLabel(
   if (outcome === "created") return t`Create space`;
   if (outcome === "cancelled") return t`Cancel`;
   if (id === "allow") return t`Allow once`;
-  if (id === "always") return t`Always allow this tool`;
+  if (id === "always") return t`Always allow`;
   if (id === "deny") return t`Deny`;
   return fallback;
 }
@@ -60,6 +61,7 @@ export function AskCard({
   const [username, setUsername] = useState("");
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const submitting = pendingAction !== null;
   const approvalActions = isApprovalAskBlock(block) ? block.actions : undefined;
   const askActions = block.actions;
@@ -90,12 +92,106 @@ export function AskCard({
     }
   }
 
+  if (approvalActions) {
+    if (block.status === "answered") {
+      const outcome = approvalActions.find((action) => action.id === block.answer)?.outcome;
+      const declined = block.answer === "deny" || outcome === "cancelled";
+      return (
+        <div
+          role="status"
+          data-testid="approval-resolved"
+          className="flex w-fit max-w-full items-center gap-2 rounded-lg border border-border px-3 py-2 text-small text-muted-foreground"
+        >
+          {declined ? (
+            <X size={15} strokeWidth={2} className="shrink-0 text-destructive" aria-hidden="true" />
+          ) : (
+            <Check size={15} strokeWidth={2} className="shrink-0 text-success" aria-hidden="true" />
+          )}
+          <span>{formatAnsweredState(block.answer, true, false, outcome, askActions)}</span>
+        </div>
+      );
+    }
+    return (
+      <section
+        data-testid="approval-card"
+        aria-label={t`Approval`}
+        className="w-full max-w-[560px] overflow-hidden rounded-[18px] border border-border bg-card shadow-raised"
+      >
+        <div className="flex items-start gap-2.5 bg-warning-surface px-4 py-3.5">
+          <ShieldAlert
+            size={16}
+            strokeWidth={1.8}
+            className="mt-0.5 shrink-0 text-warning"
+            aria-hidden="true"
+          />
+          <div className="min-w-0 flex-1 font-semibold text-foreground">
+            <ChatMarkdown>{block.text}</ChatMarkdown>
+          </div>
+        </div>
+        {block.detail ? (
+          <div className="px-4 pt-3">
+            <button
+              type="button"
+              aria-expanded={detailsOpen}
+              onClick={() => setDetailsOpen((open) => !open)}
+              className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground"
+            >
+              <ChevronRight
+                size={13}
+                strokeWidth={1.8}
+                className={cn("transition-transform", detailsOpen && "rotate-90")}
+                aria-hidden="true"
+              />
+              <Trans>Details</Trans>
+            </button>
+            {detailsOpen ? (
+              <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-[10px] bg-muted px-3 py-2.5 font-mono text-[12px] leading-relaxed text-muted-foreground">
+                {block.detail}
+              </pre>
+            ) : null}
+          </div>
+        ) : null}
+        {canAnswer ? (
+          <div className="flex flex-wrap gap-2 p-4">
+            {approvalActions.map((action) => (
+              <Button
+                key={action.id}
+                size="lg"
+                variant={
+                  action.id === "allow" || action.outcome === "created"
+                    ? "default"
+                    : action.id === "deny" || action.outcome === "cancelled"
+                      ? "ghost"
+                      : "outline"
+                }
+                className="px-4"
+                disabled={submitting}
+                onClick={() => void submitAnswer(action.id)}
+              >
+                {pendingAction === action.id ? (
+                  <Trans>Sending…</Trans>
+                ) : (
+                  approvalActionLabel(action.id, action.label, action.outcome)
+                )}
+              </Button>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 text-small text-muted-foreground">
+            <Trans>No longer active</Trans>
+          </div>
+        )}
+        {error ? <p className="px-4 pb-4 text-[13px] text-destructive">{error}</p> : null}
+      </section>
+    );
+  }
+
   return (
     <div
       data-testid={secretInput ? "secret-ask-card" : undefined}
-      className="max-w-[74%] rounded-2xl border border-border bg-card px-5 py-4"
+      className="w-full max-w-[560px] rounded-[18px] border border-border bg-card px-4 py-3.5 shadow-raised"
     >
-      <div className="text-[15.5px] leading-[1.5] text-foreground">
+      <div className="leading-normal text-foreground">
         <ChatMarkdown>{block.text}</ChatMarkdown>
       </div>
       {secretInput && block.credential ? (
@@ -104,19 +200,13 @@ export function AskCard({
         </div>
       ) : null}
       {block.detail && !secretInput ? (
-        <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-xl bg-muted px-3.5 py-3 font-mono text-[12.5px] leading-[1.7] text-muted-foreground">
+        <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-[10px] bg-muted px-3 py-2.5 font-mono text-[12px] leading-relaxed text-muted-foreground">
           {block.detail}
         </pre>
       ) : null}
       {block.status === "answered" ? (
         <div className="mt-3.5 text-[13.5px] font-medium text-success">
-          {formatAnsweredState(
-            block.answer,
-            Boolean(approvalActions),
-            secretInput,
-            approvalActions?.find((action) => action.id === block.answer)?.outcome,
-            askActions,
-          )}
+          {formatAnsweredState(block.answer, false, secretInput, undefined, askActions)}
         </div>
       ) : !canAnswer ? (
         <div className="mt-3.5 text-[13.5px] font-medium text-muted-foreground">
@@ -127,18 +217,12 @@ export function AskCard({
           {askActions.map((action) => (
             <Button
               key={action.id}
-              variant={approvalActions && action.id === "allow" ? "default" : "outline"}
-              className="h-auto w-full justify-start whitespace-normal px-3.5 py-3 text-start font-normal"
+              variant="outline"
+              className="h-auto w-full justify-start whitespace-normal rounded-xl px-3.5 py-3 text-start font-normal"
               disabled={submitting}
               onClick={() => void submitAnswer(action.id)}
             >
-              {pendingAction === action.id ? (
-                <Trans>Sending…</Trans>
-              ) : approvalActions ? (
-                approvalActionLabel(action.id, action.label, action.outcome)
-              ) : (
-                action.label
-              )}
+              {pendingAction === action.id ? <Trans>Sending…</Trans> : action.label}
             </Button>
           ))}
         </div>

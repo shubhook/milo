@@ -15,7 +15,7 @@ describe("buildApprovalAskBlock", () => {
       approvalEffectId: "effect-1",
       actions: [
         { id: "allow", label: "Allow once" },
-        { id: "always", label: "Always allow this tool" },
+        { id: "always", label: "Always allow" },
         { id: "deny", label: "Deny" },
       ],
     });

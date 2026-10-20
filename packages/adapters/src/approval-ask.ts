@@ -34,7 +34,7 @@ export function buildApprovalAskBlock(
           ]
         : [
             { id: "allow", label: "Allow once" },
-            { id: "always", label: "Always allow this tool" },
+            { id: "always", label: "Always allow" },
             { id: "deny", label: "Deny" },
           ],
   };

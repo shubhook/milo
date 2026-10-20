@@ -155,8 +155,7 @@ test("changes and recovers an email password", async ({ page }, testInfo) => {
   await completeOnboarding(page);
   await page.waitForURL(/\/app\/[^/]+$/);
 
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
   await expect(page.getByTestId("sidebar-search").locator("input")).toHaveAttribute(
