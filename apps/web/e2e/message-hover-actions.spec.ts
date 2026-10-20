@@ -55,14 +55,14 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
   const composer = page.getByRole("combobox", { name: /^Message/ });
   await expect(composer).toBeVisible();
 
-  // Intro includes suggestion chips in the same frame the rail centers on; a short
-  // echoed bot bubble keeps geometry checks against the text bubble meaningful.
+  // Intro chips sit in the same frame the rail centers on, so geometry uses the
+  // follow-up bot bubble. Scripted replies wrap the prompt ("done. i handled: …").
   const layoutText = `hover-layout-${stamp}`;
   await sendComposerMessage(page, composer, layoutText);
   const botRow = transcript
     .locator(`[data-message-id]`)
     .filter({
-      has: page.getByTestId("message-bot-bubble").getByText(layoutText, { exact: true }),
+      has: page.getByTestId("message-bot-bubble").getByText(layoutText),
     })
     .first();
   await expect(botRow).toBeVisible({ timeout: 20_000 });
