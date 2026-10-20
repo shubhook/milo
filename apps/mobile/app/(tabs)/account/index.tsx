@@ -121,11 +121,7 @@ export default function Account() {
     <SafeAreaView edges={["bottom"]} style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.navGroup}>
-          <NavRow
-            label={t("Usage")}
-            onPress={() => router.push("/agent-models")}
-            styles={styles}
-          />
+          <NavRow label={t("Usage")} onPress={() => router.push("/agent-models")} styles={styles} />
           <NavRow
             label={t("Allow list")}
             onPress={() => router.push("/allow-list")}

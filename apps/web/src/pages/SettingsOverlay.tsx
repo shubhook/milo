@@ -171,12 +171,14 @@ export function SettingsOverlay({
                   : "rk-scroll overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8"
               }`}
             >
-              {section === "general" ? <GeneralSettingsPanels
+              {section === "general" ? (
+                <GeneralSettingsPanels
                   email={email}
                   name={name}
                   avatarStyle={avatarStyle}
                   onAvatarStyleChange={onAvatarStyleChange}
-                /> : null}
+                />
+              ) : null}
               {section === "usage" ? (
                 <div
                   ref={usageRef}

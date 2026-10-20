@@ -18,13 +18,8 @@ const lingui = vi.hoisted(() => {
   };
   return {
     useLingui: () => ({ t: translate, _: translate }),
-    Trans: ({
-      children,
-      message,
-    }: {
-      children?: ReactNode;
-      message?: string;
-    }) => children ?? message ?? null,
+    Trans: ({ children, message }: { children?: ReactNode; message?: string }) =>
+      children ?? message ?? null,
   };
 });
 vi.mock("@lingui/react/macro", () => lingui);

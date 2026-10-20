@@ -8,8 +8,12 @@ import { afterEach, expect, it, vi } from "vitest";
 const bridge = vi.hoisted(() => ({ current: undefined as { update?: object } | undefined }));
 
 const lingui = vi.hoisted(() => {
-  const translate = (msg: { message?: string } | TemplateStringsArray) =>
-    Array.isArray(msg) ? msg.join("") : String(msg?.message ?? "");
+  const translate = (msg: { message?: string } | TemplateStringsArray) => {
+    if (typeof msg === "object" && msg !== null && "message" in msg) {
+      return String(msg.message ?? "");
+    }
+    return Array.from(msg as TemplateStringsArray).join("");
+  };
   return { useLingui: () => ({ t: translate, _: translate }) };
 });
 vi.mock("@lingui/react/macro", () => lingui);

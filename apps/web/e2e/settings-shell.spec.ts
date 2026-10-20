@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
 
-test("settings shell is Usage, General and Allow list in a browser", async ({
-  page,
-}, testInfo) => {
+test("settings shell is Usage, General and Allow list in a browser", async ({ page }, testInfo) => {
   const stamp = Date.now();
   const userName = `Settings shell ${stamp}`;
   await signup(page, `settings-shell-${stamp}@rakazo.test`, "password12", userName);
