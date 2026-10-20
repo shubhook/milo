@@ -73,11 +73,19 @@ msgstr "{0} exécutions · {1} jetons"
 msgid "{0}'s screen"
 msgstr "Écran de {0}"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s {period} limit is used up."
+msgstr "La limite {period} de {agent} est atteinte."
+
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s weekly limit is used up."
+msgstr "La limite hebdomadaire de {agent} est atteinte."
+
 #: src/pages/Shell.tsx
 msgid "{botName}’s computer"
 msgstr "Ordinateur de {botName}"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{days}-day"
 msgstr ""
 
@@ -90,7 +98,7 @@ msgstr "il y a {days} j"
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
 msgstr ""
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{hours}-hour"
 msgstr ""
 
@@ -3119,6 +3127,7 @@ msgstr "Réinitialiser le mot de passe"
 msgid "Reset your password"
 msgstr "Réinitialisez votre mot de passe"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/AgentModelsPanel.tsx
 msgid "Resets {resetsAt}"
 msgstr ""
@@ -3876,6 +3885,10 @@ msgstr "Utiliser {hostLabel}"
 msgid "Use a found model"
 msgstr "Utiliser un modèle trouvé"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "Use ChatGPT"
+msgstr "Utiliser ChatGPT"
+
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."
 msgstr ""
@@ -3930,6 +3943,7 @@ msgstr "Voix"
 msgid "Voice chat"
 msgstr "Chat vocal"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
 msgid "Waiting for ChatGPT…"
@@ -3960,7 +3974,7 @@ msgstr ""
 msgid "Weekdays"
 msgstr "Jours ouvrés"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "Weekly"
 msgstr ""
 

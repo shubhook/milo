@@ -1,7 +1,8 @@
-import type { ModelCatalogEntry } from "@milo/contracts";
+import type { AgentModel, ModelCatalogEntry } from "@milo/contracts";
 import { describe, expect, it } from "vitest";
 import {
   clampCatalogThinkingLevel,
+  exhaustedUsageWindow,
   featuredModelProviders,
   filterModelCatalog,
   pickCatalogModelId,
@@ -202,5 +203,41 @@ describe("usageWindowTone", () => {
     expect(usageWindowTone(80)).toBe("warning");
     expect(usageWindowTone(99.5)).toBe("warning");
     expect(usageWindowTone(100)).toBe("destructive");
+  });
+});
+
+describe("exhaustedUsageWindow", () => {
+  const now = Date.parse("2026-10-18T12:00:00.000Z");
+  function model(provider: string, inUse: boolean, limits: AgentModel["limits"]): AgentModel {
+    return { provider, label: provider, model: provider, inUse, limits, limitsUpdatedAt: null };
+  }
+
+  it("finds the full window of the model in use", () => {
+    const blocked = model("claude-code", true, [
+      { windowMinutes: 300, usedPercent: 100, resetsAt: "2026-10-18T15:40:00.000Z" },
+      { windowMinutes: 10_080, usedPercent: 40, resetsAt: "2026-10-22T00:00:00.000Z" },
+    ]);
+    expect(exhaustedUsageWindow([blocked, model("chatgpt", false, [])], now)).toEqual({
+      model: blocked,
+      window: blocked.limits[0],
+    });
+  });
+
+  it("ignores windows that already reset and models not in use", () => {
+    const reset = model("claude-code", true, [
+      { windowMinutes: 300, usedPercent: 100, resetsAt: "2026-10-18T11:00:00.000Z" },
+    ]);
+    const idle = model("chatgpt", false, [
+      { windowMinutes: 300, usedPercent: 100, resetsAt: "2026-10-18T15:00:00.000Z" },
+    ]);
+    expect(exhaustedUsageWindow([reset, idle], now)).toBeNull();
+  });
+
+  it("reports the window that resets last when several are full", () => {
+    const blocked = model("claude-code", true, [
+      { windowMinutes: 300, usedPercent: 100, resetsAt: "2026-10-18T15:00:00.000Z" },
+      { windowMinutes: 10_080, usedPercent: 100, resetsAt: "2026-10-21T09:00:00.000Z" },
+    ]);
+    expect(exhaustedUsageWindow([blocked], now)?.window.windowMinutes).toBe(10_080);
   });
 });

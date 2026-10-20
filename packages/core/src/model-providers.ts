@@ -1,4 +1,4 @@
-import type { ModelCatalogEntry, ModelUsageWindow } from "@milo/contracts";
+import type { AgentModel, ModelCatalogEntry, ModelUsageWindow } from "@milo/contracts";
 import { matchesSearchQuery } from "./search.js";
 
 /** Effort choices an OpenAI-compatible endpoint stores when reasoning is enabled. */
@@ -141,4 +141,26 @@ export function usageWindowTone(usedPercent: number): "normal" | "warning" | "de
   if (usedPercent >= 100) return "destructive";
   if (usedPercent >= USAGE_WINDOW_HIGH_PERCENT) return "warning";
   return "normal";
+}
+
+/**
+ * The full plan window that blocks the model bots run on now. With several full windows,
+ * the one that resets last decides when the plan works again.
+ */
+export function exhaustedUsageWindow(
+  models: readonly AgentModel[],
+  now: number = Date.now(),
+): { model: AgentModel; window: ModelUsageWindow } | null {
+  const model = models.find((item) => item.inUse);
+  if (!model) return null;
+  const full = model.limits
+    .map((window) => currentUsageWindow(window, now))
+    .filter((window) => usageWindowTone(window.usedPercent) === "destructive");
+  if (full.length === 0) return null;
+  const resetTime = (window: ModelUsageWindow) =>
+    window.resetsAt ? Date.parse(window.resetsAt) : Number.POSITIVE_INFINITY;
+  const window = full.reduce((latest, next) =>
+    resetTime(next) > resetTime(latest) ? next : latest,
+  );
+  return { model, window };
 }

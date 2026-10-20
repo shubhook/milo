@@ -1,4 +1,3 @@
-import { i18n } from "@lingui/core";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { AgentModel, ModelUsageWindow } from "@milo/contracts";
 import type { AgentLogo as AgentLogoName } from "@milo/core";
@@ -7,9 +6,7 @@ import { Badge, cn, Progress, ProgressLabel, ProgressValue } from "@milo/ui-web"
 import { useEffect, useState } from "react";
 import { AgentLogo } from "../components/AgentLogo";
 import { rpc } from "../lib/rpc";
-
-const HOUR = 60;
-const DAY = 24 * HOUR;
+import { formatUsageReset, usageWindowLabel } from "../lib/usage-window";
 
 const PROVIDER_LOGOS: Partial<Record<string, AgentLogoName>> = {
   "claude-code": "claude",
@@ -95,24 +92,8 @@ function UsageWindow({ window }: { window: ModelUsageWindow }) {
   const { t } = useLingui();
   const used = Math.round(window.usedPercent);
   const tone = usageWindowTone(window.usedPercent);
-  const days = window.windowMinutes / DAY;
-  const hours = Math.round(window.windowMinutes / HOUR);
-  const label =
-    window.windowMinutes === 7 * DAY
-      ? t`Weekly`
-      : Number.isInteger(days)
-        ? t`${days}-day`
-        : t`${hours}-hour`;
-  const reset = window.resetsAt ? new Date(window.resetsAt) : null;
-  // A weekday alone is ambiguous once the reset is a week or more away.
-  const resetsAt = reset
-    ? reset.toLocaleString(
-        i18n.locale || "en",
-        reset.getTime() - Date.now() < 6 * DAY * 60_000
-          ? { weekday: "short", hour: "numeric", minute: "2-digit" }
-          : { month: "short", day: "numeric" },
-      )
-    : null;
+  const label = usageWindowLabel(window.windowMinutes);
+  const resetsAt = window.resetsAt ? formatUsageReset(window.resetsAt) : null;
   return (
     <Progress
       value={window.usedPercent}

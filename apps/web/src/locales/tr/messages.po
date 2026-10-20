@@ -73,11 +73,19 @@ msgstr "{0} çalıştırma · {1} token"
 msgid "{0}'s screen"
 msgstr ""
 
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s {period} limit is used up."
+msgstr "{agent} için {period} sınırı doldu."
+
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s weekly limit is used up."
+msgstr "{agent} için haftalık sınır doldu."
+
 #: src/pages/Shell.tsx
 msgid "{botName}’s computer"
 msgstr "{botName} adlı botun bilgisayarı"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{days}-day"
 msgstr ""
 
@@ -90,7 +98,7 @@ msgstr "{days} g önce"
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
 msgstr ""
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{hours}-hour"
 msgstr ""
 
@@ -3119,6 +3127,7 @@ msgstr "Parolayı sıfırla"
 msgid "Reset your password"
 msgstr "Parolanızı sıfırlayın"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/AgentModelsPanel.tsx
 msgid "Resets {resetsAt}"
 msgstr ""
@@ -3876,6 +3885,10 @@ msgstr "{hostLabel} kullan"
 msgid "Use a found model"
 msgstr "Bulunan bir modeli kullan"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "Use ChatGPT"
+msgstr "ChatGPT kullan"
+
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."
 msgstr ""
@@ -3930,6 +3943,7 @@ msgstr "Ses"
 msgid "Voice chat"
 msgstr "Sesli sohbet"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
 msgid "Waiting for ChatGPT…"
@@ -3960,7 +3974,7 @@ msgstr ""
 msgid "Weekdays"
 msgstr "Hafta içi"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "Weekly"
 msgstr ""
 

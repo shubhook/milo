@@ -73,11 +73,19 @@ msgstr "{0} रन · {1} टोकन"
 msgid "{0}'s screen"
 msgstr ""
 
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s {period} limit is used up."
+msgstr "{agent} की {period} सीमा पूरी हो गई है।"
+
+#: src/components/UsageLimitNotice.tsx
+msgid "{agent}'s weekly limit is used up."
+msgstr "{agent} की साप्ताहिक सीमा पूरी हो गई है।"
+
 #: src/pages/Shell.tsx
 msgid "{botName}’s computer"
 msgstr "{botName} का कंप्यूटर"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{days}-day"
 msgstr ""
 
@@ -90,7 +98,7 @@ msgstr "{days} दिन पहले"
 msgid "{hidden, plural, one {+# earlier step} other {+# earlier steps}}"
 msgstr ""
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "{hours}-hour"
 msgstr ""
 
@@ -3119,6 +3127,7 @@ msgstr "पासवर्ड रीसेट करें"
 msgid "Reset your password"
 msgstr "अपना पासवर्ड रीसेट करें"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/AgentModelsPanel.tsx
 msgid "Resets {resetsAt}"
 msgstr ""
@@ -3876,6 +3885,10 @@ msgstr "{hostLabel} का उपयोग करें"
 msgid "Use a found model"
 msgstr "मिला हुआ मॉडल उपयोग करें"
 
+#: src/components/UsageLimitNotice.tsx
+msgid "Use ChatGPT"
+msgstr "ChatGPT इस्तेमाल करें"
+
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Use Protected input for passwords."
 msgstr ""
@@ -3930,6 +3943,7 @@ msgstr "आवाज़"
 msgid "Voice chat"
 msgstr "वॉइस चैट"
 
+#: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx
 #: src/pages/OnboardingAgent.tsx
 msgid "Waiting for ChatGPT…"
@@ -3960,7 +3974,7 @@ msgstr ""
 msgid "Weekdays"
 msgstr "कार्यदिवस"
 
-#: src/pages/AgentModelsPanel.tsx
+#: src/lib/usage-window.ts
 msgid "Weekly"
 msgstr ""
 
