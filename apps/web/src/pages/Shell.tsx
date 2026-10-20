@@ -2757,7 +2757,8 @@ export function ShellPage() {
     .slice(0, 2)
     .toUpperCase();
 
-  const headerWorkLabel = !inGroup && active ? rosterWorkStatusLabel(active.status) : null;
+  const headerWorkLabel =
+    !inGroup && active ? rosterWorkStatusLabel(active.status, active.statusLine) : null;
   const headerWorking = headerWorkLabel !== null;
   const headerStatus = inGroup
     ? (activeSnapshot?.members ?? activeGroup?.members ?? [])
@@ -3174,7 +3175,9 @@ export function ShellPage() {
                             (item.kind === "bot" && !inGroup && active?.id === item.chat.id) ||
                             (item.kind === "group" && inGroup && activeGroup?.id === item.chat.id);
                           const workStatusLabel =
-                            item.kind === "bot" ? rosterWorkStatusLabel(item.chat.status) : null;
+                            item.kind === "bot"
+                              ? rosterWorkStatusLabel(item.chat.status, item.chat.statusLine)
+                              : null;
                           const rosterLine =
                             workStatusLabel ??
                             (item.kind === "bot"

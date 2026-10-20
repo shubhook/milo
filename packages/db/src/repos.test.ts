@@ -289,7 +289,7 @@ describe("createRepos.listSpaceBotsForSpaces", () => {
           unread: true,
           messages: [{ blocks: [{ kind: "text", text: "Waiting for a reply" }] }],
         },
-        runs: [{ status: "running" }],
+        runs: [{ status: "running", statusLine: "Searching the web: refunds" }],
       },
     ]);
     const repos = createRepos({ bot: { findMany } } as unknown as PrismaClient);
@@ -308,6 +308,7 @@ describe("createRepos.listSpaceBotsForSpaces", () => {
         parentBotId: null,
         preview: "Waiting for a reply",
         status: "running",
+        statusLine: "Searching the web: refunds",
         updatedAt: "2026-08-20T00:00:00.000Z",
       },
     ]);

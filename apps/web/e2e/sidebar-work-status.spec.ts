@@ -25,7 +25,7 @@ async function captureSidebarRoster(page: Page, testInfo: TestInfo, name: string
   await captureScreenshot(page, testInfo, name);
 }
 
-test("sidebar roster shows Working… while a run is active", async ({ page }, testInfo) => {
+test("sidebar roster shows what an active run is doing", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `work-status-${stamp}@rakazo.test`, "password12", "Work Status");
   await completeOnboarding(page);
@@ -42,7 +42,12 @@ test("sidebar roster shows Working… while a run is active", async ({ page }, t
     await expect(page.getByRole("button", { name: "Stop", exact: true })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(row.getByText("Working…", { exact: true })).toBeVisible();
+    // The scripted runtime reports "still working…" as its activity; the roster shows that
+    // line in place of the generic Working….
+    await expect(row.getByText("still working…", { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId("thread-header-status")).toContainText("still working…");
     await expect(row).not.toContainText("keep working until I stop you");
     await captureSidebarRoster(page, testInfo, "sidebar-work-status-working");
   } finally {

@@ -160,6 +160,7 @@ export function createRepos(prisma: PrismaClient) {
         parentBotId: bot.parentBotId,
         preview: previewFromBlocks(bot.thread.messages[0]?.blocks),
         status: bot.runs[0]?.status ?? "idle",
+        statusLine: bot.runs[0]?.statusLine ?? null,
         updatedAt: bot.updatedAt.toISOString(),
       };
     });
@@ -346,7 +347,10 @@ export function createRepos(prisma: PrismaClient) {
             });
             if (messages.length === 0) break;
           }
-          return mapBot(bot, preview, bot.runs[0]?.status ?? "idle");
+          return {
+            ...mapBot(bot, preview, bot.runs[0]?.status ?? "idle"),
+            statusLine: bot.runs[0]?.statusLine ?? null,
+          };
         }),
       );
     },

@@ -972,10 +972,13 @@ function BotRow({
   onLongPress?: () => void;
 }) {
   const { t } = useI18n();
-  const preview = previewSnippet(bot.preview, 40) || bot.title || t("No messages yet");
   const time = bot.updatedAt ? formatThreadTime(bot.updatedAt) : "";
   const tag = botTag(bot.title, bot.name);
   const working = ACTIVE_RUN_STATUSES.some((status) => status === bot.status);
+  // While it runs, the row says what the run is doing instead of the last message.
+  const statusLine = bot.status === "running" ? bot.statusLine?.trim() : undefined;
+  const preview =
+    statusLine || previewSnippet(bot.preview, 40) || bot.title || t("No messages yet");
   // Only flat avatars carry a usable color; image avatars fall back to the muted dot.
   const presentation = parseBotAvatarValue(bot.color || FALLBACK_COLOR);
   const tint =

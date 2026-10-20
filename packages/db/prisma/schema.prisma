@@ -572,6 +572,8 @@ model Run {
   modelProvider        String?
   modelId              String?
   error                String?
+  /// The runtime's latest activity line while the run works, such as "Searching the web: …".
+  statusLine           String?
   leaseOwner           String?
   leaseFence           Int              @default(0)
   leaseExpiresAt       DateTime?

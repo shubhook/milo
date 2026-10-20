@@ -10,6 +10,11 @@ describe("rosterWorkStatusLabel", () => {
     expect(rosterWorkStatusLabel("queued")).toBe("Waiting in line…");
     expect(rosterWorkStatusLabel("leased")).toBe("Starting…");
     expect(rosterWorkStatusLabel("running")).toBe("Working…");
+    expect(rosterWorkStatusLabel("running", "Searching the web: flights")).toBe(
+      "Searching the web: flights",
+    );
+    expect(rosterWorkStatusLabel("running", "  ")).toBe("Working…");
+    expect(rosterWorkStatusLabel("queued", "Searching the web: flights")).toBe("Waiting in line…");
   });
 
   it("leaves other statuses to the message preview", () => {
