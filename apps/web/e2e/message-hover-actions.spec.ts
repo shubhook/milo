@@ -52,13 +52,17 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
 
   const transcript = page.getByTestId("transcript");
+  const composer = page.getByRole("combobox", { name: /^Message/ });
+  await expect(composer).toBeVisible();
 
-  // Intro bubble for hover checks. Page-relative `has` (not transcript-scoped)
-  // so filter does not nest transcript inside each row; sidebar has no message-id.
+  // Intro includes suggestion chips in the same frame the rail centers on; a short
+  // echoed bot bubble keeps geometry checks against the text bubble meaningful.
+  const layoutText = `hover-layout-${stamp}`;
+  await sendComposerMessage(page, composer, layoutText);
   const botRow = transcript
     .locator(`[data-message-id]`)
     .filter({
-      has: page.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./),
+      has: page.getByTestId("message-bot-bubble").getByText(layoutText, { exact: true }),
     })
     .first();
   await expect(botRow).toBeVisible({ timeout: 20_000 });
@@ -101,8 +105,6 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
 
   const parentText = `hover-parent-${stamp}`;
   const replyText = `hover-reply-${stamp}`;
-  const composer = page.getByRole("combobox", { name: /^Message/ });
-  await expect(composer).toBeVisible();
   await sendComposerMessage(page, composer, parentText);
 
   const parentRow = transcript.locator(`[data-message-id]`).filter({ hasText: parentText }).first();
