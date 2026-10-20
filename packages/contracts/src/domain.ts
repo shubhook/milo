@@ -1102,8 +1102,8 @@ export const AgentModelSchema = z.object({
   provider: z.string(),
   /** Display name of the agent or plan, such as Claude Code or ChatGPT. */
   label: z.string(),
-  /** Display name of the model it runs. */
-  model: z.string(),
+  /** Display name of the model it runs; null while the ChatGPT plan's model list can't be read. */
+  model: z.string().nullable(),
   /** This model runs the caller's bots; the others are connected but idle. */
   inUse: z.boolean(),
   limits: z.array(ModelUsageWindowSchema),

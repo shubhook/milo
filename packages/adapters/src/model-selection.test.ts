@@ -4,13 +4,16 @@ import { describe, expect, it, vi } from "vitest";
 import {
   defaultCatalogModelId,
   modelCredentialAuthKindsForSpace,
+  PlanModelUnavailableError,
   readStoredModelAuth,
   selectConfiguredModel,
   selectDefaultCredentialId,
+  selectRuntimeModel,
   validateConnectedModelChoice,
   validateModelAuthAvailability,
 } from "./model-selection.js";
 import { listAvailablePiCatalog } from "./pi-catalog-availability.js";
+import type { CodexLiveCatalog } from "./pi-codex-catalog.js";
 
 type SelectionInput = Parameters<typeof selectConfiguredModel>[0];
 
@@ -951,5 +954,86 @@ describe("connected model validation", () => {
     await expect(
       validateConnectedModelChoice(catalogPrisma, actor, "xai", "undefined"),
     ).resolves.toBe("Unknown model for that provider");
+  });
+});
+
+describe("runtime model on a ChatGPT plan", () => {
+  const runtime = { provider: "claude-code", id: "sonnet" };
+  const scope = { userId: "user-1", spaceId: "space-1" };
+
+  function planPrisma(defaultModel: string | null) {
+    const plan = credential("chatgpt", null);
+    return {
+      spaceModelPreference: {
+        findMany: vi
+          .fn()
+          .mockResolvedValue(
+            defaultModel
+              ? [{ credential: plan, isDefault: true, modelId: defaultModel, thinkingLevel: null }]
+              : [],
+          ),
+      },
+      userModelCredential: { findMany: vi.fn().mockResolvedValue([plan]) },
+      secret: {
+        findFirst: vi.fn().mockResolvedValue({ id: "secret-chatgpt", ciphertext: "cipher" }),
+      },
+    } as unknown as PrismaClient;
+  }
+  const secretStore = {
+    load: () =>
+      JSON.stringify({
+        type: "oauth",
+        access: "fake-access-token",
+        refresh: "fake-refresh-token",
+        expires: Date.now() + 3_600_000,
+        accountId: "acct-test-1",
+      }),
+  };
+  const liveCatalog = (slugs: string[] | undefined) => ({
+    read: vi.fn<CodexLiveCatalog["read"]>(async () =>
+      slugs?.map((slug) => ({
+        slug,
+        reasoningEfforts: [],
+        supportsImages: true,
+        supportsFastTier: false,
+      })),
+    ),
+  });
+
+  it("runs the plan's quick model from its live list", async () => {
+    const catalog = liveCatalog(["gpt-6-sol", "gpt-6-luna"]);
+
+    const selected = await selectRuntimeModel(planPrisma("gpt-6-sol"), scope, runtime, {
+      secretStore,
+      catalog,
+    });
+
+    expect(selected).toMatchObject({ provider: "chatgpt", id: "gpt-6-luna" });
+    expect(catalog.read).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ accountId: "acct-test-1" }),
+    );
+  });
+
+  it("refuses to guess a model when the list is unreadable and none is saved", async () => {
+    await expect(
+      selectRuntimeModel(planPrisma(null), scope, runtime, {
+        secretStore,
+        catalog: liveCatalog(undefined),
+      }),
+    ).rejects.toBeInstanceOf(PlanModelUnavailableError);
+  });
+
+  it("keeps the runtime's own model without a ChatGPT sign-in", async () => {
+    const prisma = {
+      spaceModelPreference: { findMany: vi.fn().mockResolvedValue([]) },
+      userModelCredential: { findMany: vi.fn().mockResolvedValue([]) },
+    } as unknown as PrismaClient;
+
+    await expect(selectRuntimeModel(prisma, scope, runtime)).resolves.toEqual({
+      ...runtime,
+      credential: null,
+      thinkingLevel: null,
+    });
   });
 });

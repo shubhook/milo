@@ -2,6 +2,7 @@ import type { OAuthCredential } from "@earendil-works/pi-ai";
 import type { ThinkingLevel } from "@milo/contracts";
 import { ThinkingLevelSchema } from "@milo/contracts";
 import type { PrismaClient } from "@milo/db";
+import { CHATGPT_PLAN_PROVIDER, CHATGPT_PLAN_QUICK_MODELS } from "./chatgpt-plan.js";
 import type { ModelCredentialAuthKind } from "./pi-catalog-availability.js";
 import type { PiCatalogEntry } from "./pi-models.js";
 import { listPiCatalog } from "./pi-models.js";
@@ -565,4 +566,41 @@ function liveThinkingLevels(model: CodexCatalogModel): ThinkingLevel[] | undefin
     ),
   ];
   return levels.length > 0 ? levels : undefined;
+}
+
+export const PLAN_MODEL_UNAVAILABLE_MESSAGE =
+  "Couldn't read the models on your ChatGPT plan. Try again in a minute.";
+
+export type PlanModelResolution =
+  | { status: "ok"; modelId: string }
+  | { status: "error"; message: string };
+
+/**
+ * The quick model this ChatGPT plan serves: the first `CHATGPT_PLAN_QUICK_MODELS`
+ * slug on the account's live Codex list, else the first model on that list. Only
+ * slugs the pi registry knows count, since others cannot run. When the list can't
+ * be read the saved model stands in; with none saved this is an error, never a guess.
+ */
+export async function resolvePlanModel(
+  catalog: CodexLiveCatalog | undefined,
+  userId: string,
+  credential: OAuthCredential | undefined,
+  savedModel?: string | null,
+): Promise<PlanModelResolution> {
+  const account = credential ? codexAccountHandle(credential) : null;
+  const live =
+    catalog && account ? await catalog.read(userId, account).catch(() => undefined) : undefined;
+  const known = new Set(
+    listPiCatalog()
+      .filter((entry) => entry.provider === CHATGPT_PLAN_PROVIDER)
+      .map((entry) => entry.id),
+  );
+  const slugs = (live ?? []).map((model) => model.slug).filter((slug) => known.has(slug));
+  const modelId =
+    CHATGPT_PLAN_QUICK_MODELS.find((slug) => slugs.includes(slug)) ??
+    slugs[0] ??
+    (savedModel && known.has(savedModel) ? savedModel : undefined);
+  return modelId
+    ? { status: "ok", modelId }
+    : { status: "error", message: PLAN_MODEL_UNAVAILABLE_MESSAGE };
 }

@@ -2968,6 +2968,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
         deps.prisma,
         scope,
         deps.runtime.describe().capabilities.model,
+        { secretStore: deps.secretStore, catalog: deps.codexCatalog },
       );
       if (managed && !managed.credential) {
         return { provider: managed.provider, id: managed.id, thinkingLevel: null };
@@ -3438,6 +3439,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             deps.prisma,
             { userId: run.userId, spaceId: run.spaceId },
             deps.runtime.describe().capabilities.model,
+            { secretStore: deps.secretStore, catalog: deps.codexCatalog },
           )) ??
           selectConfiguredModel({
             bot,

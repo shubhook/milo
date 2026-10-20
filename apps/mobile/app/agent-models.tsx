@@ -44,9 +44,11 @@ export default function AgentModels() {
                 {logo ? <AgentLogo agent={logo} /> : null}
                 <View style={styles.title}>
                   <Text style={styles.cardTitle}>{model.label}</Text>
-                  <Text style={styles.cardMeta} numberOfLines={1}>
-                    {model.model}
-                  </Text>
+                  {model.model ? (
+                    <Text style={styles.cardMeta} numberOfLines={1}>
+                      {model.model}
+                    </Text>
+                  ) : null}
                 </View>
                 {model.inUse ? <Text style={styles.badge}>{t("In use")}</Text> : null}
               </View>
