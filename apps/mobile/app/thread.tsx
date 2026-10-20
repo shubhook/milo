@@ -1171,7 +1171,8 @@ function Thread() {
     !onCall &&
     draft.trim().length === 0 &&
     !selectedSkill &&
-    selectedMentions.length === 0;
+    selectedMentions.length === 0 &&
+    activePendingAttachments.length === 0;
   const canSend =
     Boolean(draft.trim()) ||
     selectedSkill !== null ||
