@@ -1,4 +1,9 @@
 export const ZH_MESSAGES: Record<string, string> = {
+  // app/(tabs)
+  "All bots": "所有机器人",
+  Artifacts: "产物",
+  Bots: "机器人",
+  Routines: "例行任务",
   "Update your server to use AI data sharing in this mobile version.":
     "请更新服务器，以便在此移动版本中使用 AI 数据共享功能。",
   "Release computer": "释放电脑",

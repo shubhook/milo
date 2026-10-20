@@ -23,17 +23,17 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BotAvatar } from "../components/bot-avatar";
-import { BotOrganizeModal } from "../components/bot-organize-modal";
-import { GroupAvatar } from "../components/group-avatar";
-import { NativeSymbol } from "../components/native-symbol";
-import { WorkingIndicator } from "../components/WorkingIndicator";
+import { BotAvatar } from "../../components/bot-avatar";
+import { BotOrganizeModal } from "../../components/bot-organize-modal";
+import { GroupAvatar } from "../../components/group-avatar";
+import { NativeSymbol } from "../../components/native-symbol";
+import { WorkingIndicator } from "../../components/WorkingIndicator";
 import {
   activityStatusLabel,
   fetchSpaceActivity,
   formatActivityRelativeTime,
-} from "../lib/activity";
-import { loadActivityMode, saveActivityMode } from "../lib/activity-mode";
+} from "../../lib/activity";
+import { loadActivityMode, saveActivityMode } from "../../lib/activity-mode";
 import {
   currentApiBase,
   loadSessionToken,
@@ -47,11 +47,11 @@ import {
   selectedSpaceId,
   selectInitialSpace,
   selectSpace,
-} from "../lib/api";
-import { mobileTokens, resolveMobileAppearance } from "../lib/appearance";
-import { allowFocusPrompt, scheduleFocusPrompt } from "../lib/focus-prompt";
-import { t, useI18n } from "../lib/i18n";
-import { botTag, filterBots, formatThreadTime, userInitials } from "../lib/inbox";
+} from "../../lib/api";
+import { mobileTokens, resolveMobileAppearance } from "../../lib/appearance";
+import { allowFocusPrompt, scheduleFocusPrompt } from "../../lib/focus-prompt";
+import { t, useI18n } from "../../lib/i18n";
+import { botTag, filterBots, formatThreadTime } from "../../lib/inbox";
 import {
   canDeleteInboxSpace,
   type InboxSpace,
@@ -60,13 +60,14 @@ import {
   retryInboxSpaceFallback,
   selectInboxSpace,
   spaceInboxItems,
-} from "../lib/inbox-spaces";
-import { dismissThreadNotifications, resumeLiveNotifications } from "../lib/live-notifications";
-import { native, useThemedStyles } from "../lib/native";
-import { previewSnippet } from "../lib/preview";
-import { registerPushToken } from "../lib/push";
-import { querySpaceSearch } from "../lib/search";
-import { mobileSearchDestination } from "../lib/search-destination";
+} from "../../lib/inbox-spaces";
+import { dismissThreadNotifications, resumeLiveNotifications } from "../../lib/live-notifications";
+import { native, useThemedStyles } from "../../lib/native";
+import { countBotsNeedingYou, setNeedsYouCount } from "../../lib/needs-you";
+import { previewSnippet } from "../../lib/preview";
+import { registerPushToken } from "../../lib/push";
+import { querySpaceSearch } from "../../lib/search";
+import { mobileSearchDestination } from "../../lib/search-destination";
 
 const FALLBACK_COLOR = botColors[3];
 
@@ -153,6 +154,7 @@ export default function Home() {
       }
       if (requestId !== inboxRequestId.current) return;
       setBots(navigation.current.bots);
+      setNeedsYouCount(countBotsNeedingYou(navigation.current.bots));
       setBotSections(navigation.current.botSections);
       setGroups(navigation.current.groups);
       setSpaces(navigation.spaces);
@@ -321,7 +323,6 @@ export default function Home() {
     visible,
     visibleGroups,
   ]);
-  const initials = userInitials(me?.name ?? "");
   const organizeChat = organizeTarget
     ? organizeTarget.kind === "bot"
       ? bots.find((bot) => bot.id === organizeTarget.id)
@@ -466,9 +467,9 @@ export default function Home() {
   return (
     <View style={[styles.screen, { paddingTop: Math.max(insets.top, 20) }]}>
       <View style={styles.header}>
-        <CircleButton accessibilityLabel={t("Account")} onPress={() => router.push("/account")}>
-          <Text style={styles.profileInitials}>{initials}</Text>
-        </CircleButton>
+        <Text accessibilityRole="header" style={styles.title}>
+          {t("Bots")}
+        </Text>
         <View style={styles.headerActions}>
           <CircleButton
             accessibilityLabel={t("Activity")}
@@ -1090,10 +1091,10 @@ function createHomeStyles() {
     circleAccent: {
       backgroundColor: tokens.primary,
     },
-    profileInitials: {
+    title: {
       color: native.label,
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: 34,
+      fontWeight: "700",
     },
     searchField: {
       marginHorizontal: 16,

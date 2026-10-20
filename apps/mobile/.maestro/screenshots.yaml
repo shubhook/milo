@@ -81,6 +81,18 @@ tags:
 - takeScreenshot: "10b-change-password"
 - back
 
+- openLink: "rakazo:///routines"
+- extendedWaitUntil:
+    visible: "Weekly fixture review"
+    timeout: 10000
+- takeScreenshot: "10c-routines-tab"
+
+- openLink: "rakazo:///artifacts"
+- extendedWaitUntil:
+    visible: "All bots"
+    timeout: 10000
+- takeScreenshot: "10d-artifacts-tab"
+
 - openLink: "rakazo:///models"
 - extendedWaitUntil:
     visible: "Active model"

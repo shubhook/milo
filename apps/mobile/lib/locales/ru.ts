@@ -1,4 +1,9 @@
 export const RU_MESSAGES: Record<string, string> = {
+  // app/(tabs)
+  "All bots": "Все боты",
+  Artifacts: "Артефакты",
+  Bots: "Боты",
+  Routines: "Задачи",
   "Update your server to use AI data sharing in this mobile version.":
     "Обновите сервер, чтобы использовать обмен данными с ИИ в этой версии мобильного приложения.",
   "Ask the server owner to configure this provider.":
