@@ -1,15 +1,14 @@
 import type { AgentModel, ModelUsageWindow } from "@milo/contracts";
-import { currentUsageWindow } from "@milo/core";
+import { agentLogoForProvider, currentUsageWindow, usageWindowTone } from "@milo/core";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AgentLogo } from "../components/agent-logo";
 import { rpc } from "../lib/api";
 import { mobileTokens } from "../lib/appearance";
-import { dateLocaleForUi, useI18n } from "../lib/i18n";
-import { native, useThemedStyles } from "../lib/native";
-
-const HOUR = 60;
-const DAY = 24 * HOUR;
+import { useI18n } from "../lib/i18n";
+import { native, useMobileTokens, useThemedStyles } from "../lib/native";
+import { formatUsageReset, usageWindowLabel } from "../lib/usage-window";
 
 /** Models the agent runtime runs bots on, with each plan's current usage limits. */
 export default function AgentModels() {
@@ -37,26 +36,30 @@ export default function AgentModels() {
       <ScrollView contentContainerStyle={styles.content}>
         {!models && !error ? <ActivityIndicator color={native.secondaryLabel} /> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        {models?.map((model) => (
-          <View key={model.provider} style={styles.card}>
-            <View style={styles.header}>
-              <View style={styles.title}>
-                <Text style={styles.cardTitle}>{model.label}</Text>
-                <Text style={styles.cardMeta} numberOfLines={1}>
-                  {model.model}
-                </Text>
+        {models?.map((model) => {
+          const logo = agentLogoForProvider(model.provider);
+          return (
+            <View key={model.provider} style={styles.card}>
+              <View style={styles.header}>
+                {logo ? <AgentLogo agent={logo} /> : null}
+                <View style={styles.title}>
+                  <Text style={styles.cardTitle}>{model.label}</Text>
+                  <Text style={styles.cardMeta} numberOfLines={1}>
+                    {model.model}
+                  </Text>
+                </View>
+                {model.inUse ? <Text style={styles.badge}>{t("In use")}</Text> : null}
               </View>
-              {model.inUse ? <Text style={styles.badge}>{t("In use")}</Text> : null}
+              {model.limits.length ? (
+                model.limits.map((window) => (
+                  <UsageWindow key={window.windowMinutes} window={currentUsageWindow(window)} />
+                ))
+              ) : (
+                <Text style={styles.cardMeta}>{t("Limits show after the next run.")}</Text>
+              )}
             </View>
-            {model.limits.length ? (
-              model.limits.map((window) => (
-                <UsageWindow key={window.windowMinutes} window={currentUsageWindow(window)} />
-              ))
-            ) : (
-              <Text style={styles.cardMeta}>{t("Limits show after the next run.")}</Text>
-            )}
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -66,40 +69,36 @@ function UsageWindow({ window }: { window: ModelUsageWindow }) {
   const styles = useThemedStyles(createStyles);
   const { t } = useI18n();
   const used = Math.round(window.usedPercent);
-  const reset = window.resetsAt ? new Date(window.resetsAt) : null;
-  // A weekday alone is ambiguous once the reset is a week or more away.
-  const resetsAt = reset
-    ? reset.toLocaleString(
-        dateLocaleForUi(),
-        reset.getTime() - Date.now() < 6 * 24 * 60 * 60_000
-          ? { weekday: "short", hour: "numeric", minute: "2-digit" }
-          : { month: "short", day: "numeric" },
-      )
-    : null;
+  const tokens = useMobileTokens();
+  const toneColor = { warning: tokens.warning, destructive: tokens.destructive };
+  const tone = usageWindowTone(window.usedPercent);
+  const resetsAt = window.resetsAt ? formatUsageReset(window.resetsAt) : null;
   return (
     <View style={styles.window}>
       <View style={styles.windowRow}>
-        <Text style={styles.windowLabel}>{windowLabel(window.windowMinutes, t)}</Text>
-        <Text style={styles.windowValue}>{t("{used}% used", { used })}</Text>
+        <Text style={styles.windowLabel}>{usageWindowLabel(window.windowMinutes)}</Text>
+        <Text style={[styles.windowValue, tone !== "normal" && { color: toneColor[tone] }]}>
+          {t("{used}% used", { used })}
+        </Text>
       </View>
       <View
         style={styles.track}
         accessibilityRole="progressbar"
         accessibilityValue={{ min: 0, max: 100, now: used }}
       >
-        <View style={[styles.indicator, { width: `${window.usedPercent}%` }]} />
+        <View
+          style={[
+            styles.indicator,
+            { width: `${window.usedPercent}%` },
+            tone !== "normal" && { backgroundColor: toneColor[tone] },
+          ]}
+        />
       </View>
       {resetsAt ? (
         <Text style={styles.cardMeta}>{t("Resets {time}", { time: resetsAt })}</Text>
       ) : null}
     </View>
   );
-}
-
-function windowLabel(minutes: number, t: ReturnType<typeof useI18n>["t"]): string {
-  if (minutes === 7 * DAY) return t("Weekly");
-  if (minutes % DAY === 0) return t("{days}-day", { days: minutes / DAY });
-  return t("{hours}-hour", { hours: Math.round(minutes / HOUR) });
 }
 
 function createStyles() {
@@ -116,7 +115,7 @@ function createStyles() {
       gap: 14,
       backgroundColor: tokens.card,
     },
-    header: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+    header: { flexDirection: "row", alignItems: "center", gap: 12 },
     title: { flex: 1, minWidth: 0 },
     cardTitle: { color: native.label, fontSize: 16 },
     cardMeta: { color: native.tertiaryLabel, marginTop: 4, fontSize: 12 },

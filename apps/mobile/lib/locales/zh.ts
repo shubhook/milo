@@ -1,4 +1,7 @@
 export const ZH_MESSAGES: Record<string, string> = {
+  // components/usage-limit-notice.tsx
+  "{agent}'s {period} limit is used up.": "{agent} 的 {period} 额度已用完。",
+  "{agent}'s weekly limit is used up.": "{agent} 的每周额度已用完。",
   // app/(tabs)
   "All bots": "所有机器人",
   Artifacts: "产物",

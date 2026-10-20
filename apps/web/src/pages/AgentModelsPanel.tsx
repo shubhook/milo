@@ -1,18 +1,11 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { AgentModel, ModelUsageWindow } from "@milo/contracts";
-import type { AgentLogo as AgentLogoName } from "@milo/core";
-import { currentUsageWindow, usageWindowTone } from "@milo/core";
+import { agentLogoForProvider, currentUsageWindow, usageWindowTone } from "@milo/core";
 import { Badge, cn, Progress, ProgressLabel, ProgressValue } from "@milo/ui-web";
 import { useEffect, useState } from "react";
 import { AgentLogo } from "../components/AgentLogo";
 import { rpc } from "../lib/rpc";
 import { formatUsageReset, usageWindowLabel } from "../lib/usage-window";
-
-const PROVIDER_LOGOS: Partial<Record<string, AgentLogoName>> = {
-  "claude-code": "claude",
-  chatgpt: "openai",
-  codex: "openai",
-};
 
 const METER_TONE_CLASS = {
   normal: "",
@@ -51,7 +44,7 @@ export function AgentModelsPanel() {
   return (
     <ul data-testid="agent-models" className="m-0 list-none p-0">
       {models.map((model) => {
-        const logo = PROVIDER_LOGOS[model.provider];
+        const logo = agentLogoForProvider(model.provider);
         return (
           <li
             key={model.provider}

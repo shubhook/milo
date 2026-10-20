@@ -80,6 +80,7 @@ import {
   type MarkdownArtifactPreviewTarget,
 } from "../components/markdown-artifact-preview";
 import { NativeSymbol } from "../components/native-symbol";
+import { UsageLimitNotice } from "../components/usage-limit-notice";
 import { VoiceChatCard } from "../components/VoiceChatCard";
 import { WorkingIndicator } from "../components/WorkingIndicator";
 import {
@@ -1164,6 +1165,13 @@ function Thread() {
     });
   }
 
+  // An empty composer offers a call in the send button's place; typing swaps it back.
+  const showCall =
+    Boolean(botId) &&
+    !onCall &&
+    draft.trim().length === 0 &&
+    !selectedSkill &&
+    selectedMentions.length === 0;
   const canSend =
     Boolean(draft.trim()) ||
     selectedSkill !== null ||
@@ -2075,6 +2083,7 @@ function Thread() {
             ))}
           </View>
         ) : null}
+        {botId ? <UsageLimitNotice refreshKey={working} /> : null}
         <View
           style={{
             flexDirection: "row",
@@ -2232,7 +2241,7 @@ function Thread() {
               }}
             />
           </View>
-          {botId && !onCall && draft.trim().length === 0 ? (
+          {showCall ? (
             <Pressable
               accessibilityLabel={t("Call")}
               onPress={() => void startVoiceCall()}
@@ -2254,27 +2263,29 @@ function Thread() {
               />
             </Pressable>
           ) : null}
-          <Pressable
-            accessibilityLabel={t("Send")}
-            disabled={sending || !canSend}
-            onPress={() => void send()}
-            style={{
-              backgroundColor: tokens.primary,
-              borderRadius: 22,
-              width: 44,
-              height: 44,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: sending || !canSend ? 0.5 : 1,
-            }}
-          >
-            <NativeSymbol
-              ios="arrow.up"
-              android="arrow-up"
-              size={18}
-              color={tokens.primaryForeground}
-            />
-          </Pressable>
+          {showCall ? null : (
+            <Pressable
+              accessibilityLabel={t("Send")}
+              disabled={sending || !canSend}
+              onPress={() => void send()}
+              style={{
+                backgroundColor: tokens.primary,
+                borderRadius: 22,
+                width: 44,
+                height: 44,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: sending || !canSend ? 0.5 : 1,
+              }}
+            >
+              <NativeSymbol
+                ios="arrow.up"
+                android="arrow-up"
+                size={18}
+                color={tokens.primaryForeground}
+              />
+            </Pressable>
+          )}
           {working ? (
             <Pressable
               accessibilityLabel={t("Stop")}

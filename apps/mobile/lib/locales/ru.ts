@@ -1,4 +1,7 @@
 export const RU_MESSAGES: Record<string, string> = {
+  // components/usage-limit-notice.tsx
+  "{agent}'s {period} limit is used up.": "Лимит {agent} на {period} исчерпан.",
+  "{agent}'s weekly limit is used up.": "Недельный лимит {agent} исчерпан.",
   // app/(tabs)
   "All bots": "Все боты",
   Artifacts: "Артефакты",
