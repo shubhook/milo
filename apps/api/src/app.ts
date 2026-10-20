@@ -430,6 +430,7 @@ export async function createApp(
     sandbox,
     memory,
     home,
+    runtime,
     secrets,
     oauthLogins,
     integrationSettings,

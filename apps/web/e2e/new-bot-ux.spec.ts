@@ -4,11 +4,10 @@ import {
   completeOnboarding,
   createBotFromPicker,
   openNewBot,
-  rpc,
   signup,
 } from "./helpers";
 
-test("+ opens the form, then an empty chat; sidebar collapses", async ({ page }, testInfo) => {
+test("+ opens the form, then an intro chat; sidebar collapses", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `new-bot-ux-${stamp}@rakazo.test`, "password12", "New Bot UX");
   await completeOnboarding(page);
@@ -21,8 +20,10 @@ test("+ opens the form, then an empty chat; sidebar collapses", async ({ page },
   await expect(form).toBeVisible();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
   await expect(form.locator("label:has-text('Name') input")).toBeVisible();
-  await expect(form.locator("label:has-text('Title') input")).toBeVisible();
-  await expect(form.locator("label:has-text('What this bot is for') textarea")).toBeVisible();
+  await expect(form.locator("label:has-text('What should it do?') textarea")).toBeVisible();
+  await expect(form.locator("label:has-text('Title')")).toHaveCount(0);
+  await expect(form.getByTestId("create-bot-computer")).toHaveCount(0);
+  await expect(form.getByTestId("create-bot-runs-on")).toHaveCount(0);
   for (const starter of ["Inbox", "Research", "Design", "Expenses"]) {
     await expect(form.getByRole("button", { name: starter, exact: true })).toBeVisible();
   }
@@ -35,18 +36,22 @@ test("+ opens the form, then an empty chat; sidebar collapses", async ({ page },
   await expect(
     page.getByRole("dialog").locator('.rakazo-bot-avatar[data-shape="squircle"]'),
   ).toBeVisible();
-  await expect(form.getByTestId("create-bot-computer")).toBeVisible();
-  await expect(form.getByTestId("create-bot-team")).toBeVisible();
-  await expect(form.getByTestId("create-bot-private")).toBeVisible();
   await captureScreenshot(page, testInfo, "create-bot-form");
 
   await form.locator("label:has-text('Name') input").fill("New Bot");
+  await form
+    .locator("label:has-text('What should it do?') textarea")
+    .fill("Help with research briefs.");
   await form.getByRole("button", { name: "Create", exact: true }).click();
   await page.waitForURL(/\/app\/[^/]+$/);
   await expect(page.getByPlaceholder("Message New Bot")).toBeVisible();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
+  await expect(
+    page.getByText(/Hi, I'm New Bot\. I run on your own subscription/, { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByTestId("suggestion-chips")).toBeVisible();
   await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
-  await captureScreenshot(page, testInfo, "create-chat-sidepanel-closed");
+  await captureScreenshot(page, testInfo, "create-chat-intro");
 
   await page.getByTestId("minimize-bots-sidebar").click();
   await expect(page.getByTestId("bots-sidebar")).toHaveAttribute("data-collapsed", "true");
@@ -62,7 +67,6 @@ test("+ opens the form, then an empty chat; sidebar collapses", async ({ page },
 
   await page.getByTestId("minimize-bots-sidebar").click();
   await expect(page.getByTestId("bots-sidebar")).toHaveAttribute("data-collapsed", "true");
-  // The edge slides to the window edge; grab it only once it has settled there.
   await expect.poll(async () => (await edge.boundingBox())?.x).toBe(0);
 
   const box = await edge.boundingBox();
@@ -75,20 +79,47 @@ test("+ opens the form, then an empty chat; sidebar collapses", async ({ page },
   await captureScreenshot(page, testInfo, "bots-sidebar-expanded");
 });
 
-test("plus picker can create a Private computer bot", async ({ page }, testInfo) => {
+test("new bot skips the old focus card", async ({ page }) => {
   const stamp = Date.now();
-  await signup(page, `new-bot-private-${stamp}@rakazo.test`, "password12", "New Bot Private");
+  await signup(page, `focus-gone-${stamp}@rakazo.test`, "password12", "Focus Gone");
+  await completeOnboarding(page);
+
+  await createBotFromPicker(page, { description: "Keep my calendar clear." });
+  await expect(page.getByPlaceholder("Message New Bot")).toBeVisible();
+  await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("suggestion-chips")).toBeVisible();
+});
+
+test("Runs on appears only when Claude Code is ready", async ({ page }) => {
+  const stamp = Date.now();
+  await signup(page, `runs-on-${stamp}@rakazo.test`, "password12", "Runs On");
   await completeOnboarding(page);
   await page.goto("/app");
   await page.waitForURL(/\/app\/[^/]+$/);
 
-  await createBotFromPicker(page, { computerMode: "dedicated" });
-  await expect(page.getByPlaceholder("Message New Bot")).toBeVisible();
-  await captureScreenshot(page, testInfo, "create-private-computer-bot");
+  await openNewBot(page);
+  await expect(page.getByTestId("create-bot-runs-on")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cancel new bot" }).click();
 
-  const botId = page.url().split("/").pop()!;
-  const bots = await rpc<Array<{ id: string; computerMode: string }>>(page, "bots/list", {});
-  expect(bots.find((bot) => bot.id === botId)?.computerMode).toBe("dedicated");
+  await page.route("**/rpc/agent/status", (route) =>
+    route.fulfill({
+      json: {
+        json: {
+          agent: "claude-code",
+          installed: true,
+          version: "1.0.0",
+          loggedIn: true,
+          platform: "darwin",
+          chatgpt: true,
+        },
+      },
+    }),
+  );
+  await openNewBot(page);
+  const form = page.getByTestId("create-bot-form");
+  await expect(form.getByTestId("create-bot-runs-on")).toBeVisible();
+  await expect(form.getByTestId("create-bot-chatgpt")).toBeVisible();
+  await expect(form.getByTestId("create-bot-claude")).toBeVisible();
 });
 
 test("second bot from plus opens create form before persist", async ({ page }, testInfo) => {
@@ -102,10 +133,7 @@ test("second bot from plus opens create form before persist", async ({ page }, t
   const form = page.getByTestId("create-bot-form");
   await expect(form).toBeVisible();
   await form.locator("label:has-text('Name') input").fill("Researcher");
-  await form.locator("label:has-text('Title') input").fill("Finds sources");
-  await form
-    .locator("label:has-text('What this bot is for') textarea")
-    .fill("Briefs from the web.");
+  await form.locator("label:has-text('What should it do?') textarea").fill("Briefs from the web.");
   await captureScreenshot(page, testInfo, "second-bot-create-form");
 
   const create = page.waitForResponse(

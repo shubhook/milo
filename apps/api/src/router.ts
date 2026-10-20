@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type {
   AdapterContext,
   AgentHomeStore,
+  AgentRuntime,
   ArtifactStore,
   ConnectorCatalogItem,
   JobPublisher,
@@ -198,6 +199,7 @@ import {
 import { getLogger } from "@milo/logging";
 import { implement, ORPCError } from "@orpc/server";
 import { deleteAgentSecret, listAgentSecrets, putAgentSecret } from "./agent-secrets.js";
+import { refineBotProfile } from "./bot-refine.js";
 import { createAgentSkillsService } from "./agent-skills.js";
 import { aiConsentStatus, allowAiConsent } from "./ai-consent.js";
 import {
@@ -542,6 +544,8 @@ export interface RouterDeps {
   sandbox: SandboxProvider;
   memory: MemoryStore;
   home: AgentHomeStore;
+  /** Used by bots.refine for a short profile pass before create. */
+  runtime: AgentRuntime;
   secrets: EncryptedSecretStore;
   oauthLogins: PiOAuthLogins;
   /** Live Codex catalog seam; defaults to the shared per-process cache. */
@@ -1406,10 +1410,26 @@ export function createRouter(deps: RouterDeps) {
         } catch (error) {
           throw mapSpaceLifecycleError(error);
         }
-        await enqueueBotIntroRun(deps, context.actor, bot).catch((error) => {
-          getLogger().error("bot intro run enqueue", error);
+        // Fixed intro with idea chips; the model-driven intro run is unused since v0.
+        await introduce(onboardingDeps, context.actor, bot.id).catch((error) => {
+          getLogger().error("bot intro", error);
         });
         return bot;
+      }),
+      refine: authed.bots.refine.handler(async ({ context, input }) => {
+        const managed = await selectRuntimeModel(
+          deps.prisma,
+          context.actor,
+          runtimeModel(deps.env.agentRuntime),
+        );
+        const model = managed
+          ? { provider: managed.provider, id: managed.id }
+          : { provider: "scripted", id: "scripted" };
+        return refineBotProfile(
+          deps.runtime,
+          { name: input.name, description: input.description },
+          model,
+        );
       }),
       duplicate: authed.bots.duplicate.handler(async ({ context, input }) => {
         const source = await repos.getBot(context.actor, input.botId);

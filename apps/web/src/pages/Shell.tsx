@@ -28,7 +28,6 @@ import {
   canReactToThreadMessage,
   MESSAGE_REACTIONS,
   type MessageReaction,
-  normalizeCreateBotProfile,
 } from "@milo/contracts";
 import {
   attachmentsForThread,
@@ -2390,11 +2389,16 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   }
 
   async function createBot(input: CreateBotInputDraft) {
+    const usesClaude = input.modelProvider === "claude";
     const bot = await rpc.bots.create({
-      ...normalizeCreateBotProfile(input),
+      name: input.name,
+      title: input.title,
+      description: input.description,
+      instructions: input.instructions || input.description,
       notifyOnFinish: true,
       color: input.color,
-      computerMode: input.computerMode,
+      // ChatGPT is the default runtime path; only Claude needs an explicit override.
+      ...(usesClaude ? { modelProvider: "claude-code", modelId: "sonnet" } : {}),
     });
     setBots((current) =>
       current.some((item) => item.id === bot.id) ? current : [bot, ...current],

@@ -1,10 +1,7 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import type { ComputerMode } from "@milo/contracts";
-import {
-  BOT_DESCRIPTION_MAX_LENGTH,
-  BOT_NAME_MAX_LENGTH,
-  BOT_TITLE_MAX_LENGTH,
-} from "@milo/contracts";
+import type { AgentStatus } from "@milo/contracts";
+import { BOT_DESCRIPTION_MAX_LENGTH, BOT_NAME_MAX_LENGTH } from "@milo/contracts";
+import { BOT_PALETTE_COLORS } from "@milo/core";
 import {
   BotAvatar,
   Button,
@@ -17,24 +14,33 @@ import {
   Textarea,
 } from "@milo/ui-web";
 import { X } from "lucide-react";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { BotColorChoices, BotShapeChoices } from "../../components/BotAvatarChoices";
+import { Shimmer } from "../../components/ai/primitives";
 import { SegmentedControl } from "../../components/SegmentedControl";
 import { createBotStarters } from "../../lib/create-bot-starters";
+import { rpc } from "../../lib/rpc";
+
+export type CreateBotProvider = "chatgpt" | "claude";
 
 export type CreateBotInputDraft = {
   name: string;
   title: string;
   description: string;
+  instructions: string;
   color: string;
-  computerMode: ComputerMode;
+  modelProvider: CreateBotProvider;
 };
 
 const labelClass = "flex flex-col gap-1.5 text-small font-medium text-muted-foreground";
 
+function claudeReady(status: AgentStatus | null): boolean {
+  return Boolean(status?.installed && status.loggedIn);
+}
+
 /**
- * New bot: a live avatar preview beside the form. Starter chips fill the form with
- * client-side presets; nothing about them is stored.
+ * New bot: name, look, optional Runs on, and what it should do. Starter chips
+ * prefill the form; Create refines then persists.
  */
 export function CreateBotDialog({
   open,
@@ -50,26 +56,58 @@ export function CreateBotDialog({
   const starters = createBotStarters();
   const [starter, setStarter] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [shapeIndex, setShapeIndex] = useState(0);
-  const [color, setColor] = useState(starters[0]!.color);
-  const [computerMode, setComputerMode] = useState<ComputerMode>("team");
+  const [color, setColor] = useState(BOT_PALETTE_COLORS[0] ?? starters[0]!.color);
+  const [provider, setProvider] = useState<CreateBotProvider>("chatgpt");
+  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const avatar = `${color}::shape_${shapeIndex}`;
+  const showRunsOn = claudeReady(agentStatus);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    void rpc.agent
+      .status()
+      .then((status) => {
+        if (active) setAgentStatus(status);
+      })
+      .catch(() => {
+        if (active) setAgentStatus(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open]);
 
   async function handleSubmit() {
     if (!name.trim() || submitting) return;
     setError(null);
     setSubmitting(true);
+    const trimmedName = name.trim();
+    const trimmedDescription = description.trim();
     try {
+      let title = "";
+      let instructions = trimmedDescription;
+      try {
+        const refined = await rpc.bots.refine({
+          name: trimmedName,
+          description: trimmedDescription,
+        });
+        title = refined.title;
+        instructions = refined.instructions;
+      } catch {
+        // Create still works with the raw description when refine fails.
+      }
       await onCreate({
-        name: name.trim(),
-        title: title.trim(),
-        description: description.trim(),
+        name: trimmedName,
+        title,
+        description: trimmedDescription,
+        instructions,
         color: avatar,
-        computerMode,
+        modelProvider: showRunsOn ? provider : "chatgpt",
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : t`Could not create bot`);
@@ -92,9 +130,6 @@ export function CreateBotDialog({
           <span className="max-w-full truncate text-center text-[22px] font-semibold text-foreground">
             {name.trim() || t`New bot`}
           </span>
-          {title.trim() ? (
-            <span className="max-w-full truncate text-center text-muted-foreground">{title}</span>
-          ) : null}
         </div>
 
         <form
@@ -129,7 +164,6 @@ export function CreateBotDialog({
                   onClick={() => {
                     setStarter(item.id);
                     setName(item.name);
-                    setTitle(item.title);
                     setDescription(item.description);
                     setShapeIndex(item.shapeIndex);
                     setColor(item.color);
@@ -150,30 +184,18 @@ export function CreateBotDialog({
               </p>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label htmlFor={`${ids}-name`} className={labelClass}>
-                <Trans>Name</Trans>
-                <Input
-                  id={`${ids}-name`}
-                  value={name}
-                  maxLength={BOT_NAME_MAX_LENGTH}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder={t`Name this bot`}
-                />
-              </label>
-              <label htmlFor={`${ids}-title`} className={labelClass}>
-                <Trans>Title</Trans>
-                <Input
-                  id={`${ids}-title`}
-                  value={title}
-                  maxLength={BOT_TITLE_MAX_LENGTH}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder={t`Inbox, Research…`}
-                />
-              </label>
-            </div>
+            <label htmlFor={`${ids}-name`} className={labelClass}>
+              <Trans>Name</Trans>
+              <Input
+                id={`${ids}-name`}
+                value={name}
+                maxLength={BOT_NAME_MAX_LENGTH}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t`Name this bot`}
+              />
+            </label>
             <label htmlFor={`${ids}-description`} className={labelClass}>
-              <Trans>What this bot is for</Trans>
+              <Trans>What should it do?</Trans>
               <Textarea
                 id={`${ids}-description`}
                 value={description}
@@ -195,24 +217,31 @@ export function CreateBotDialog({
                 <span className="text-small font-medium text-muted-foreground">
                   <Trans>Color</Trans>
                 </span>
-                <BotColorChoices value={color} onChange={setColor} className="max-w-[260px]" />
+                <BotColorChoices
+                  colors={BOT_PALETTE_COLORS}
+                  value={color}
+                  onChange={setColor}
+                  className="max-w-[260px]"
+                />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2" data-testid="create-bot-computer">
-              <span className="text-small font-medium text-muted-foreground">
-                <Trans>Computer</Trans>
-              </span>
-              <SegmentedControl
-                label={t`Computer`}
-                value={computerMode}
-                onChange={setComputerMode}
-                options={[
-                  { value: "team", label: t`Team`, testId: "create-bot-team" },
-                  { value: "dedicated", label: t`Private`, testId: "create-bot-private" },
-                ]}
-              />
-            </div>
+            {showRunsOn ? (
+              <div className="flex flex-col gap-2" data-testid="create-bot-runs-on">
+                <span className="text-small font-medium text-muted-foreground">
+                  <Trans>Runs on</Trans>
+                </span>
+                <SegmentedControl
+                  label={t`Runs on`}
+                  value={provider}
+                  onChange={setProvider}
+                  options={[
+                    { value: "chatgpt", label: t`ChatGPT`, testId: "create-bot-chatgpt" },
+                    { value: "claude", label: t`Claude`, testId: "create-bot-claude" },
+                  ]}
+                />
+              </div>
+            ) : null}
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border px-5 pt-3.5 pb-[18px]">
@@ -220,7 +249,13 @@ export function CreateBotDialog({
               <Trans>Cancel</Trans>
             </DialogClose>
             <Button type="submit" size="lg" className="px-4" disabled={!name.trim() || submitting}>
-              {submitting ? <Trans>Creating…</Trans> : <Trans>Create</Trans>}
+              {submitting ? (
+                <Shimmer>
+                  <Trans>Creating…</Trans>
+                </Shimmer>
+              ) : (
+                <Trans>Create</Trans>
+              )}
             </Button>
           </div>
         </form>
