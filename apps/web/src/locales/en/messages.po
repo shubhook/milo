@@ -214,6 +214,7 @@ msgid "Actions for space"
 msgstr "Actions for space"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Active"
 msgstr "Active"
 
@@ -235,11 +236,11 @@ msgstr "Add"
 msgid "Add a model in Settings to use this."
 msgstr "Add a model in Settings to use this."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a run time for this one-shot."
 msgstr "Add a run time for this one-shot."
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Add a schedule, webhook, or GitHub trigger"
 msgstr "Add a schedule, webhook, or GitHub trigger"
 
@@ -605,6 +606,7 @@ msgid "bot"
 msgstr "bot"
 
 #: src/pages/IntegrationSetup.tsx
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Bot"
@@ -624,6 +626,7 @@ msgid "Bot screen preview"
 msgstr "Bot screen preview"
 
 #: src/pages/Artifacts.tsx
+#: src/pages/Routines.tsx
 msgid "Bots"
 msgstr "Bots"
 
@@ -708,7 +711,7 @@ msgstr "Check failed"
 msgid "Check for updates"
 msgstr "Check for updates"
 
-#: src/pages/Shell.tsx
+#: src/lib/routine-save.ts
 msgid "Check in."
 msgstr "Check in."
 
@@ -1334,6 +1337,7 @@ msgstr "Could not reset password"
 msgid "Could not revoke connection"
 msgstr "Could not revoke connection"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not run routine"
 msgstr "Could not run routine"
@@ -1355,6 +1359,7 @@ msgstr "Could not save Auto Review"
 msgid "Could not save group"
 msgstr "Could not save group"
 
+#: src/pages/Routines.tsx
 #: src/pages/Shell.tsx
 msgid "Could not save routine"
 msgstr "Could not save routine"
@@ -1472,6 +1477,7 @@ msgid "Create new Space"
 msgstr "Create new Space"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Create Routine"
 msgstr "Create Routine"
 
@@ -2821,6 +2827,7 @@ msgid "Paste your API key"
 msgstr "Paste your API key"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
 msgid "Paused"
 msgstr "Paused"
 
@@ -3163,12 +3170,14 @@ msgstr "Rotate key"
 msgid "Rounded square"
 msgstr "Rounded square"
 
+#: src/lib/routine-save.ts
 #: src/pages/RoutineEditor.tsx
-#: src/pages/Shell.tsx
 msgid "Routine"
 msgstr "Routine"
 
 #: src/pages/RoutineEditor.tsx
+#: src/pages/Routines.tsx
+#: src/pages/Shell.tsx
 msgid "Routines"
 msgstr "Routines"
 
@@ -3184,7 +3193,11 @@ msgstr "Run at"
 msgid "Run history"
 msgstr "Run history"
 
-#: src/pages/Shell.tsx
+#: src/pages/RoutineEditor.tsx
+msgid "Run now"
+msgstr "Run now"
+
+#: src/lib/routine-save.ts
 msgid "Run time must be in the future."
 msgstr "Run time must be in the future."
 
@@ -3536,6 +3549,7 @@ msgstr "Starting…"
 msgid "Steps"
 msgstr "Steps"
 
+#: src/pages/RoutineEditor.tsx
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "Stop"
@@ -3618,10 +3632,6 @@ msgstr "Terminal"
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
 msgstr "Test"
-
-#: src/pages/RoutineEditor.tsx
-msgid "Test run"
-msgstr "Test run"
 
 #: src/components/SoftwareUpdateSection.tsx
 msgid "The API did not come back. Refresh this page."

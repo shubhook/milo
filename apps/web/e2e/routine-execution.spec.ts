@@ -76,7 +76,7 @@ test("routine test-run completes and survives reload", async ({ page }, testInfo
   await completeOnboarding(page);
 
   await page.getByTitle("Agent computer").click();
-  await expect(page.getByRole("button", { name: "Test run" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Run now" })).toHaveCount(0);
   await page.getByRole("button", { name: "Create Routine" }).click();
   await page.locator("label:has-text('Name') input").fill("Daily verification");
   await page
@@ -100,7 +100,7 @@ test("routine test-run completes and survives reload", async ({ page }, testInfo
   await captureScreenshot(page, testInfo, "33-routine-scheduled");
 
   await routine.click();
-  await page.getByRole("button", { name: "Test run" }).click();
+  await page.getByRole("button", { name: "Run now" }).click();
   await expect(page.getByText(/routine-run-now-ok/i).first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("button", { name: "Send" })).toBeVisible({ timeout: 30_000 });
   await captureScreenshot(page, testInfo, "34-routine-run-completed");

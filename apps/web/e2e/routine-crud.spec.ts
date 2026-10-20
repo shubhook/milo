@@ -39,24 +39,23 @@ test("routine active switch keeps its thumb inside the track", async ({ page }, 
   }
 
   await expect(toggle).toHaveAttribute("aria-checked", "true");
-  await expectThumbInsets(20, 2);
+  await expectThumbInsets(15, 1);
   await captureScreenshot(page, testInfo, "routine-toggle-desktop-active");
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-checked", "false");
-  await expectThumbInsets(2, 20);
+  await expectThumbInsets(1, 15);
   await captureScreenshot(page, testInfo, "routine-toggle-desktop-inactive");
 
   await toggle.focus();
   await page.keyboard.press("Space");
   await expect(toggle).toHaveAttribute("aria-checked", "true");
-  expect(await toggle.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe(
-    "none",
-  );
+  // The shared switch shows keyboard focus as a ring (box-shadow), not an outline.
+  expect(await toggle.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe("none");
   await page.setViewportSize({ width: 390, height: 844 });
-  await expectThumbInsets(20, 2);
+  await expectThumbInsets(15, 1);
   await captureScreenshot(page, testInfo, "routine-toggle-mobile-active");
   await toggle.click();
-  await expectThumbInsets(2, 20);
+  await expectThumbInsets(1, 15);
   await captureScreenshot(page, testInfo, "routine-toggle-mobile-inactive");
 });
 
@@ -317,3 +316,40 @@ function localSchedule(iso: string, timezone: string) {
     minute: Number(value("minute")),
   };
 }
+
+test("routines page lists every bot's routines beside the editor", async ({ page }, testInfo) => {
+  const stamp = Date.now();
+  await signup(page, `routines-page-${stamp}@rakazo.test`, "password12", "Routines Page");
+  await completeOnboarding(page);
+  const chiefId = activeBotId(page);
+  await rpc(page, "routines/create", {
+    botId: chiefId,
+    name: "Morning digest",
+    prompt: "Summarize overnight email.",
+    crons: ["0 9 * * *"],
+    timezone: "UTC",
+    active: true,
+    notify: true,
+  });
+
+  await page.getByRole("button", { name: "Routines", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/routines$/);
+  await expect(page.getByRole("heading", { name: "Routines", exact: true })).toBeVisible();
+  const row = page.getByTestId("routine-page-row").filter({ hasText: "Morning digest" });
+  await expect(row).toBeVisible();
+  await expect(row).toContainText("Active");
+  await expect(page.locator("label:has-text('Name') input")).toHaveValue("Morning digest");
+  await expect(page.getByRole("button", { name: "Run now" })).toBeEnabled();
+  await captureScreenshot(page, testInfo, "routines-page");
+
+  await page.getByRole("button", { name: "Create Routine" }).click();
+  await expect(page.getByRole("group", { name: "Bot" })).toBeVisible();
+  await page.locator("label:has-text('Name') input").fill("Weekly review");
+  await addScheduleTrigger(page, "Every week");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(
+    page.getByTestId("routine-page-row").filter({ hasText: "Weekly review" }),
+  ).toBeVisible();
+  expect((await rpc<Routine[]>(page, "routines/list", { botId: chiefId })).length).toBe(2);
+  await captureScreenshot(page, testInfo, "routines-page-created");
+});

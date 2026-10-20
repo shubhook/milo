@@ -20,10 +20,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   Input,
+  Switch,
   Textarea,
 } from "@milo/ui-web";
-import { ChevronLeft, Clock, GitBranch, Globe, Pause, Plus, X } from "lucide-react";
-import { useId } from "react";
+import { ChevronLeft, Clock, GitBranch, Globe, Pause, Play, Plus, Trash2, X } from "lucide-react";
+import { type ReactNode, useId } from "react";
+import { Shimmer } from "../components/ai/primitives";
 import { RoutineRunHistory } from "./RoutineRunHistory";
 import { RoutineSchedule } from "./RoutineSchedule";
 
@@ -93,6 +95,8 @@ export function draftFromRoutine(routine: Routine): RoutineDraftState {
   };
 }
 
+const ROUTINE_LABEL_CLASS = "flex flex-col gap-1.5 text-small font-medium text-muted-foreground";
+
 export function routineTriggerSummary(routine: Routine): string {
   if (!routine.active) return t`Paused`;
   const parts: string[] = [];
@@ -158,11 +162,7 @@ export function RoutineListRow({
         </span>
       </button>
       {running ? (
-        <Button
-          size="xs"
-          onClick={onStop}
-          className="shrink-0 rounded-full bg-warning/15 text-warning hover:bg-warning/25"
-        >
+        <Button size="xs" onClick={onStop} variant="outline" className="shrink-0">
           <Trans>Running · Stop</Trans>
         </Button>
       ) : null}
@@ -184,8 +184,10 @@ export function RoutineEditor({
   onClose,
   onSave,
   onTestRun,
+  onStop,
   onDelete,
   onEnsureWebhook,
+  botPicker,
 }: {
   draft: RoutineDraftState;
   onChange: (next: RoutineDraftState) => void;
@@ -196,12 +198,17 @@ export function RoutineEditor({
   saving: boolean;
   running: boolean;
   error: string | null;
-  onBack: () => void;
-  onClose: () => void;
+  /** Side panel only: the routines page has no back or close. */
+  onBack?: () => void;
+  onClose?: () => void;
   onSave: () => void;
   onTestRun: () => void;
+  /** Shown as "Stop" while a run started from here is going. */
+  onStop?: () => void;
   onDelete: () => void;
   onEnsureWebhook: () => Promise<void>;
+  /** Picks the bot for a new routine. Saved routines keep their bot. */
+  botPicker?: ReactNode;
 }) {
   const { t } = useLingui();
   const fieldId = useId();
@@ -232,74 +239,96 @@ export function RoutineEditor({
   }
 
   return (
-    <div>
-      <div className="mb-5 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onBack}
-          className="text-muted-foreground"
-          aria-label={t`Back`}
-        >
-          <ChevronLeft />
-        </Button>
-        <div className="text-[15.5px] font-medium text-foreground">
-          <Trans>Routine</Trans>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClose}
-          className="text-muted-foreground"
-          aria-label={t`Close`}
-        >
-          <X />
-        </Button>
-      </div>
-
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2.5 text-sm text-foreground/75">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={draft.active}
-            onClick={() => onChange({ ...draft, active: !draft.active })}
-            className={`relative h-[22px] w-[40px] rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
-              draft.active ? "bg-primary" : "bg-input"
-            }`}
+    <div className="flex flex-col gap-[18px]">
+      {onBack && onClose ? (
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onBack}
+            className="text-muted-foreground"
+            aria-label={t`Back`}
           >
-            <span
-              className={`absolute top-[2px] left-0 h-[18px] w-[18px] rounded-full bg-background transition-transform ${
-                draft.active
-                  ? "translate-x-[20px] dark:bg-primary-foreground"
-                  : "translate-x-[2px] dark:bg-foreground"
-              }`}
-            />
-          </button>
-          <Trans>Active</Trans>
-        </label>
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" disabled={saving || running} onClick={onDelete}>
-            <Trans>Delete</Trans>
+            <ChevronLeft />
           </Button>
-          <Button variant="secondary" disabled={!canTest} onClick={onTestRun}>
-            {running ? t`Running…` : t`Test run`}
+          <div className="font-medium text-foreground">
+            <Trans>Routine</Trans>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            className="text-muted-foreground"
+            aria-label={t`Close`}
+          >
+            <X />
           </Button>
         </div>
-      </div>
+      ) : null}
 
-      <label htmlFor={`${fieldId}-name`} className="block text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-1 items-center gap-2.5 text-foreground">
+          <Switch
+            aria-label={t`Active`}
+            checked={draft.active}
+            onCheckedChange={(checked) => onChange({ ...draft, active: checked })}
+          />
+          <span aria-hidden="true">
+            {draft.active ? <Trans>Active</Trans> : <Trans>Paused</Trans>}
+          </span>
+        </div>
+        {running ? (
+          <>
+            <Shimmer>{t`Running…`}</Shimmer>
+            {onStop ? (
+              <Button variant="outline" size="lg" onClick={onStop}>
+                <Trans>Stop</Trans>
+              </Button>
+            ) : null}
+          </>
+        ) : (
+          <Button variant="outline" size="lg" disabled={!canTest} onClick={onTestRun}>
+            <Play />
+            <Trans>Run now</Trans>
+          </Button>
+        )}
+        <Button
+          size="lg"
+          className="px-4"
+          disabled={saving || running || !hasTriggers}
+          onClick={onSave}
+        >
+          {saving ? t`Saving…` : t`Save`}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          aria-label={t`Delete`}
+          disabled={saving || running}
+          onClick={onDelete}
+          className="text-muted-foreground"
+        >
+          <Trash2 />
+        </Button>
+      </div>
+      {error ? (
+        <p role="alert" className="-mt-2 text-small text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      <label htmlFor={`${fieldId}-name`} className={ROUTINE_LABEL_CLASS}>
         <Trans>Name</Trans>
         <Input
           id={`${fieldId}-name`}
           value={draft.name}
           placeholder={t`Name this routine`}
           onChange={(e) => onChange({ ...draft, name: e.target.value })}
-          className="mt-2"
         />
       </label>
+      {botPicker}
 
-      <label htmlFor={`${fieldId}-prompt`} className="mt-5 block text-sm text-muted-foreground">
+      <label htmlFor={`${fieldId}-prompt`} className={ROUTINE_LABEL_CLASS}>
         <Trans>Instruction</Trans>
         <Textarea
           id={`${fieldId}-prompt`}
@@ -307,14 +336,13 @@ export function RoutineEditor({
           placeholder={t`What should this routine do each time it runs?`}
           onChange={(e) => onChange({ ...draft, prompt: e.target.value })}
           rows={4}
-          className="mt-2"
         />
       </label>
 
-      <div className="mt-5 text-sm text-muted-foreground">
-        <div className="flex items-baseline gap-2">
+      <div className="text-small text-muted-foreground">
+        <div className="flex items-baseline gap-2 font-medium">
           <Trans>When to run</Trans>
-          <span className="text-xs text-muted-foreground/70">{timezone}</span>
+          <span className="text-xs font-normal text-muted-foreground/70">{timezone}</span>
         </div>
 
         <div className="mt-2 space-y-2">
@@ -387,7 +415,7 @@ export function RoutineEditor({
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="outline" className="mt-2 h-auto w-full rounded-xl py-3" />}
+            render={<Button variant="outline" size="lg" className="mt-2.5 px-3.5" />}
           >
             <Plus />
             <Trans>Add trigger</Trans>
@@ -439,17 +467,6 @@ export function RoutineEditor({
         ) : null}
       </div>
 
-      <div className="mt-5">
-        <Button disabled={saving || running || !hasTriggers} onClick={onSave}>
-          {saving ? t`Saving…` : t`Save`}
-        </Button>
-      </div>
-      {error ? (
-        <p role="alert" className="mt-3 text-[13px] text-destructive">
-          {error}
-        </p>
-      ) : null}
-
       {editing ? <RoutineRunHistory key={editing.id} routineId={editing.id} /> : null}
     </div>
   );
@@ -495,7 +512,7 @@ function InboundTriggerCard({
     "break-all rounded-lg bg-muted px-2.5 py-1.5 font-mono text-xs text-foreground/75";
 
   return (
-    <div className="rounded-xl border border-border p-3">
+    <div className="rounded-2xl border border-border bg-card p-3.5">
       <div className="flex items-center gap-2.5 px-0.5">
         {kind === "github" ? (
           <GitBranch size={16} strokeWidth={1.6} className="text-muted-foreground" aria-hidden />

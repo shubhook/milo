@@ -601,7 +601,6 @@
   "Team": "Equipo",
   "Team Computer": "Team Computer",
   "Test": "Probar",
-  "Test run": "Ejecución de prueba",
   "The API did not come back. Refresh this page.": "La API no volvió. Actualiza esta página.",
   "Thinking": "Pensando",
   "This bot runs on this computer, not a Linux desktop. Shell and files use your home folder.": "Este bot se ejecuta en esta computadora, no en un escritorio Linux. El shell y los archivos usan tu carpeta de inicio.",
@@ -691,5 +690,6 @@
   "Nothing is still running": "No queda nada en ejecución",
   "Credentials are encrypted and never sent to the model.": "Las credenciales se cifran y nunca se envían al modelo.",
   "Rename section": "Renombrar sección",
-  "Could not rename section": "No se pudo renombrar la sección"
+  "Could not rename section": "No se pudo renombrar la sección",
+  "Run now": "Ejecutar ahora"
 }
