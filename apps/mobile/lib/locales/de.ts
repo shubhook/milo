@@ -670,4 +670,15 @@ export const DE_MESSAGES: Record<string, string> = {
   Weekly: "Wöchentlich",
   "{days}-day": "{days} Tage",
   "{hours}-hour": "{hours} Stunden",
+  // Settings: Usage / General / Allow list / Updates
+  Act: "Handeln",
+  "Allow list": "Freigabeliste",
+  Apps: "Apps",
+  "Ask first": "Erst fragen",
+  ChatGPT: "ChatGPT",
+  "Could not load approval rules": "Bestätigungsregeln konnten nicht geladen werden",
+  "Could not save rule": "Regel konnte nicht gespeichert werden",
+  General: "Allgemein",
+  Purchases: "Käufe",
+  Updates: "Updates",
 };

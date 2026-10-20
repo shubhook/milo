@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   captureScreenshot,
   completeOnboarding,
+  openUserSettings,
   reachMeetStep,
   sayHiToFirstBot,
   signup,
@@ -253,13 +254,18 @@ test("configured server owners manage providers from settings", async ({ page },
   await signup(page, `configured-owner-${Date.now()}@rakazo.test`, "password12", "Server Owner");
   await expect(page.getByRole("heading", { name: "Server integrations" })).toBeHidden();
   await completeOnboarding(page);
-  await page.getByTestId("sidebar-settings").click();
-  const settings = page.getByTestId("user-settings");
-  const link = settings.getByRole("link", { name: "Server integrations", exact: true });
-  await expect(link).toBeVisible();
-  await captureScreenshot(page, testInfo, "server-integrations-settings");
-  await link.click();
+  // v0 Settings no longer links here; owners still open the setup page directly.
+  const settings = await openUserSettings(page);
+  await expect(
+    settings.getByRole("link", { name: "Server integrations", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    settings.getByRole("button", { name: "Server integrations", exact: true }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.goto("/integrations/setup");
   await expect(page.getByRole("heading", { name: "Server integrations" })).toBeVisible();
+  await captureScreenshot(page, testInfo, "server-integrations-settings");
   await page.getByRole("button", { name: "Composio", exact: true }).click();
   await expect(page.getByText("Connected", { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "server-integrations-configured");

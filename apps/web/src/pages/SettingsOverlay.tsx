@@ -1,41 +1,15 @@
 import { useLingui } from "@lingui/react/macro";
 import type { AvatarStyle } from "@milo/contracts";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
-import {
-  Bell,
-  Brain,
-  CloudDownload,
-  Gauge,
-  Monitor,
-  Settings,
-  ShieldCheck,
-  Volume2,
-  XIcon,
-} from "lucide-react";
+import { CloudDownload, Gauge, Settings, ShieldCheck, Volume2, XIcon } from "lucide-react";
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { ApprovalRulesSettings } from "../components/ApprovalRulesSettings";
-import { computersAreUnavailable } from "../components/ComputersUnavailableHint";
-import { NotificationSettings } from "../components/NotificationSettings";
-import {
-  ComputerSettingsPanel,
-  GeneralSettingsPanels,
-  UpdatesSettingsPanel,
-  UsageSettingsPanel,
-} from "./AccountSettingsOverlay";
+import { desktopBridge } from "../lib/desktop";
+import { GeneralSettingsPanels, UpdatesSettingsPanel } from "./AccountSettingsOverlay";
 import { AgentModelsPanel } from "./AgentModelsPanel";
-import { SpaceMemorySection } from "./KnowledgeSection";
-import { ModelSettingsOverlay } from "./ModelSettingsOverlay";
 import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
 
-export type SettingsSection =
-  | "general"
-  | "usage"
-  | "approvals"
-  | "notifications"
-  | "memory"
-  | "voice"
-  | "computer"
-  | "updates";
+export type SettingsSection = "general" | "usage" | "approvals" | "voice" | "updates";
 
 type NavItem = {
   id: SettingsSection;
@@ -43,31 +17,28 @@ type NavItem = {
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 };
 
+/** Settings is Usage, General, Allow list and Updates. */
 export function SettingsOverlay({
   email,
   name,
-  usage,
-  initialSection = "general",
   avatarStyle,
   onAvatarStyleChange,
-  isDeploymentOwner = false,
-  modelManaged = false,
-  sandboxProvider,
+  initialSection = "general",
   onClose,
   onVoiceStatusMaybeChanged,
-  onBotUpdated,
 }: {
   email?: string | null;
   name: string;
-  usage?: { runs: number; inputTokens: number; outputTokens: number } | null;
-  initialSection?: SettingsSection;
   avatarStyle: AvatarStyle;
   onAvatarStyleChange: (style: AvatarStyle) => Promise<void>;
+  initialSection?: SettingsSection;
+  onClose: () => void;
+  onVoiceStatusMaybeChanged?: () => void | Promise<void>;
+  // Still passed by the shell; nothing in v0 settings reads them.
+  usage?: { runs: number; inputTokens: number; outputTokens: number } | null;
   isDeploymentOwner?: boolean;
   modelManaged?: boolean;
   sandboxProvider?: string | null;
-  onClose: () => void;
-  onVoiceStatusMaybeChanged?: () => void | Promise<void>;
   onBotUpdated?: () => void;
 }) {
   const { t } = useLingui();
@@ -75,7 +46,8 @@ export function SettingsOverlay({
   const usageRef = useRef<HTMLDivElement>(null);
   const [section, setSection] = useState<SettingsSection>(initialSection);
   const [voiceBusy, setVoiceBusy] = useState(false);
-  const showComputer = isDeploymentOwner && computersAreUnavailable(sandboxProvider);
+  // The desktop app updates itself; a browser has nothing to update here.
+  const showUpdates = Boolean(desktopBridge()?.update);
   const panelBusy = voiceBusy;
 
   useEffect(() => {
@@ -89,14 +61,11 @@ export function SettingsOverlay({
   }, [section]);
 
   const navItems: NavItem[] = [
+    { id: "usage", label: t`Usage`, icon: Gauge },
     { id: "general", label: t`General`, icon: Settings },
-    { id: "usage", label: t`Models`, icon: Gauge },
-    { id: "approvals", label: t`Approvals`, icon: ShieldCheck },
-    { id: "notifications", label: t`Notifications`, icon: Bell },
-    { id: "memory", label: t`Memory`, icon: Brain },
+    { id: "approvals", label: t`Allow list`, icon: ShieldCheck },
     { id: "voice", label: t`Voice`, icon: Volume2 },
-    ...(showComputer ? [{ id: "computer" as const, label: t`Computer`, icon: Monitor }] : []),
-    { id: "updates", label: t`Updates`, icon: CloudDownload },
+    ...(showUpdates ? [{ id: "updates" as const, label: t`Updates`, icon: CloudDownload }] : []),
   ];
 
   const sectionTitle =
@@ -106,11 +75,9 @@ export function SettingsOverlay({
   const closeLabel =
     section === "usage"
       ? t`Close usage settings`
-      : section === "memory"
-        ? t`Close memory settings`
-        : section === "voice"
-          ? t`Close voice settings`
-          : t`Close user settings`;
+      : section === "voice"
+        ? t`Close voice settings`
+        : t`Close user settings`;
 
   async function refreshVoiceStatus() {
     await onVoiceStatusMaybeChanged?.();
@@ -125,8 +92,7 @@ export function SettingsOverlay({
     leaveSettings(onClose);
   }
 
-  const showModels = section === "usage" && !modelManaged;
-  const widePane = showModels || section === "voice";
+  const widePane = section === "voice";
 
   return (
     <Dialog
@@ -200,7 +166,7 @@ export function SettingsOverlay({
 
             <div
               className={`min-h-0 flex-1 ${
-                showModels || section === "voice"
+                section === "voice"
                   ? "flex flex-col overflow-hidden"
                   : "rk-scroll overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8"
               }`}
@@ -211,38 +177,20 @@ export function SettingsOverlay({
                   name={name}
                   avatarStyle={avatarStyle}
                   onAvatarStyleChange={onAvatarStyleChange}
-                  isDeploymentOwner={isDeploymentOwner}
                 />
               ) : null}
-              {section === "usage" && !showModels ? (
-                <>
-                  <UsageSettingsPanel usage={usage} panelRef={usageRef} ownKeys={false} />
-                  <div className={usage ? "mt-6" : ""}>
-                    <AgentModelsPanel />
-                  </div>
-                </>
-              ) : null}
-              {section === "approvals" ? <ApprovalRulesSettings /> : null}
-              {section === "notifications" ? (
-                <NotificationSettings onBotUpdated={onBotUpdated} />
-              ) : null}
-              {section === "computer" && showComputer ? <ComputerSettingsPanel /> : null}
-              {section === "updates" ? (
-                <UpdatesSettingsPanel isDeploymentOwner={isDeploymentOwner} />
-              ) : null}
-              {showModels ? (
-                <>
-                  <div className="px-6 pb-4 pt-5 sm:px-8">
-                    <UsageSettingsPanel usage={usage} panelRef={usageRef} ownKeys />
-                  </div>
-                  <ModelSettingsOverlay embedded onClose={requestClose} />
-                </>
-              ) : null}
-              {section === "memory" ? (
-                <div data-testid="memory-settings">
-                  <SpaceMemorySection />
+              {section === "usage" ? (
+                <div
+                  ref={usageRef}
+                  tabIndex={-1}
+                  data-testid="usage-settings"
+                  className="min-h-8 outline-none"
+                >
+                  <AgentModelsPanel />
                 </div>
               ) : null}
+              {section === "approvals" ? <ApprovalRulesSettings /> : null}
+              {section === "updates" && showUpdates ? <UpdatesSettingsPanel /> : null}
               {section === "voice" ? (
                 <VoiceSettingsOverlay embedded onClose={requestClose} onBusyChange={setVoiceBusy} />
               ) : null}

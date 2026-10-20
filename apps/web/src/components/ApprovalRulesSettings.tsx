@@ -157,7 +157,10 @@ export function ApprovalRulesSettings() {
             options={[
               { value: "act", label: t`Act` },
               { value: "ask", label: t`Ask first` },
-              { value: "hand", label: t`Hand to me` },
+              // Hand to me stays visible only for a category already set to it.
+              ...(categoryLevel(rules, category.id) === "hand"
+                ? [{ value: "hand" as const, label: t`Hand to me` }]
+                : []),
             ]}
           />
         </div>

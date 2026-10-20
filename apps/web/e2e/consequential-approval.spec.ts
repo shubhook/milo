@@ -8,7 +8,7 @@ import {
   signup,
 } from "./helpers";
 
-test("actions run by default while optional confirmations live in Settings > Approvals", async ({
+test("actions run by default while optional confirmations live in Settings > Allow list", async ({
   page,
 }, testInfo) => {
   const stamp = Date.now();
@@ -28,12 +28,14 @@ test("actions run by default while optional confirmations live in Settings > App
 
   const settings = await openUserSettings(page, "approvals");
   await expect(settings).toHaveAttribute("role", "dialog");
-  await expect(settings.getByRole("heading", { name: "Approvals", exact: true })).toBeVisible();
+  await expect(settings.getByRole("heading", { name: "Allow list", exact: true })).toBeVisible();
   const email = settings.getByRole("group", { name: "Email" });
   await expect(email.getByRole("button", { name: "Act", exact: true })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
+  // v0 offers two levels; Hand to me shows only for a category already set to it.
+  await expect(email.getByRole("button", { name: "Hand to me", exact: true })).toHaveCount(0);
   await expect(settings.getByTestId("auto-review-toggle")).toBeVisible();
   await expect(settings.getByTestId("auto-review-toggle")).not.toBeChecked();
   await expect(settings.getByText("Flag unexpected actions")).toBeVisible();
@@ -110,20 +112,17 @@ test("Hand to me never asks: the action is handed back to the person", async ({
   await signup(page, `hand-to-me-${Date.now()}@rakazo.test`, "password12", "Hand To Me");
   await completeOnboarding(page);
 
+  await rpc(page, "approvalRules/set", {
+    effect: "hand_off",
+    matchKind: "category",
+    matchValue: "email",
+  });
   const settings = await openUserSettings(page, "approvals");
   const email = settings.getByRole("group", { name: "Email" });
-  await email.getByRole("button", { name: "Hand to me", exact: true }).click();
   await expect(email.getByRole("button", { name: "Hand to me", exact: true })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
-  await expect
-    .poll(async () =>
-      (await rpc<{ matchValue: string; effect: string }[]>(page, "approvalRules/list", undefined))
-        .filter((rule) => rule.matchValue === "email")
-        .map((rule) => rule.effect),
-    )
-    .toEqual(["hand_off"]);
   await captureScreenshot(page, testInfo, "57-settings-approvals-hand-to-me");
   await settings.getByRole("button", { name: "Close user settings" }).click();
 

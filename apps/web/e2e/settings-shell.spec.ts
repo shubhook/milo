@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
 
-test("settings shell is two-pane and deep-links Models Memory Voice Usage", async ({
-  page,
-}, testInfo) => {
+test("settings shell is Usage, General and Allow list in a browser", async ({ page }, testInfo) => {
   const stamp = Date.now();
   const userName = `Settings shell ${stamp}`;
   await signup(page, `settings-shell-${stamp}@rakazo.test`, "password12", userName);
@@ -25,44 +23,38 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
     "aria-current",
     "page",
   );
+  for (const hidden of ["notifications", "memory", "computer", "models"]) {
+    await expect(settings.getByTestId(`settings-nav-${hidden}`)).toHaveCount(0);
+  }
+  // A browser session has no desktop app to update.
+  await expect(settings.getByTestId("settings-nav-updates")).toHaveCount(0);
   await expect(settings.getByRole("heading", { name: "General", exact: true })).toBeVisible();
   await expect(settings.getByRole("heading", { name: "Account", exact: true })).toBeVisible();
-  await expect(settings.getByRole("heading", { name: "Replies", exact: true })).toHaveCount(0);
-  await settings.getByTestId("advanced-settings").locator("summary").click();
-  const streamReplies = settings.getByTestId("response-streaming-toggle");
-  await expect(streamReplies).toBeVisible();
-  await expect(streamReplies).not.toBeChecked();
-  await expect(settings.getByText("Stream replies", { exact: true })).toBeVisible();
-  await streamReplies.scrollIntoViewIfNeeded();
+  await expect(settings.getByRole("heading", { name: "Password", exact: true })).toHaveCount(0);
+  await expect(settings.getByTestId("response-streaming-toggle")).toHaveCount(0);
+  await expect(settings.getByRole("button", { name: "Server integrations" })).toHaveCount(0);
+  await expect(settings.getByTestId("sign-out")).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-shell-general");
-  await streamReplies.click();
-  await expect(streamReplies).toBeChecked();
-  await expect
-    .poll(() => page.evaluate(() => window.localStorage.getItem("rakazo.responseStreaming")))
-    .toBe("on");
 
   await settings.getByTestId("settings-nav-usage").click();
   await expect(settings).toHaveAttribute("data-settings-section", "usage");
-  await expect(settings.getByTestId("settings-nav-models")).toHaveCount(0);
+  await expect(settings.getByRole("heading", { name: "Usage", exact: true })).toBeVisible();
   await expect(settings.getByTestId("usage-settings")).toBeVisible();
-  await expect(settings.getByTestId("model-settings")).toBeVisible();
-  await captureScreenshot(page, testInfo, "settings-shell-usage-models");
+  // Fresh accounts may have no plan meters yet; the panel still renders a body.
+  await expect(
+    settings
+      .getByTestId("agent-models")
+      .or(settings.getByTestId("agent-models-loading"))
+      .or(settings.getByRole("alert")),
+  ).toBeVisible();
+  await expect(settings.getByTestId("model-settings")).toHaveCount(0);
+  await expect(settings.getByText("Model spend uses your provider keys.")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "settings-shell-usage");
 
-  await settings.getByTestId("settings-nav-notifications").click();
-  await expect(settings.getByRole("heading", { name: "Notifications", exact: true })).toBeVisible();
-  const chief = settings.getByRole("switch", { name: "Chief", exact: true });
-  await expect(chief).toBeChecked();
-  await chief.click();
-  await expect(chief).not.toBeChecked();
-  await captureScreenshot(page, testInfo, "settings-shell-notifications");
-
-  await settings.getByTestId("settings-nav-memory").click();
-  await expect(settings).toHaveAttribute("data-settings-section", "memory");
-  await expect(settings.getByRole("heading", { name: "Memory", exact: true })).toBeVisible();
-  const memory = settings.getByTestId("memory-settings");
-  await expect(memory.getByTestId("space-memory-documents")).toBeVisible();
-  await expect(memory.getByLabel("Provider")).toHaveCount(0);
-  await captureScreenshot(page, testInfo, "settings-shell-memory");
+  await settings.getByTestId("settings-nav-approvals").click();
+  await expect(settings.getByRole("heading", { name: "Allow list", exact: true })).toBeVisible();
+  await expect(settings.getByTestId("action-confirmation-settings")).toBeVisible();
+  await captureScreenshot(page, testInfo, "settings-shell-allow-list");
 
   await settings.getByTestId("settings-nav-voice").click();
   await expect(settings).toHaveAttribute("data-settings-section", "voice");
@@ -76,7 +68,12 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await openUserSettings(page, "usage");
   await expect(page.getByTestId("user-settings")).toHaveAttribute("data-settings-section", "usage");
   await expect(page.getByTestId("usage-settings")).toBeVisible();
-  await captureScreenshot(page, testInfo, "settings-shell-usage");
+  await expect(
+    page
+      .getByTestId("agent-models")
+      .or(page.getByTestId("agent-models-loading"))
+      .or(page.getByRole("alert")),
+  ).toBeVisible();
 });
 
 test("usage lists the agent's models with their plan limits", async ({ page }, testInfo) => {

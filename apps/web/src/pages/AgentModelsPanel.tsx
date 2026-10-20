@@ -40,7 +40,20 @@ export function AgentModelsPanel() {
       </p>
     );
   }
-  if (!models) return null;
+  if (!models) {
+    return (
+      <p data-testid="agent-models-loading" className="text-[14px] text-muted-foreground">
+        <Trans>Loading…</Trans>
+      </p>
+    );
+  }
+  if (models.length === 0) {
+    return (
+      <p data-testid="agent-models" className="text-[14px] text-muted-foreground">
+        <Trans>Limits show after the next run.</Trans>
+      </p>
+    );
+  }
   return (
     <ul data-testid="agent-models" className="m-0 list-none p-0">
       {models.map((model) => {

@@ -672,4 +672,15 @@ export const RU_MESSAGES: Record<string, string> = {
   Weekly: "Неделя",
   "{days}-day": "{days} дн.",
   "{hours}-hour": "{hours} ч",
+  // Settings: Usage / General / Allow list / Updates
+  Act: "Действовать",
+  "Allow list": "Список разрешений",
+  Apps: "Приложения",
+  "Ask first": "Сначала спросить",
+  ChatGPT: "ChatGPT",
+  "Could not load approval rules": "Не удалось загрузить правила одобрения.",
+  "Could not save rule": "Не удалось сохранить правило.",
+  General: "Общие",
+  Purchases: "Покупки",
+  Updates: "Обновления",
 };

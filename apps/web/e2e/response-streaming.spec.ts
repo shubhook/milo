@@ -59,27 +59,14 @@ async function capture(
   await writeShot(testInfo, name, screenshotPath);
 }
 
-test("settings overlay keeps Stream replies inside Advanced", async ({ page }, testInfo) => {
+test("settings overlay no longer exposes Stream replies", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openFixture(page, { view: "settings", stream: "off" });
   const settings = page.getByTestId("user-settings");
-  await expect(settings.getByRole("heading", { name: "Replies", exact: true })).toHaveCount(0);
-  await expect(settings.getByTestId("response-streaming-toggle")).toBeHidden();
-  await settings.getByTestId("advanced-settings").locator("summary").click();
-  const streamReplies = settings.getByTestId("response-streaming-toggle");
-  await expect(streamReplies).toBeVisible();
-  await expect(streamReplies).not.toBeChecked();
-  await expect(settings.getByText("Stream replies", { exact: true })).toBeVisible();
-  await streamReplies.scrollIntoViewIfNeeded();
-  await capture(page, testInfo, "settings-stream-off");
-
-  await openFixture(page, { view: "settings", stream: "on" });
-  const settingsOn = page.getByTestId("user-settings");
-  await settingsOn.getByTestId("advanced-settings").locator("summary").click();
-  const onToggle = settingsOn.getByTestId("response-streaming-toggle");
-  await expect(onToggle).toBeVisible();
-  await expect(onToggle).toBeChecked();
-  await capture(page, testInfo, "settings-stream-on");
+  await expect(settings.getByTestId("advanced-settings")).toHaveCount(0);
+  await expect(settings.getByTestId("response-streaming-toggle")).toHaveCount(0);
+  await expect(settings.getByText("Stream replies", { exact: true })).toHaveCount(0);
+  await capture(page, testInfo, "settings-stream-removed");
 });
 
 test("thread reducer hides live tokens when Stream replies is off", async ({ page }, testInfo) => {

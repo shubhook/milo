@@ -652,4 +652,15 @@ export const ZH_MESSAGES: Record<string, string> = {
   Weekly: "每周",
   "{days}-day": "{days} 天",
   "{hours}-hour": "{hours} 小时",
+  // Settings: Usage / General / Allow list / Updates
+  Act: "直接执行",
+  "Allow list": "允许列表",
+  Apps: "应用",
+  "Ask first": "先询问",
+  ChatGPT: "ChatGPT",
+  "Could not load approval rules": "无法加载审批规则",
+  "Could not save rule": "无法保存规则",
+  General: "通用",
+  Purchases: "购买",
+  Updates: "更新",
 };
