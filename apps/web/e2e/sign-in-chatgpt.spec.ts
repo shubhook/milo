@@ -84,7 +84,7 @@ test("onboarding accepts ChatGPT in place of Claude Code", async ({ page }, test
   const continueButton = page.getByRole("button", { name: "Continue" });
   await expect(continueButton).toBeDisabled();
   await page.getByRole("button", { name: "Sign in with ChatGPT" }).click();
-  await expect(page.getByText("Milo runs your bots on your ChatGPT plan.")).toBeVisible({
+  await expect(page.getByTestId("onboarding-agent-chatgpt").getByText("Ready")).toBeVisible({
     timeout: 10_000,
   });
   await expect(continueButton).toBeEnabled();

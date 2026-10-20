@@ -17,28 +17,48 @@ export async function rpc<T>(page: Page, procedure: string, body: unknown): Prom
 
 export async function completeOnboarding(page: Page, testInfo?: TestInfo) {
   await page.waitForURL(/\/(onboarding|app)/, { timeout: 20_000 });
-  // Optional Server integrations step (needsSetup). Skip when shown, then the
-  // first bot is created automatically — land in Chief's chat with no form.
+  // Optional Server integrations step (needsSetup). Skip it when shown.
   const integrations = page.getByRole("heading", { name: "Server integrations", exact: true });
-  const chief = page.getByText("Chief").first();
-  await integrations.or(chief).or(page.getByText("Opening chat…")).waitFor({ timeout: 20_000 });
-  if ((await chief.isVisible().catch(() => false)) && page.url().includes("/app")) {
-    if (testInfo) {
-      await captureScreenshot(page, testInfo, "03-create-first-bot");
-      await captureScreenshot(page, testInfo, "06-onboarding-complete");
-    }
-    return;
-  }
+  const firstRunStep = page
+    .getByRole("heading", { name: /^(Connect your apps|Meet your first bot)$/ })
+    .or(page.getByRole("combobox", { name: /^Message / }));
+  await integrations.or(firstRunStep).first().waitFor({ timeout: 20_000 });
   if (await integrations.isVisible().catch(() => false)) {
     if (testInfo) await captureScreenshot(page, testInfo, "02-connect-apps");
     await page.getByRole("button", { name: "Skip", exact: true }).click();
   }
-  await page.waitForURL(/\/app\//, { timeout: 20_000 });
+  await sayHiToFirstBot(page, testInfo);
   await expect(page.getByText("Chief").first()).toBeVisible();
-  if (testInfo) {
-    await captureScreenshot(page, testInfo, "03-create-first-bot");
-    await captureScreenshot(page, testInfo, "06-onboarding-complete");
+  if (testInfo) await captureScreenshot(page, testInfo, "06-onboarding-complete");
+}
+
+/** Skip the optional apps step, if shown, and wait for the Meet step. */
+export async function reachMeetStep(page: Page) {
+  const apps = page.getByRole("heading", { name: "Connect your apps", exact: true });
+  const meet = page.getByRole("heading", { name: "Meet your first bot", exact: true });
+  await apps.or(meet).first().waitFor({ timeout: 20_000 });
+  if (await apps.isVisible().catch(() => false)) {
+    await page.getByRole("button", { name: "Skip for now", exact: true }).click();
   }
+  await expect(meet).toBeVisible();
+}
+
+/** Skip the optional apps step and create the first bot from the Meet step, if shown. */
+export async function sayHiToFirstBot(page: Page, testInfo?: TestInfo) {
+  const apps = page.getByRole("heading", { name: "Connect your apps", exact: true });
+  const meet = page.getByRole("heading", { name: "Meet your first bot", exact: true });
+  const chat = page.getByRole("combobox", { name: /^Message / });
+  await apps.or(meet).or(chat).first().waitFor({ timeout: 20_000 });
+  if (await apps.isVisible().catch(() => false)) {
+    if (testInfo) await captureScreenshot(page, testInfo, "02-connect-apps");
+    await page.getByRole("button", { name: "Skip for now", exact: true }).click();
+    await meet.or(chat).first().waitFor({ timeout: 20_000 });
+  }
+  if (await meet.isVisible().catch(() => false)) {
+    if (testInfo) await captureScreenshot(page, testInfo, "03-meet-first-bot");
+    await page.getByRole("button", { name: "Say hi", exact: true }).click();
+  }
+  await page.waitForURL(/\/app\//, { timeout: 20_000 });
 }
 
 export async function signup(
