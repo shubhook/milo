@@ -72,6 +72,7 @@ import {
   redactSecrets,
   renderBotDirectory,
   resolveActionApprovalDetail,
+  runStatusLine,
   sandboxCommandTimeoutMs,
   type ToolCallStreak,
   toolRequiresApproval,
@@ -3715,6 +3716,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
         };
         let pendingProgress = "";
         let lastProgressAt = 0;
+        let lastStatusLine: string | null = null;
         let hasStreamedText = false;
         let toolCallStreak: ToolCallStreak = { key: undefined, count: 0 };
         let lastComputerFrameId: string | undefined;
@@ -6133,6 +6135,24 @@ export function createRunExecutor(deps: ExecutorDeps) {
               }
             } else if (event.type === "progress") {
               toolCallStreak = { key: undefined, count: 0 };
+              if (event.activity) {
+                // The roster shows this line under the bot's name while it works.
+                const statusLine = runStatusLine(redactSecrets(event.text, runSecrets));
+                if (statusLine !== lastStatusLine) {
+                  lastStatusLine = statusLine;
+                  await deps.prisma.run
+                    .updateMany({
+                      where: {
+                        id: runId,
+                        status: "running",
+                        leaseOwner: workerId,
+                        leaseFence: fence,
+                      },
+                      data: { statusLine },
+                    })
+                    .catch(() => undefined);
+                }
+              }
               // Flush batched text deltas first so an activity line cannot land
               // ahead of text the model streamed before the tool call.
               if (pendingProgress) {

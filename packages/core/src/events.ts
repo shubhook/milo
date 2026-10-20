@@ -225,6 +225,15 @@ export function runFailureError(event: {
     : message;
 }
 
+const RUN_STATUS_LINE_MAX = 120;
+
+/** One line for the roster from a runtime activity update, or null to clear it. */
+export function runStatusLine(text: string): string | null {
+  const line = text.replaceAll(/\s+/g, " ").trim();
+  if (!line) return null;
+  return line.length > RUN_STATUS_LINE_MAX ? `${line.slice(0, RUN_STATUS_LINE_MAX)}…` : line;
+}
+
 // Agent sign-in failures as the runtimes word them: Claude Code's signed-out message and the
 // ChatGPT plan's "Sign in again" errors.
 const AGENT_SIGN_IN_PATTERN = /is not signed in|sign in again/i;

@@ -6,7 +6,7 @@ export const activeRunSelection = {
   where: { status: { in: activeRunStatuses } },
   orderBy: { createdAt: "desc" as const },
   take: 1,
-  select: { status: true },
+  select: { status: true, statusLine: true },
 } as const;
 
 export function previewFromBlocks(blocks: unknown): string {

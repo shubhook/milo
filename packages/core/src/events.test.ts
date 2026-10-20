@@ -14,6 +14,7 @@ import {
   responseStreamingEnabled,
   runFailedBlock,
   runFailureError,
+  runStatusLine,
   sanitizeJsonValue,
   sanitizeUtf16ForJson,
   stripLiveStreamingProgress,
@@ -139,6 +140,14 @@ describe("reduceLiveMessageBlocks", () => {
     expect(reduceLiveMessageBlocks(activity, { type: "tool", name: "shell" })).toEqual([
       { kind: "steps", steps: [{ label: "Shell", count: 1 }] },
     ]);
+  });
+});
+
+describe("runStatusLine", () => {
+  it("keeps one trimmed line and clears on empty activity", () => {
+    expect(runStatusLine("  Searching the web:\n  flights  ")).toBe("Searching the web: flights");
+    expect(runStatusLine("   ")).toBeNull();
+    expect(runStatusLine("x".repeat(200))).toBe(`${"x".repeat(120)}…`);
   });
 });
 
