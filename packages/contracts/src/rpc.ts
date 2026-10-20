@@ -52,6 +52,8 @@ import {
   ModelCredentialSchema,
   ModelOAuthBeginSchema,
   REPLY_QUOTE_MAX_LENGTH,
+  RefineBotInput,
+  RefineBotOutput,
   ReorderBotsInput,
   RoutineSchema,
   ScratchpadItemSchema,
@@ -252,6 +254,8 @@ export const appContract = {
     listArchived: oc.output(z.array(BotSchema)),
     get: oc.input(botId).output(BotSchema),
     create: oc.input(CreateBotInput).output(BotSchema),
+    /** Turn a short description into title + instructions. Fails open for the client. */
+    refine: oc.input(RefineBotInput).output(RefineBotOutput),
     duplicate: oc.input(botId).output(BotSchema),
     reorder: oc.input(ReorderBotsInput).output(z.object({ ok: z.literal(true) })),
     update: oc.input(UpdateBotInput).output(BotSchema),

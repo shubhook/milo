@@ -123,25 +123,15 @@ export async function createBotFromPicker(
   page: Page,
   options: {
     name?: string;
-    title?: string;
     description?: string;
-    computerMode?: "team" | "dedicated";
   } = {},
 ) {
   const name = options.name ?? "New Bot";
   await openNewBot(page);
   const form = page.getByTestId("create-bot-form");
   await form.locator("label:has-text('Name') input").fill(name);
-  if (options.title != null) {
-    await form.locator("label:has-text('Title') input").fill(options.title);
-  }
   if (options.description != null) {
-    await form.locator("label:has-text('What this bot is for') textarea").fill(options.description);
-  }
-  if (options.computerMode === "dedicated") {
-    await form.getByTestId("create-bot-private").click();
-  } else if (options.computerMode === "team") {
-    await form.getByTestId("create-bot-team").click();
+    await form.locator("label:has-text('What should it do?') textarea").fill(options.description);
   }
   await form.getByRole("button", { name: "Create", exact: true }).click();
   await page.waitForURL(/\/app\/[^/]+$/);

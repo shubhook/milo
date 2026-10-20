@@ -24,7 +24,9 @@ export const DE_MESSAGES: Record<string, string> = {
   // app/_layout.tsx
   Account: "Konto",
   "Change password": "Passwort ändern",
+  ChatGPT: "ChatGPT",
   "Chat settings": "Chat-Einstellungen",
+  Claude: "Claude",
   Computer: "Computer",
   Group: "Gruppe",
   "Group settings": "Gruppeneinstellungen",
@@ -34,6 +36,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "New group": "Neue Gruppe",
   "New space": "Neuer Space",
   Routine: "Routine",
+  "Runs on": "Läuft auf",
   "Server integrations": "Server-Integrationen",
   Thread: "Thread",
   Voice: "Stimme",
@@ -215,6 +218,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "Space default": "Space-Standard",
   Thinking: "Denkmodus",
   Title: "Titel",
+  "What should it do?": "Was soll er tun?",
   "What this bot is for": "Wofür dieser Bot gedacht ist",
   // app/group-settings.tsx
   "Could not delete group": "Gruppe konnte nicht gelöscht werden",
@@ -675,7 +679,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Allow list": "Freigabeliste",
   Apps: "Apps",
   "Ask first": "Erst fragen",
-  ChatGPT: "ChatGPT",
   "Could not load approval rules": "Bestätigungsregeln konnten nicht geladen werden",
   "Could not save rule": "Regel konnte nicht gespeichert werden",
   General: "Allgemein",

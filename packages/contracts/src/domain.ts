@@ -227,8 +227,23 @@ export const CreateBotInput = z.object({
   computerMode: ComputerModeSchema.default("team"),
   /** Idempotency key within a space (unique with spaceId). */
   spawnKey: z.string().trim().min(1).max(120).optional(),
+  modelProvider: z.string().trim().min(1).max(80).nullable().optional(),
+  modelId: z.string().trim().min(1).max(200).nullable().optional(),
 });
 export type CreateBotInput = z.infer<typeof CreateBotInput>;
+
+/** Turn a short "what should it do?" into title + instructions for bots.create. */
+export const RefineBotInput = z.object({
+  name: z.string().trim().min(1).max(BOT_NAME_MAX_LENGTH),
+  description: z.string().max(BOT_DESCRIPTION_MAX_LENGTH).default(""),
+});
+export type RefineBotInput = z.infer<typeof RefineBotInput>;
+
+export const RefineBotOutput = z.object({
+  title: z.string().max(BOT_TITLE_MAX_LENGTH),
+  instructions: z.string().max(BOT_INSTRUCTIONS_MAX_LENGTH),
+});
+export type RefineBotOutput = z.infer<typeof RefineBotOutput>;
 
 export function normalizeCreateBotProfile(
   input: Pick<CreateBotInput, "name" | "title" | "description">,
