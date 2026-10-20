@@ -143,11 +143,10 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await expect(page.getByTestId("transcript").getByText(message, { exact: true })).toBeVisible();
 });
 
-test("changes and recovers an email password", async ({ page }, testInfo) => {
+test("recovers an email password from the sign-in screen", async ({ page }, testInfo) => {
   const stamp = Date.now();
   const email = `password-recovery-${stamp}@rakazo.test`;
   const originalPassword = "password12";
-  const changedPassword = "changed-password12";
   const resetPassword = "reset-password12";
   const userName = "Password Recovery";
 
@@ -155,37 +154,12 @@ test("changes and recovers an email password", async ({ page }, testInfo) => {
   await completeOnboarding(page);
   await page.waitForURL(/\/app\/[^/]+$/);
 
+  // v0 Settings dropped the change-password form; recovery still starts from sign-in.
   await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
-  await expect(page.getByTestId("sidebar-search").locator("input")).toHaveAttribute(
-    "autocomplete",
-    "off",
-  );
-  await expect(page.getByTestId("sidebar-search").locator("input")).toHaveAttribute(
-    "name",
-    "sidebar-search",
-  );
-  await expect(settings.locator('input[name="username"]')).toHaveAttribute(
-    "autocomplete",
-    "username",
-  );
-  await expect(settings.locator('input[name="username"]')).toHaveValue(email);
-  await expect(settings.getByLabel("Current password")).toHaveAttribute(
-    "autocomplete",
-    "current-password",
-  );
-  await expect(settings.getByLabel("New password")).toHaveAttribute("autocomplete", "new-password");
-  await expect(settings.getByLabel("Confirm password")).toHaveAttribute(
-    "autocomplete",
-    "new-password",
-  );
-  await settings.getByLabel("Current password").fill(originalPassword);
-  await settings.getByLabel("New password").fill(changedPassword);
-  await settings.getByLabel("Confirm password").fill(changedPassword);
-  await settings.getByRole("button", { name: "Change password" }).click();
-  await expect(settings.getByText("Password updated")).toBeVisible();
-  await captureScreenshot(page, testInfo, "41-password-changed");
+  await expect(settings.getByLabel("Current password")).toHaveCount(0);
+  await expect(settings.getByRole("button", { name: "Change password" })).toHaveCount(0);
   await settings.getByRole("button", { name: "Close user settings" }).click();
 
   await page.getByRole("button", { name: new RegExp(userName, "i") }).click();

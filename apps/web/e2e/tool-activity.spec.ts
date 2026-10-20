@@ -27,7 +27,6 @@ async function setToggle(page: Page, on: boolean) {
   await page.goto(`${fixture}?view=settings`);
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
-  await settings.getByTestId("advanced-settings").locator("summary").click();
   const toggle = settings.getByTestId("tool-activity-toggle");
   await expect(toggle).toBeVisible();
   await expect(settings.getByText("Show tool activity", { exact: true })).toBeVisible();
@@ -90,7 +89,6 @@ test("the settings toggle hides and restores tool activity", async ({ page }, te
   await page.goto(`${fixture}?view=settings`);
   const settings = page.getByTestId("user-settings");
   await expect(settings).toBeVisible();
-  await settings.getByTestId("advanced-settings").locator("summary").click();
   const initialToggle = settings.getByTestId("tool-activity-toggle");
   await expect(initialToggle).toBeVisible();
   await expect(initialToggle).not.toBeChecked();
@@ -151,7 +149,6 @@ test("the chat transcript shows tool activity when turned on and hides it when t
   await captureScreenshot(page, testInfo, "shell-tool-activity-on");
 
   const settings = await openUserSettings(page);
-  await settings.getByTestId("advanced-settings").locator("summary").click();
   const toggle = settings.getByTestId("tool-activity-toggle");
   await expect(toggle).toBeChecked();
   await toggle.click();

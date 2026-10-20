@@ -5,7 +5,6 @@ import { BotAvatar, Button, Label, Switch, Toggle } from "@milo/ui-web";
 import { ChevronDown } from "lucide-react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useId, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AgentLogo } from "../components/AgentLogo";
 import { Shimmer } from "../components/ai/primitives";
 import { DesktopUpdateSection } from "../components/DesktopUpdates";
@@ -36,7 +35,6 @@ export function GeneralSettingsPanels({
   onAvatarStyleChange,
 }: SettingsGeneralProps) {
   const { t } = useLingui();
-  const navigate = useNavigate();
   const [locale, setLocale] = useState<UiLocale>(() => getActiveUiLocale());
   const localeRequestRef = useRef(0);
   const [appearance, setAppearance] = useState<AppearancePreference>(() =>
@@ -188,7 +186,7 @@ export function GeneralSettingsPanels({
           onClick={() =>
             void authClient.signOut().then(() => {
               clearSpaceSelection();
-              navigate("/");
+              window.location.assign("/");
             })
           }
         >

@@ -40,7 +40,13 @@ export function AgentModelsPanel() {
       </p>
     );
   }
-  if (!models) return null;
+  if (!models) {
+    return (
+      <p className="text-[14px] text-muted-foreground">
+        <Trans>Loading…</Trans>
+      </p>
+    );
+  }
   return (
     <ul data-testid="agent-models" className="m-0 list-none p-0">
       {models.map((model) => {

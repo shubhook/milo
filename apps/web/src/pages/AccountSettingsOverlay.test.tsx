@@ -97,7 +97,6 @@ vi.mock("../lib/ui-appearance", () => ({
   getUiAppearancePreference: () => "system",
   setUiAppearance: vi.fn(),
 }));
-vi.mock("react-router-dom", () => ({ useNavigate: () => vi.fn() }));
 
 import { TOOL_ACTIVITY_STORAGE_KEY } from "../lib/tool-activity-preference";
 import { GeneralSettingsPanels } from "./AccountSettingsOverlay";
