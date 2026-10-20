@@ -3449,6 +3449,7 @@ msgstr "Show transcript"
 msgid "Sign in"
 msgstr "Sign in"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
 msgstr "Sign in again"

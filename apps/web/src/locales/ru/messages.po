@@ -3449,9 +3449,10 @@ msgstr "Показать расшифровку"
 msgid "Sign in"
 msgstr "Войти"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
-msgstr ""
+msgstr "Войти снова"
 
 #: src/pages/Auth.tsx
 msgid "Sign in to Milo"

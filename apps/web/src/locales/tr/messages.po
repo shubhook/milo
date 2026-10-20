@@ -3449,9 +3449,10 @@ msgstr "Dökümü göster"
 msgid "Sign in"
 msgstr "Oturum aç"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
-msgstr ""
+msgstr "Yeniden oturum aç"
 
 #: src/pages/Auth.tsx
 msgid "Sign in to Milo"

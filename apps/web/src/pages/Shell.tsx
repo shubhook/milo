@@ -150,6 +150,7 @@ import { VoiceChatCard } from "../components/call/VoiceChatCard";
 import { BOT_BUBBLE_CLASS, USER_BUBBLE_CLASS } from "../components/chat-bubble";
 import { ComputerWorkspace } from "../components/computer/ComputerWorkspace";
 import { MessageHoverMetadata } from "../components/MessageHoverMetadata";
+import { RunFailedCard } from "../components/RunFailedCard";
 import {
   LIVE_TOOL_STEP_WINDOW,
   StandaloneToolActivity,
@@ -208,7 +209,6 @@ import {
 import { rosterWorkStatusLabel } from "../lib/roster-status";
 import { saveRoutineDraft } from "../lib/routine-save";
 import { clearSpaceSelection, rpc, selectedSpaceId, selectSpace } from "../lib/rpc";
-import { readSeenRunErrorIds, rememberSeenRunErrorId } from "../lib/run-error-storage";
 import { sharedInflight } from "../lib/shared-inflight";
 import {
   activeThreadRuns,
@@ -224,7 +224,6 @@ import {
   reconcileRefreshedThread,
   reduceComputerStatus,
   reduceThreadSnapshot,
-  threadRunError,
   userHoldsComputerControl,
 } from "../lib/thread-events";
 import { getToolActivityEnabled, subscribeToolActivity } from "../lib/tool-activity-preference";
@@ -544,8 +543,6 @@ export function ShellPage() {
   const call = useCallSession();
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus | null>(null);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
-  const [dismissedRunErrorIds, setDismissedRunErrorIds] =
-    useState<ReadonlySet<string>>(readSeenRunErrorIds);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const mobileSidebarSwipeRef = useRef<{ startX: number; startY: number } | null>(null);
@@ -1811,12 +1808,6 @@ export function ShellPage() {
   );
   const transcriptRunning = workingRuns.length > 0;
   const composerRunning = currentRuns.some((run) => isActive(run.status));
-  const runError = threadRunError(activeSnapshot, dismissedRunErrorIds);
-  const displayedRunError = !sendError ? runError : null;
-  const displayedRunErrorId = displayedRunError ? (activeSnapshot?.run?.id ?? null) : null;
-  const handleRunErrorPresented = useCallback((runId: string) => {
-    rememberSeenRunErrorId(runId);
-  }, []);
   const transcriptMessages = useMemo(
     () => userVisibleMessages(activeSnapshot?.messages ?? [], { includePeerReceipts: true }),
     [activeSnapshot?.messages],
@@ -2721,14 +2712,7 @@ export function ShellPage() {
   );
 
   function dismissComposerError() {
-    // The strip shows one message at a time, so only dismiss the run failure when it is the
-    // one on screen; otherwise a live run would be silenced before it has even failed.
-    const failedRunId = displayedRunErrorId;
     setSendError(null);
-    if (failedRunId) {
-      rememberSeenRunErrorId(failedRunId);
-      setDismissedRunErrorIds((current) => new Set(current).add(failedRunId));
-    }
   }
 
   const embeddedScreenUrl = embeddableScreenUrl(screenUrl);
@@ -3729,9 +3713,6 @@ export function ShellPage() {
             attachmentNotice={attachmentNotice}
             showUsageLimit={!inGroup}
             sendError={sendError}
-            runError={displayedRunError}
-            runErrorId={displayedRunErrorId}
-            onRunErrorPresented={handleRunErrorPresented}
             onDismissError={dismissComposerError}
             sending={sending}
             fileInputRef={fileInputRef}
@@ -5211,9 +5192,6 @@ const Composer = memo(function Composer({
   attachmentNotice,
   showUsageLimit,
   sendError,
-  runError,
-  runErrorId,
-  onRunErrorPresented,
   onDismissError,
   sending,
   fileInputRef,
@@ -5239,9 +5217,6 @@ const Composer = memo(function Composer({
   /** Plan limits belong to the person, so group chats leave the notice to each bot's chat. */
   showUsageLimit: boolean;
   sendError: string | null;
-  runError: string | null;
-  runErrorId: string | null;
-  onRunErrorPresented: (runId: string) => void;
   onDismissError: () => void;
   sending: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -5272,8 +5247,6 @@ const Composer = memo(function Composer({
   // "reply" text, while an explicit cancel must keep "Reply cancelled".
   const replyAnnouncementKind = useRef<"reply" | "cancelled" | null>(null);
   const prevReplyTarget = useRef<ThreadMessage | null>(null);
-  const runErrorRef = useRef<HTMLDivElement>(null);
-  const presentedRunErrorIdRef = useRef<string | null>(null);
   const mentionListboxId = useId();
   const dragDepth = useRef(0);
   const [draggingFiles, setDraggingFiles] = useState(false);
@@ -5282,40 +5255,6 @@ const Composer = memo(function Composer({
     selectedSkill !== null ||
     selectedMentions.length > 0 ||
     pendingAttachments.length > 0;
-
-  useEffect(() => {
-    if (!runError || !runErrorId) return;
-    const currentRunErrorId = runErrorId;
-    let frame = 0;
-    function recordIfPresented() {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const element = runErrorRef.current;
-        if (!element || document.visibilityState !== "visible") return;
-        const rect = element.getBoundingClientRect();
-        const topElement = document.elementFromPoint(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2,
-        );
-        if (topElement && (topElement === element || element.contains(topElement))) {
-          if (presentedRunErrorIdRef.current === currentRunErrorId) return;
-          presentedRunErrorIdRef.current = currentRunErrorId;
-          onRunErrorPresented(currentRunErrorId);
-        }
-      });
-    }
-    recordIfPresented();
-    const observer = new MutationObserver(recordIfPresented);
-    observer.observe(document.body, { childList: true, subtree: true });
-    document.addEventListener("transitionend", recordIfPresented);
-    document.addEventListener("visibilitychange", recordIfPresented);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      document.removeEventListener("transitionend", recordIfPresented);
-      document.removeEventListener("visibilitychange", recordIfPresented);
-    };
-  }, [onRunErrorPresented, runError, runErrorId]);
 
   useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -5571,9 +5510,8 @@ const Composer = memo(function Composer({
         {replyAnnouncement}
       </div>
       {showUsageLimit ? <UsageLimitNotice refreshKey={running} /> : null}
-      {sendError || runError ? (
+      {sendError ? (
         <div
-          ref={runErrorRef}
           role="alert"
           data-testid="composer-error"
           className="mb-3 flex items-start gap-2.5 rounded-2xl bg-destructive-surface px-4 py-3 text-small text-foreground"
@@ -5584,7 +5522,7 @@ const Composer = memo(function Composer({
             className="mt-0.5 shrink-0 text-destructive"
             aria-hidden="true"
           />
-          <span className="min-w-0 flex-1">{sendError ?? runError}</span>
+          <span className="min-w-0 flex-1">{sendError}</span>
           <button
             type="button"
             aria-label={t`Dismiss error`}
@@ -6377,6 +6315,9 @@ const MessageView = memo(function MessageView({
               onClick={() => onOpenPeerMessages({ peerBotId, peerBotName: peer })}
             />
           );
+        }
+        if (block.kind === "run_failed") {
+          return <RunFailedCard key={i} error={block.error} fix={block.fix} />;
         }
         if (block.kind === "meta") {
           return (

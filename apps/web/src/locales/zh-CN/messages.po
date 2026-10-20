@@ -3449,9 +3449,10 @@ msgstr "显示文字记录"
 msgid "Sign in"
 msgstr "登录"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
-msgstr ""
+msgstr "重新登录"
 
 #: src/pages/Auth.tsx
 msgid "Sign in to Milo"

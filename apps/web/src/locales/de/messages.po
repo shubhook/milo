@@ -3449,9 +3449,10 @@ msgstr "Transkript anzeigen"
 msgid "Sign in"
 msgstr "Anmelden"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
-msgstr ""
+msgstr "Erneut anmelden"
 
 #: src/pages/Auth.tsx
 msgid "Sign in to Milo"

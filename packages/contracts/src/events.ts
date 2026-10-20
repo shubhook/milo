@@ -91,6 +91,10 @@ const ChartBlock = z
 export const SecretAskPurpose = z.enum(["otp", "password", "api_key"]);
 export type SecretAskPurpose = z.infer<typeof SecretAskPurpose>;
 
+/** A fix the person can make from the failure card. */
+export const RunFailureFix = z.enum(["agent_sign_in"]);
+export type RunFailureFix = z.infer<typeof RunFailureFix>;
+
 export const MessageBlock = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("text"), text: z.string() }),
   z.object({
@@ -258,6 +262,12 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     returnToMessageId: Id.optional(),
     /** Links in a bot-started chain; absent when a person started it. */
     hop: z.number().int().nonnegative().optional(),
+  }),
+  z.object({
+    /** Stays in the thread after a run fails, with the action that fixes it when one is known. */
+    kind: z.literal("run_failed"),
+    error: z.string(),
+    fix: RunFailureFix.nullable(),
   }),
 ]);
 export type MessageBlock = z.infer<typeof MessageBlock>;

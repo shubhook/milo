@@ -1458,7 +1458,16 @@ function Thread() {
   }
 
   const answerableAskMessageId = latestAnswerableAskMessageId(snap);
-  const runError = snap?.run?.status === "failed" ? (snap.run.error ?? null) : null;
+  // A failure card in the thread already says it; the banner only covers runs without one.
+  const runError =
+    snap?.run?.status === "failed" &&
+    !snap.messages.some(
+      (message) =>
+        message.runId === snap.run?.id &&
+        message.blocks.some((block) => block.kind === "run_failed"),
+    )
+      ? (snap.run.error ?? null)
+      : null;
   // Group calls in reading order, then reverse for the inverted list.
   const liveItems = useMemo(() => groupVoiceChats(visibleMessages).reverse(), [visibleMessages]);
   const messagesById = useMemo(
@@ -2696,6 +2705,26 @@ const MessageBubble = memo(function MessageBubble({
             onAccessibilityAction={actionProps.onAccessibilityAction}
           />
         ))}
+      </View>
+    );
+  }
+  const failure = message.blocks.find((block) => block.kind === "run_failed");
+  if (failure) {
+    return (
+      <View
+        {...actionProps}
+        accessible
+        accessibilityRole="alert"
+        testID="run-failed-card"
+        style={{
+          width: "100%",
+          borderRadius: 16,
+          backgroundColor: tokens.destructiveSurface,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+        }}
+      >
+        <Text style={{ color: tokens.foreground, fontSize: 15 }}>{failure.error}</Text>
       </View>
     );
   }
