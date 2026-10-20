@@ -5,6 +5,7 @@ import {
   browserNotificationMessage,
   deliverBrowserNotification,
   requestBrowserNotificationPermission,
+  rosterNotices,
   shouldNotifyBrowser,
 } from "./browser-notifications.js";
 import { i18n } from "./i18n.js";
@@ -158,5 +159,55 @@ describe("browser notifications", () => {
     await Promise.resolve();
     requestBrowserNotificationPermission(api);
     expect(requestPermission).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("rosterNotices", () => {
+  const bot = (id: string, status: string, notifyOnFinish = true) => ({
+    id,
+    status,
+    notifyOnFinish,
+  });
+
+  it("alerts when another bot finishes, fails or starts waiting on the person", () => {
+    const previous = new Map([
+      ["a", "running"],
+      ["b", "running"],
+      ["c", "running"],
+      ["d", "queued"],
+    ]);
+    expect(
+      rosterNotices(
+        previous,
+        [bot("a", "completed"), bot("b", "failed"), bot("c", "waiting_input"), bot("d", "running")],
+        null,
+      ),
+    ).toEqual([
+      { botId: "a", status: "completed" },
+      { botId: "b", status: "failed" },
+      { botId: "c", status: "waiting_input" },
+    ]);
+  });
+
+  it("skips the open chat, muted bots, unchanged and first-seen bots, and stops", () => {
+    const previous = new Map([
+      ["open", "running"],
+      ["muted", "running"],
+      ["same", "completed"],
+      ["stopped", "running"],
+    ]);
+    expect(
+      rosterNotices(
+        previous,
+        [
+          bot("open", "completed"),
+          bot("muted", "completed", false),
+          bot("same", "completed"),
+          bot("new", "completed"),
+          bot("stopped", "cancelled"),
+        ],
+        "open",
+      ),
+    ).toEqual([]);
   });
 });

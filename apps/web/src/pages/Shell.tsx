@@ -174,6 +174,8 @@ import {
 import {
   deliverBrowserNotification as deliverNativeBrowserNotification,
   requestBrowserNotificationPermission,
+  rosterNoticeMessage,
+  rosterNotices,
   shouldNotifyBrowser,
 } from "../lib/browser-notifications";
 import { startCall, useCallSession } from "../lib/call-session";
@@ -297,6 +299,9 @@ type PendingAttachment = {
   file: File;
   previewUrl?: string;
 };
+
+/** Every fifth 3-second tick: a hidden tab refreshes the roster every 15 seconds. */
+const HIDDEN_ROSTER_POLL_TICKS = 5;
 
 type PendingBrowserNotification = {
   event: Pick<ProductEvent, "id" | "type" | "threadId" | "botId" | "payload">;
@@ -714,6 +719,33 @@ export function ShellPage() {
 
   const inGroup = Boolean(groupId);
   const active = inGroup ? undefined : (bots.find((b) => b.id === botId) ?? bots[0]);
+  // Bots other than the open chat alert from roster refreshes, since only the open chat streams.
+  const rosterStatuses = useRef<Map<string, string> | null>(null);
+  const openBotId = active?.id ?? null;
+  useEffect(() => {
+    const previous = rosterStatuses.current;
+    rosterStatuses.current = new Map(bots.map((bot) => [bot.id, bot.status]));
+    if (!previous || typeof Notification === "undefined") return;
+    if (Notification.permission !== "granted") return;
+    if (document.visibilityState === "visible" && document.hasFocus()) return;
+    for (const notice of rosterNotices(previous, bots, openBotId)) {
+      const name = bots.find((bot) => bot.id === notice.botId)?.name ?? "";
+      const message = rosterNoticeMessage(notice.status, name);
+      try {
+        const shown = new Notification(message.title, {
+          body: message.body,
+          tag: `bot:${notice.botId}`,
+        });
+        shown.onclick = () => {
+          window.focus();
+          navigate(`/app/${notice.botId}`);
+          shown.close();
+        };
+      } catch {
+        // Some browsers only allow notifications from a service worker; skip quietly.
+      }
+    }
+  }, [bots, openBotId, navigate]);
   const computerBot =
     (computerBotId ? bots.find((bot) => bot.id === computerBotId) : undefined) ?? active;
   computerOpenRef.current = computerOpen;
@@ -1143,6 +1175,16 @@ export function ShellPage() {
       window.clearTimeout(refreshTimer);
       refreshTimer = window.setTimeout(() => void refreshBots().catch(() => undefined), 50);
     };
+    // A hidden tab still refreshes the roster now and then when alerts are allowed, so other
+    // bots can say they finished or need you.
+    let hiddenTicks = 0;
+    const refreshHiddenBots = () => {
+      if (document.visibilityState === "visible") return;
+      if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+      hiddenTicks += 1;
+      if (hiddenTicks % HIDDEN_ROSTER_POLL_TICKS !== 0) return;
+      void refreshBots().catch(() => undefined);
+    };
     window.addEventListener("focus", refreshVisibleBots);
     document.addEventListener("visibilitychange", refreshVisibleBots);
     // Poll skips while a refresh is in flight; focus/visibility and event-driven
@@ -1150,6 +1192,7 @@ export function ShellPage() {
     const poll = window.setInterval(() => {
       if (botsRefreshInFlight.current > 0) return;
       refreshVisibleBots();
+      refreshHiddenBots();
     }, 3_000);
     return () => {
       cancelled = true;

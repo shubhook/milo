@@ -131,3 +131,58 @@ export function deliverBrowserNotification(
     return "pending";
   }
 }
+
+export type RosterNotice = {
+  botId: string;
+  status: "completed" | "failed" | "waiting_input" | "waiting_takeover";
+};
+
+const NOTICE_STATUSES: ReadonlySet<string> = new Set([
+  "completed",
+  "failed",
+  "waiting_input",
+  "waiting_takeover",
+]);
+
+/**
+ * Bots other than the open chat have no event stream here, so their alerts come from roster
+ * refreshes: a bot whose run just finished, failed, or stopped to wait for the person.
+ * The open chat's stream already alerts for its own bot, and a first sighting is not a change.
+ */
+export function rosterNotices(
+  previous: ReadonlyMap<string, string>,
+  bots: readonly { id: string; status: string; notifyOnFinish: boolean }[],
+  openBotId: string | null,
+): RosterNotice[] {
+  return bots.flatMap((bot) => {
+    const before = previous.get(bot.id);
+    if (before === undefined || before === bot.status) return [];
+    if (!NOTICE_STATUSES.has(bot.status) || !bot.notifyOnFinish || bot.id === openBotId) {
+      return [];
+    }
+    return [{ botId: bot.id, status: bot.status as RosterNotice["status"] }];
+  });
+}
+
+export function rosterNoticeMessage(
+  status: RosterNotice["status"],
+  botName: string,
+): { title: string; body: string } {
+  const name = botName.trim() || i18n._({ id: "Bot", message: "Bot" });
+  if (status === "failed") {
+    return {
+      title: i18n._({ id: "{name} failed", message: "{name} failed", values: { name } }),
+      body: i18n._({ id: "Failed.", message: "Failed." }),
+    };
+  }
+  if (status === "waiting_input") {
+    return { title: name, body: i18n._({ id: "Needs input", message: "Needs input" }) };
+  }
+  if (status === "waiting_takeover") {
+    return { title: name, body: i18n._({ id: "Needs takeover", message: "Needs takeover" }) };
+  }
+  return {
+    title: i18n._({ id: "{name} finished", message: "{name} finished", values: { name } }),
+    body: i18n._({ id: "Finished.", message: "Finished." }),
+  };
+}
