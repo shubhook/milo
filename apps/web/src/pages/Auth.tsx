@@ -10,6 +10,7 @@ import { chatGptAvailable, useChatGptSignIn } from "../lib/chatgpt-sign-in";
 import { desktopBridge } from "../lib/desktop";
 import { type LocalAccountAuth, resumeLocalAccount, startLocalAccount } from "../lib/local-account";
 import { clearSpaceSelection } from "../lib/rpc";
+import { ChatGptStep } from "./OnboardingChatGpt";
 
 type AuthMode = "in" | "up" | "forgot";
 type AuthCapabilities = {
@@ -37,11 +38,13 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   // Signup triggers a session refresh that remounts the anonymous auth page.
   const sent = resetSent || searchParams.get("verify") === "email";
   const [capabilities, setCapabilities] = useState<AuthCapabilities | null>(null);
-  const chatgpt = useChatGptSignIn(({ created }) => {
+  const [capabilitiesLoaded, setCapabilitiesLoaded] = useState(false);
+  const onChatGptConnected = ({ created }: { created: boolean }) => {
     clearSpaceSelection();
     authClient.$store.notify("$sessionSignal");
     navigate(created ? "/onboarding" : "/app");
-  });
+  };
+  const chatgpt = useChatGptSignIn(onChatGptConnected);
   const passwordFieldId = mode === "in" ? "current-password" : "new-password";
   const title = sent ? (
     <Trans>Check your email</Trans>
@@ -70,7 +73,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         if (active) setCapabilities(loaded);
       })
       .catch(() => undefined)
-      .finally(() => clearTimeout(timer));
+      .finally(() => {
+        clearTimeout(timer);
+        if (active) setCapabilitiesLoaded(true);
+      });
     return () => {
       // Do not abort on unmount: a guard redirect that bounces through this
       // page only mounts it for a render or two, and the cancelled fetch then
@@ -132,11 +138,25 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     }
   }
 
+  // Signing in and signing up are one ChatGPT sign-in. The email form stays for
+  // `?with=email` and for servers where ChatGPT cannot reach the 127.0.0.1 callback.
+  const emailForm = mode === "forgot" || sent || searchParams.get("with") === "email";
+  if (!emailForm && !capabilitiesLoaded) return <div className="h-full bg-background" />;
+  if (!emailForm && chatGptAvailable(capabilities?.chatgpt)) {
+    return (
+      <div className="flex min-h-full items-center justify-center bg-background px-6 py-16">
+        <div className="w-[460px]">
+          <ChatGptStep onConnected={onChatGptConnected} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthFrame onSubmit={submit} title={title}>
       {sent ? (
         <div className="w-full text-center">
-          <Link to="/sign-in" className="font-medium text-foreground">
+          <Link to={EMAIL_SIGN_IN_PATH} className="font-medium text-foreground">
             <Trans>Back to sign in</Trans>
           </Link>
         </div>
@@ -256,12 +276,12 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
             ) : mode === "up" ? (
               <>
                 <Trans>Already have an account?</Trans>{" "}
-                <Link to="/sign-in" className="font-medium text-foreground">
+                <Link to={EMAIL_SIGN_IN_PATH} className="font-medium text-foreground">
                   <Trans>Sign in</Trans>
                 </Link>
               </>
             ) : (
-              <Link to="/sign-in" className="font-medium text-foreground">
+              <Link to={EMAIL_SIGN_IN_PATH} className="font-medium text-foreground">
                 <Trans>Back to sign in</Trans>
               </Link>
             )}
@@ -314,7 +334,7 @@ export function PasswordResetPage() {
           <p className="text-lg">
             <Trans>Password updated</Trans>
           </p>
-          <Link to="/sign-in" className="mt-6 inline-block font-medium">
+          <Link to={EMAIL_SIGN_IN_PATH} className="mt-6 inline-block font-medium">
             <Trans>Sign in</Trans>
           </Link>
         </div>
@@ -346,7 +366,7 @@ export function PasswordResetPage() {
           >
             {pending ? <Trans>Working…</Trans> : <Trans>Reset password</Trans>}
           </Button>
-          <Link to="/sign-in" className="mt-6 font-medium">
+          <Link to={EMAIL_SIGN_IN_PATH} className="mt-6 font-medium">
             <Trans>Back to sign in</Trans>
           </Link>
         </>

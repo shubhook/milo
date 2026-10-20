@@ -10,7 +10,6 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput } from "react-native";
 import { ComputerModePicker } from "../components/computer-mode-picker";
 import { type MobileBot, rpc } from "../lib/api";
-import { allowFocusPrompt, scheduleFocusPrompt } from "../lib/focus-prompt";
 import { useI18n } from "../lib/i18n";
 import { useMobileTokens } from "../lib/native";
 
@@ -42,23 +41,12 @@ export default function NewBot() {
     setPending(true);
     setError(null);
     try {
-      // Failed list is unknown — delay focus rather than treating the bot as first.
-      const existing = await rpc<MobileBot[]>("bots/list").catch(() => null);
-      const isFirstBot = existing !== null && existing.length === 0;
       const bot = await rpc<MobileBot>("bots/create", {
         ...normalizeCreateBotProfile({ name, title, description }),
         notifyOnFinish: true,
         computerMode,
       });
-      allowFocusPrompt(bot.id);
       router.replace({ pathname: "/thread", params: { botId: bot.id, name: bot.name } });
-      void (async () => {
-        const started = await rpc("onboarding/start", { botId: bot.id })
-          .then(() => true)
-          .catch(() => false);
-        if (!started) return;
-        scheduleFocusPrompt(bot.id, isFirstBot);
-      })();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("Could not create bot"));
     } finally {

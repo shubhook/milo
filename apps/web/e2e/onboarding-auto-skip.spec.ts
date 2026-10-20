@@ -1,57 +1,20 @@
 import { expect, test } from "@playwright/test";
 import { captureScreenshot, reachMeetStep, signup } from "./helpers";
 
-test("onboarding skips agent setup when Claude Code is ready and meets the first bot", async ({
-  page,
-}, testInfo) => {
-  await page.route("**/rpc/agent/status", (route) =>
-    route.fulfill({
-      json: {
-        json: {
-          agent: "claude-code",
-          chatgpt: false,
-          installed: true,
-          version: "2.1.0",
-          loggedIn: true,
-          platform: "linux",
-        },
-      },
-    }),
-  );
-
-  await page.route("**/rpc/integrationSetup/get", (route) =>
-    route.fulfill({
-      json: {
-        json: {
-          canConfigure: false,
-          needsSetup: false,
-          webUrl: "https://example.test/integrations/setup",
-          providers: [],
-        },
-      },
-    }),
-  );
-
+test("meet the first bot offers six colors and creates Chief", async ({ page }, testInfo) => {
   const createRequest = page.waitForRequest("**/rpc/bots/create");
   const stamp = Date.now();
-  await signup(
-    page,
-    `agent-auto-skip-${stamp}@rakazo.test`,
-    "password12",
-    `Agent auto skip ${stamp}`,
-  );
+  await signup(page, `meet-first-bot-${stamp}@rakazo.test`, "password12", `Meet ${stamp}`);
 
   await expect(page.getByRole("heading", { name: "Connect your agent" })).toBeHidden();
   await expect(page.getByRole("heading", { name: "Server integrations" })).toBeHidden();
-  for (const name of ["Composio", "Pipedream", "Executor"]) {
-    await expect(page.getByRole("button", { name, exact: true })).toBeHidden();
-  }
   await reachMeetStep(page);
   const name = page.getByRole("textbox", { name: "Name" });
   await expect(name).toHaveValue("Chief");
+  await expect(page.getByRole("button", { name: /^Color / })).toHaveCount(6);
   await page.getByRole("button", { name: "Color #10B981" }).click();
   await captureScreenshot(page, testInfo, "onboarding-meet-first-bot");
-  await page.getByRole("button", { name: "Say hi", exact: true }).click();
+  await sayHiToFirstBot(page);
 
   expect((await createRequest).postDataJSON()).toMatchObject({
     json: {
@@ -69,7 +32,7 @@ test("onboarding skips agent setup when Claude Code is ready and meets the first
   await captureScreenshot(page, testInfo, "onboarding-auto-skip");
 });
 
-test("connect your apps lists featured apps with their logos and can be skipped", async ({
+test("connect your apps lists featured apps with their logos and opens the chat", async ({
   page,
 }, testInfo) => {
   const logo = (fill: string) =>
@@ -107,18 +70,24 @@ test("connect your apps lists featured apps with their logos and can be skipped"
 
   const stamp = Date.now();
   await signup(page, `onboarding-apps-${stamp}@rakazo.test`, "password12", `Apps ${stamp}`);
+  await reachMeetStep(page);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Connect your apps" })).toBeVisible({
     timeout: 20_000,
   });
   const list = page.getByRole("list");
   await expect(list.getByText("Gmail", { exact: true })).toBeVisible();
   await expect(list.locator("img")).toHaveCount(2);
+  // An app without a logo shows its first letter.
+  await expect(list.getByText("S", { exact: true })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Step 3 of 3" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
   await page.getByRole("button", { name: "Connect Gmail" }).click();
   await expect(list.getByText("Connected")).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue" })).toBeEnabled();
   await captureScreenshot(page, testInfo, "onboarding-connect-apps");
 
-  await page.getByRole("button", { name: "Skip for now" }).click();
-  await expect(page.getByRole("heading", { name: "Meet your first bot" })).toBeVisible();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.waitForURL(/\/app\//, { timeout: 20_000 });
+  await expect(page.getByRole("combobox", { name: "Message Chief" })).toBeVisible();
 });

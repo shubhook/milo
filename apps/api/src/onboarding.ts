@@ -1,6 +1,11 @@
 import type { ConnectorRegistry } from "@milo/adapters";
 import type { Actor, MessageBlock } from "@milo/contracts";
-import { featuredConnectorProvidersMatch } from "@milo/core";
+import {
+  FEATURED_CONNECTOR_IDS,
+  FEATURED_CONNECTOR_LABELS,
+  featuredConnectorProvidersMatch,
+  matchFeaturedConnectorId,
+} from "@milo/core";
 import type { Prisma, PrismaClient, ThreadEvents } from "@milo/db";
 import {
   appendEventInTransaction,
@@ -10,9 +15,11 @@ import {
 import { requireBotThread, updateBlocks } from "./bot-thread.js";
 
 /**
- * First-run conversational onboarding, seeded deterministically into the bot's
- * thread: greeting, a focus choice, and available app cards the user authorizes
- * inline. Focus must not rename the bot. No model tokens are spent.
+ * A new bot's first message: a fixed intro with idea chips, seeded into its
+ * thread without spending model tokens.
+ *
+ * The focus script below it (greeting, focus choice, app cards) is unused since
+ * v0 and stays only so old threads keep working. Delete it after v0 ships.
  */
 
 type OnboardingDeps = {
@@ -94,6 +101,85 @@ async function post(
   });
   await deps.events.notify(target.threadId, committed.event.seq);
   return committed.message.id;
+}
+
+const CATALOG_TIMEOUT_MS = 5_000;
+
+/** Labels of the featured apps this person already connected, in featured order. */
+async function connectedFeaturedApps(
+  deps: OnboardingDeps,
+  actor: Actor,
+  botId: string,
+): Promise<string[]> {
+  const items = (
+    await Promise.all(
+      deps.connectors.managedProviders().map((provider) =>
+        provider
+          .catalog({
+            operationId: "onboarding.introduce",
+            traceId: "onboarding.introduce",
+            spaceId: actor.spaceId,
+            userId: actor.userId,
+            botId,
+            signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
+          })
+          .catch(() => []),
+      ),
+    )
+  ).flat();
+  const connected = new Set(
+    items.filter((item) => item.connected).map((item) => matchFeaturedConnectorId(item.slug)),
+  );
+  return FEATURED_CONNECTOR_IDS.filter((id) => connected.has(id)).map(
+    (id) => FEATURED_CONNECTOR_LABELS[id],
+  );
+}
+
+function joinNames(names: string[]): string {
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names.join("");
+}
+
+export function introBlocks(name: string, apps: string[]): MessageBlock[] {
+  const reach = apps.length ? ` I can already reach ${joinNames(apps)}.` : "";
+  return [
+    {
+      kind: "text",
+      text: `Hi, I'm ${name}. I run on your own subscription and work on my own computer.${reach} What should I take off your plate first?`,
+    },
+    {
+      kind: "suggestions",
+      items: [
+        apps.includes(FEATURED_CONNECTOR_LABELS.gmail) ? "Summarize my inbox" : "Plan my week",
+        "Find something for me",
+        "Make another bot",
+      ],
+    },
+  ];
+}
+
+/** Posts the bot's intro once: a thread that already has any message is left alone. */
+export async function introduce(deps: OnboardingDeps, actor: Actor, botId: string): Promise<void> {
+  const { bot, thread } = await requireBotThread(deps, actor, botId);
+  if ((await deps.prisma.message.count({ where: { threadId: thread.id } })) > 0) return;
+  const blocks = introBlocks(bot.name, await connectedFeaturedApps(deps, actor, bot.id));
+  const committed = await deps.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // Serialize concurrent callers so the intro is posted at most once.
+    await tx.$executeRaw`SELECT id FROM threads WHERE id = ${thread.id} FOR UPDATE`;
+    if ((await tx.message.count({ where: { threadId: thread.id } })) > 0) return null;
+    const message = await createThreadMessageInTransaction(tx, {
+      threadId: thread.id,
+      role: "bot",
+      blocks,
+    });
+    return appendEventInTransaction(tx, {
+      spaceId: actor.spaceId,
+      threadId: thread.id,
+      botId: bot.id,
+      type: "thread.message.created",
+      payload: { messageId: message.id, role: "bot", blocks },
+    });
+  });
+  if (committed) await deps.events.notify(thread.id, committed.seq);
 }
 
 /** Sentinel answerId for a focus card the user dismissed without choosing. */

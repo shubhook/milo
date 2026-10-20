@@ -130,7 +130,13 @@ async function main() {
     }
 
     const [
-      { ComposioEmulator, EmailEmulator, PipedreamConnector, ThirdPartyConnectorEmulator },
+      {
+        ChatGptSignInEmulator,
+        ComposioEmulator,
+        EmailEmulator,
+        PipedreamConnector,
+        ThirdPartyConnectorEmulator,
+      },
       { createApp },
     ] = await Promise.all([import("@milo/adapters"), import("../../../../apps/api/src/app.ts")]);
     const { serve } = await import("@hono/node-server");
@@ -146,12 +152,14 @@ async function main() {
       { fetch: thirdParties.fetch, resolveHostname: thirdParties.resolveHostname },
     );
     const email = new EmailEmulator();
+    const chatgpt = new ChatGptSignInEmulator();
     const handles = await createApp({
       databaseUrl,
       prisma: undefined,
       composio: new ComposioEmulator(),
       pipedream,
       email,
+      chatgpt,
       remoteConnectors: {
         fetch: thirdParties.fetch,
         resolveHostname: thirdParties.resolveHostname,
@@ -164,6 +172,12 @@ async function main() {
       fetch: async (request) => {
         if (new URL(request.url).pathname === "/__e2e/emails") {
           return Response.json(email.sent, { headers: { "cache-control": "no-store" } });
+        }
+        if (new URL(request.url).pathname === "/__e2e/chatgpt/authorize") {
+          // Stands in for the person approving the ChatGPT sign-in in its browser tab.
+          const body = (await request.json()) as { state: string; email: string; name?: string };
+          const approved = chatgpt.approve(body.state, { email: body.email, name: body.name });
+          return Response.json({ approved }, { status: approved ? 200 : 404 });
         }
         activeRequests += 1;
         try {

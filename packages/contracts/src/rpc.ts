@@ -649,6 +649,9 @@ export const appContract = {
     },
   },
   onboarding: {
+    /** Post the bot's intro with idea chips. Does nothing once the thread has a message. */
+    introduce: oc.input(z.object({ botId: Id })).output(z.object({ ok: z.literal(true) })),
+    // The focus script below is unused since v0; delete it after v0 ships.
     /** Seed the first-run greeting into the bot's thread (focus card is separate). */
     start: oc.input(z.object({ botId: Id })).output(z.object({ ok: z.literal(true) })),
     /** Post the focus choice card when the thread is still idle. */

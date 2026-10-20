@@ -17,60 +17,75 @@ export async function rpc<T>(page: Page, procedure: string, body: unknown): Prom
 
 export async function completeOnboarding(page: Page, testInfo?: TestInfo) {
   await page.waitForURL(/\/(onboarding|app)/, { timeout: 20_000 });
-  // Optional Server integrations step (needsSetup). Skip it when shown.
-  const integrations = page.getByRole("heading", { name: "Server integrations", exact: true });
-  const firstRunStep = page
-    .getByRole("heading", { name: /^(Connect your apps|Meet your first bot)$/ })
-    .or(page.getByRole("combobox", { name: /^Message / }));
-  await integrations.or(firstRunStep).first().waitFor({ timeout: 20_000 });
-  if (await integrations.isVisible().catch(() => false)) {
-    if (testInfo) await captureScreenshot(page, testInfo, "02-connect-apps");
-    await page.getByRole("button", { name: "Skip", exact: true }).click();
-  }
   await sayHiToFirstBot(page, testInfo);
   await expect(page.getByText("Chief").first()).toBeVisible();
   if (testInfo) await captureScreenshot(page, testInfo, "06-onboarding-complete");
 }
 
-/** Skip the optional apps step, if shown, and wait for the Meet step. */
+/** Wait for the Meet step, the first step after signing in with ChatGPT. */
 export async function reachMeetStep(page: Page) {
-  const apps = page.getByRole("heading", { name: "Connect your apps", exact: true });
-  const meet = page.getByRole("heading", { name: "Meet your first bot", exact: true });
-  await apps.or(meet).first().waitFor({ timeout: 20_000 });
-  if (await apps.isVisible().catch(() => false)) {
-    await page.getByRole("button", { name: "Skip for now", exact: true }).click();
-  }
-  await expect(meet).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Meet your first bot", exact: true })).toBeVisible(
+    {
+      timeout: 20_000,
+    },
+  );
 }
 
-/** Skip the optional apps step and create the first bot from the Meet step, if shown. */
+/** Meet the first bot, skip the optional apps step, and wait for its chat, when onboarding shows. */
 export async function sayHiToFirstBot(page: Page, testInfo?: TestInfo) {
-  const apps = page.getByRole("heading", { name: "Connect your apps", exact: true });
   const meet = page.getByRole("heading", { name: "Meet your first bot", exact: true });
+  const apps = page.getByRole("heading", { name: "Connect your apps", exact: true });
   const chat = page.getByRole("combobox", { name: /^Message / });
-  await apps.or(meet).or(chat).first().waitFor({ timeout: 20_000 });
+  await meet.or(chat).first().waitFor({ timeout: 20_000 });
+  if (await meet.isVisible().catch(() => false)) {
+    if (testInfo) await captureScreenshot(page, testInfo, "03-meet-first-bot");
+    await page.getByRole("button", { name: /^(Continue|Say hi)$/ }).click();
+    await apps.or(chat).first().waitFor({ timeout: 20_000 });
+  }
   if (await apps.isVisible().catch(() => false)) {
     if (testInfo) await captureScreenshot(page, testInfo, "02-connect-apps");
     await page.getByRole("button", { name: "Skip for now", exact: true }).click();
-    await meet.or(chat).first().waitFor({ timeout: 20_000 });
-  }
-  if (await meet.isVisible().catch(() => false)) {
-    if (testInfo) await captureScreenshot(page, testInfo, "03-meet-first-bot");
-    await page.getByRole("button", { name: "Say hi", exact: true }).click();
   }
   await page.waitForURL(/\/app\//, { timeout: 20_000 });
 }
 
+/**
+ * Sign in with the offline ChatGPT emulator as this account. The harness stands
+ * in for the person approving the sign-in in ChatGPT's tab.
+ */
+export async function signInWithChatGpt(
+  page: Page,
+  email: string,
+  name: string,
+  testInfo?: TestInfo,
+) {
+  const api = process.env.API_URL ?? "http://127.0.0.1:3110";
+  await page.context().route("https://chatgpt.example.test/**", async (route) => {
+    const state = new URL(route.request().url()).searchParams.get("state");
+    await page.request.post(`${api}/__e2e/chatgpt/authorize`, { data: { state, email, name } });
+    await route.fulfill({ body: "" });
+  });
+  await expect(page.getByRole("heading", { name: "Sign in with ChatGPT" })).toBeVisible();
+  if (testInfo) await captureScreenshot(page, testInfo, "01-sign-up");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+}
+
+/** Create an account through Sign in with ChatGPT. The password is unused there. */
 export async function signup(
   page: Page,
   email: string,
-  password: string,
+  _password: string,
   name: string,
   testInfo?: TestInfo,
 ) {
   await page.goto("/sign-up");
+  await signInWithChatGpt(page, email, name, testInfo);
+}
+
+/** Create an email and password account, for specs about password sign-in. */
+export async function signupWithEmail(page: Page, email: string, password: string, name: string) {
+  await page.goto("/sign-up?with=email");
   await expect(page.getByRole("heading", { name: "Create your Milo" })).toBeVisible();
-  if (testInfo) await captureScreenshot(page, testInfo, "01-sign-up");
   await page.getByPlaceholder("Your name").fill(name);
   await page.getByPlaceholder("Your email address").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
