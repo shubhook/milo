@@ -40,6 +40,23 @@ describe("groupBotsForSidebar", () => {
     ]);
   });
 
+  it("lists bots that need you first, ahead of pins and sections", () => {
+    const groups = groupBotsForSidebar(
+      [
+        { id: "pinned-waiting", pinned: true, sectionId: null, needsYou: true },
+        { id: "work-failed", pinned: false, sectionId: "work", needsYou: true },
+        { id: "work", pinned: false, sectionId: "work", needsYou: false },
+        { id: "loose", pinned: false, sectionId: null },
+      ],
+      sections,
+    );
+    expect(groups.map((group) => [group.key, group.bots.map((bot) => bot.id)])).toEqual([
+      ["needs-you", ["pinned-waiting", "work-failed"]],
+      ["section:work", ["work"]],
+      ["unassigned", ["loose"]],
+    ]);
+  });
+
   it("does not add a heading before sections or pins exist", () => {
     const groups = groupBotsForSidebar([{ id: "first", pinned: false, sectionId: null }], []);
     expect(groups[0]?.title).toBeNull();

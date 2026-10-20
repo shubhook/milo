@@ -2515,7 +2515,7 @@ msgstr "Devralma bekliyor"
 
 #: src/pages/Shell.tsx
 msgid "Needs you"
-msgstr ""
+msgstr "Seni bekliyor"
 
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"

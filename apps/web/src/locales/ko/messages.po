@@ -2515,7 +2515,7 @@ msgstr "인수 필요"
 
 #: src/pages/Shell.tsx
 msgid "Needs you"
-msgstr ""
+msgstr "확인 필요"
 
 #: src/pages/shell/create-bot-dialog.tsx
 msgid "New bot"

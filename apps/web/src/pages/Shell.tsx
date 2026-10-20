@@ -32,6 +32,7 @@ import {
 } from "@milo/contracts";
 import {
   attachmentsForThread,
+  botAvatarStatusTone,
   buildComposerMentionOptions,
   type ComposerMention,
   clampMentionHighlightIndex,
@@ -44,6 +45,7 @@ import {
   isToolActivityBlock,
   latestAnswerableAskMessageId,
   mentionChipKey,
+  NEEDS_YOU_SECTION_KEY,
   nestRosterByParent,
   plainTextFromMarkdown,
   projectMessageReactions,
@@ -1470,26 +1472,31 @@ export function ShellPage() {
           parentBotId: item.kind === "bot" ? item.chat.parentBotId : null,
           pinned: item.chat.pinned,
           sectionId: item.chat.sectionId,
+          needsYou: item.kind === "bot" && botAvatarStatusTone(item.chat.status) !== null,
         })),
         space.botSections,
-      ).map((group, index) => ({
-        ...group,
-        sectionId: group.key.startsWith("section:") ? group.key.slice("section:".length) : null,
-        key: showSpaceNames ? `space:${space.id}:${group.key}` : group.key,
-        title: showSpaceNames
-          ? group.title
-            ? `${space.name} · ${group.title}`
-            : space.name
-          : // Pinned bots render as tiles, so the rest of the list needs no heading of its own.
-            group.key === "unassigned" && space.botSections.length === 0
-            ? null
-            : group.title,
-        showLock: showSpaceNames,
-        emptySpaceId: undefined as string | undefined,
-        spaceId: space.id,
-        spaceName: space.name,
-        canDeleteSpace: index === 0 && space.canDelete === true,
-      }));
+      ).map((rawGroup, index) => {
+        const group =
+          rawGroup.key === NEEDS_YOU_SECTION_KEY ? { ...rawGroup, title: t`Needs you` } : rawGroup;
+        return {
+          ...group,
+          sectionId: group.key.startsWith("section:") ? group.key.slice("section:".length) : null,
+          key: showSpaceNames ? `space:${space.id}:${group.key}` : group.key,
+          title: showSpaceNames
+            ? group.title
+              ? `${space.name} · ${group.title}`
+              : space.name
+            : // Pinned bots render as tiles, so the rest of the list needs no heading of its own.
+              group.key === "unassigned" && space.botSections.length === 0
+              ? null
+              : group.title,
+          showLock: showSpaceNames,
+          emptySpaceId: undefined as string | undefined,
+          spaceId: space.id,
+          spaceName: space.name,
+          canDeleteSpace: index === 0 && space.canDelete === true,
+        };
+      });
       if (sections.length > 0) return sections;
       // Keep empty spaces selectable; chat clicks are the only switch control.
       if (!showSpaceNames) return [];
@@ -1508,7 +1515,7 @@ export function ShellPage() {
         },
       ];
     });
-  }, [bootstrapMe, botSections, bots, groups, spaces, query]);
+  }, [bootstrapMe, botSections, bots, groups, spaces, query, t]);
 
   const openSpaceChat = useCallback(
     (spaceId: string, path: string) => {

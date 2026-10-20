@@ -1,5 +1,10 @@
 import type { SpaceBot, SpaceGroup } from "@milo/contracts";
-import { groupBotsForSidebar, nestRosterByParent } from "@milo/core";
+import {
+  botAvatarStatusTone,
+  groupBotsForSidebar,
+  NEEDS_YOU_SECTION_KEY,
+  nestRosterByParent,
+} from "@milo/core";
 import {
   adoptDeletedSpaceFallback,
   type MobileBot,
@@ -9,6 +14,7 @@ import {
   selectedSpaceId,
   selectSpace,
 } from "./api";
+import { t } from "./i18n";
 
 export type InboxSpace = Pick<
   MobileSpace,
@@ -47,6 +53,7 @@ export function spaceInboxItems(
         parentBotId: chat.parentBotId,
         pinned: chat.pinned,
         sectionId: chat.sectionId,
+        needsYou: botAvatarStatusTone(chat.status) !== null,
       })),
       ...space.groups.map((chat) => ({
         type: "group" as const,
@@ -62,7 +69,8 @@ export function spaceInboxItems(
     }
     for (const group of groupBotsForSidebar(chats, space.botSections)) {
       if (group.title) {
-        items.push({ type: "heading", key: `${space.id}:${group.key}`, title: group.title });
+        const title = group.key === NEEDS_YOU_SECTION_KEY ? t("Needs you") : group.title;
+        items.push({ type: "heading", key: `${space.id}:${group.key}`, title });
       }
       for (const row of nestRosterByParent(group.bots, collapsedParentIds)) {
         if (row.item.type === "bot") {
