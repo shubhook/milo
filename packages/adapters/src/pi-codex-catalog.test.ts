@@ -9,7 +9,9 @@ import {
   codexLiveCatalogsForSpace,
   codexLiveListsModel,
   fetchCodexCatalog,
+  PLAN_MODEL_UNAVAILABLE_MESSAGE,
   parseCodexCatalog,
+  resolvePlanModel,
 } from "./pi-codex-catalog.js";
 import { listPiCatalog } from "./pi-models.js";
 import { CHATGPT_OAUTH_PROVIDER, parseModelSecret } from "./pi-oauth.js";
@@ -1082,5 +1084,68 @@ describe("applyCodexLiveCatalog", () => {
     expect(otherProviders).toEqual(
       base.filter((entry) => entry.provider !== CHATGPT_OAUTH_PROVIDER),
     );
+  });
+});
+
+describe("resolvePlanModel", () => {
+  const planCredential = JSON.parse(oauthPlaintext());
+
+  function planCatalog(slugs: string[] | "unreadable") {
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      slugs === "unreadable"
+        ? new Response("unavailable", { status: 503 })
+        : okResponse(
+            catalogPayload(
+              slugs.map((slug) => ({ slug, visibility: "list", supported_in_api: true })),
+            ),
+          ),
+    );
+    return { fetchImpl, catalog: new CodexCatalogCache({ fetch: fetchImpl, waitMs: 1_000 }) };
+  }
+
+  it("never resolves to Sol for an account whose list lacks it", async () => {
+    const { catalog } = planCatalog(["gpt-5.5", "gpt-6-astra"]);
+
+    const resolved = await resolvePlanModel(catalog, "user-1", planCredential, "gpt-6-sol");
+
+    expect(resolved).toEqual({ status: "ok", modelId: "gpt-5.5" });
+  });
+
+  it("picks the quickest model the account serves, in preference order", async () => {
+    const { catalog, fetchImpl } = planCatalog(["gpt-6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]);
+
+    const resolved = await resolvePlanModel(catalog, "user-1", planCredential);
+
+    expect(resolved).toEqual({ status: "ok", modelId: "gpt-5.6-luna" });
+    const headers = new Headers(fetchImpl.mock.calls[0]![1]?.headers);
+    expect(headers.get("chatgpt-account-id")).toBe(ACCOUNT_ID);
+  });
+
+  it("skips live slugs the runtime cannot run", async () => {
+    const { catalog } = planCatalog(["gpt-unknown-preview", "gpt-6-astra"]);
+
+    const resolved = await resolvePlanModel(catalog, "user-1", planCredential);
+
+    expect(resolved).toEqual({ status: "ok", modelId: "gpt-6-astra" });
+  });
+
+  it("returns the error state when the list is unreadable and no model is saved", async () => {
+    const { catalog } = planCatalog("unreadable");
+
+    await expect(resolvePlanModel(catalog, "user-1", planCredential)).resolves.toEqual({
+      status: "error",
+      message: PLAN_MODEL_UNAVAILABLE_MESSAGE,
+    });
+    await expect(resolvePlanModel(undefined, "user-1", undefined)).resolves.toMatchObject({
+      status: "error",
+    });
+  });
+
+  it("falls back to the saved model only when the list is unreadable", async () => {
+    const { catalog } = planCatalog("unreadable");
+
+    await expect(
+      resolvePlanModel(catalog, "user-1", planCredential, "gpt-6-astra"),
+    ).resolves.toEqual({ status: "ok", modelId: "gpt-6-astra" });
   });
 });

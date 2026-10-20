@@ -26,6 +26,7 @@ import type {
   EncryptedSecretStore,
   IntegrationProviderSettings,
   PiOAuthLogins,
+  PlanModelSource,
   RemoteConnectorDependencies,
 } from "@milo/adapters";
 import {
@@ -38,13 +39,10 @@ import {
   buildMcpCredentialBlob,
   buildModelConnectPlaintext,
   CHATGPT_OAUTH_PROVIDER,
-  CHATGPT_PLAN_DEFAULT_MODEL,
   CHATGPT_PLAN_PROVIDER,
   CLAUDE_CODE_DEFAULT_MODEL,
   CLAUDE_CODE_PROVIDER,
-  CODEX_CLI_PROVIDER,
   CodexCatalogCache,
-  type CodexUsage,
   ComputerBusyError,
   cancelComputerRunWork,
   checkpointAndRecordComputerWorkspace,
@@ -81,6 +79,7 @@ import {
   modelCredentialAuthKindsForSpace,
   modelCredentialDto,
   normalizeSecretDestination,
+  PlanModelUnavailableError,
   parseModelSecret,
   pickReusableConnection,
   planLiveConnectionSync,
@@ -90,7 +89,6 @@ import {
   probeOpenAiCompatibleModels,
   provisionComputer,
   queueComputerUpdate,
-  readCodexUsage,
   readStoredModelAuth,
   releaseComputerExecutionLease,
   replaceComputer,
@@ -98,6 +96,8 @@ import {
   resolveBotUploadPath,
   resolveBotWorkspaceCwd,
   resolveBotWorkspacePath,
+  resolvePlanModel,
+  resolveStoredPlanModel,
   revokeScreenControl,
   runtimeModel,
   runtimeProvidesDefaultModel,
@@ -558,7 +558,6 @@ export interface RouterDeps {
   ) => void;
   /** Reads the agent CLI's install and sign-in state; defaults to the real CLI. */
   probeClaudeCode?: () => Promise<ClaudeCodeStatus>;
-  readCodexUsage?: () => Promise<CodexUsage | null>;
   integrationSettings?: IntegrationProviderSettings;
   composio?: ComposioProvider;
   mcpOAuth?: McpOAuthBroker;
@@ -588,6 +587,8 @@ export interface RouterDeps {
  * ignore the request abort signal, so without a deadline a hung destroy would
  * keep the deletion claim renewed forever and block stale-claim recovery. */
 const SPACE_TEARDOWN_TIMEOUT_MS = 120_000;
+/** Catalog for helpers outside `createRouter` when the deps bring none. */
+const sharedCodexCatalog = new CodexCatalogCache();
 
 /** The card is closed by a marker; the run that follows finishes whatever the call left open. */
 /** Deterministic nonce for a call's marker message. The unique (threadId, clientNonce)
@@ -5479,11 +5480,9 @@ async function meDto(deps: RouterDeps, actor: Actor): Promise<Me> {
       setup.credential?.provider ??
       setup.settings?.defaultModelProvider ??
       deps.env.defaultProvider,
-    defaultModel:
-      setup.runtimeModel?.id ??
-      setup.credential?.defaultModel ??
-      setup.settings?.defaultModelId ??
-      deps.env.defaultModel,
+    defaultModel: setup.runtimeModel
+      ? setup.runtimeModel.id
+      : (setup.credential?.defaultModel ?? setup.settings?.defaultModelId ?? deps.env.defaultModel),
     computerHost: computerHostFor(setup.settings?.computerHost, deps.env.sandboxProvider),
     canChooseHostComputer: actor.isDeploymentOwner && deps.env.sandboxProvider === "docker",
     sandboxProvider: deps.env.sandboxProvider,
@@ -5492,58 +5491,63 @@ async function meDto(deps: RouterDeps, actor: Actor): Promise<Me> {
 }
 
 /**
- * Claude Code runs bots until the person signs in with ChatGPT; then their plan does.
- * Each entry carries the plan limits its latest run reported. The Codex CLI on the
- * server's machine reports its plan live.
+ * Claude Code runs bots until the person signs in with ChatGPT; then their plan
+ * does, on the quick model it serves. Each entry carries the plan limits its
+ * latest run reported.
  */
 async function agentModels(deps: RouterDeps, actor: Actor): Promise<AgentModel[]> {
   const fallback = runtimeModel(deps.env.agentRuntime);
   if (!fallback) return [];
-  const [managed, chatgpt, limits, codex] = await Promise.all([
-    selectRuntimeModel(deps.prisma, actor, fallback),
+  const [chatgpt, limits] = await Promise.all([
     findModelCredential(deps.prisma, actor, CHATGPT_PLAN_PROVIDER),
     deps.prisma.modelUsageLimit.findMany({ where: { userId: actor.userId } }),
-    // The Codex CLI belongs to whoever runs the server, so only the owner sees its plan.
-    actor.isDeploymentOwner ? (deps.readCodexUsage ?? readCodexUsage)() : null,
   ]);
-  const entry = (provider: string, label: string, model: string): AgentModel => {
+  const entry = (provider: string, label: string, model: string | null): AgentModel => {
     const reported = limits.find((row) => row.provider === provider);
     return {
       provider,
       label,
       model,
-      inUse: managed?.provider === provider,
+      inUse: provider === (chatgpt ? CHATGPT_PLAN_PROVIDER : fallback.provider),
       limits: reported ? (reported.windows as AgentModel["limits"]) : [],
       limitsUpdatedAt: reported?.updatedAt.toISOString() ?? null,
     };
   };
   const models = [entry(CLAUDE_CODE_PROVIDER, "Claude Code", CLAUDE_CODE_DEFAULT_MODEL)];
   if (chatgpt) {
-    const id = usableModelId(chatgpt.defaultModel) ?? CHATGPT_PLAN_DEFAULT_MODEL;
-    const label = listPiCatalog().find(
-      (item) => item.provider === CHATGPT_PLAN_PROVIDER && item.id === id,
-    )?.label;
-    models.push(entry(CHATGPT_PLAN_PROVIDER, "ChatGPT", label ?? id));
-  }
-  if (codex?.windows.length) {
-    const plan = codex.plan ? codex.plan[0]!.toUpperCase() + codex.plan.slice(1) : null;
-    models.push({
-      provider: CODEX_CLI_PROVIDER,
-      label: "Codex",
-      model: plan ? `ChatGPT ${plan}` : "ChatGPT",
-      inUse: false,
-      limits: codex.windows,
-      limitsUpdatedAt: new Date().toISOString(),
-    });
+    const plan = await resolveStoredPlanModel(deps.prisma, actor, chatgpt, planModelSource(deps));
+    const label =
+      plan.status === "ok"
+        ? (listPiCatalog().find(
+            (item) => item.provider === CHATGPT_PLAN_PROVIDER && item.id === plan.modelId,
+          )?.label ?? plan.modelId)
+        : null;
+    models.push(entry(CHATGPT_PLAN_PROVIDER, "ChatGPT", label));
   }
   return models;
+}
+
+/** The live per-account catalog the ChatGPT plan resolves its quick model from. */
+function planModelSource(deps: RouterDeps): PlanModelSource {
+  return { secretStore: deps.secrets, catalog: deps.codexCatalog ?? sharedCodexCatalog };
 }
 
 async function modelSetup(deps: RouterDeps, actor: Actor) {
   const [credential, settings, managed] = await Promise.all([
     findDefaultModelCredential(deps.prisma, actor),
     deps.prisma.deploymentSettings.findUnique({ where: { id: "default" } }),
-    selectRuntimeModel(deps.prisma, actor, runtimeModel(deps.env.agentRuntime)),
+    selectRuntimeModel(
+      deps.prisma,
+      actor,
+      runtimeModel(deps.env.agentRuntime),
+      planModelSource(deps),
+    ).catch((error: unknown) => {
+      // The plan still runs the bots; its model shows once the list can be read.
+      if (error instanceof PlanModelUnavailableError) {
+        return { provider: CHATGPT_PLAN_PROVIDER, id: null };
+      }
+      throw error;
+    }),
   ]);
   const hasDeployment = Boolean(deps.env.deploymentModelKey);
   return {
@@ -5886,10 +5890,13 @@ async function persistModelCredential(
   ) {
     throw new ORPCError("BAD_REQUEST", { message: authError });
   }
+  // The ChatGPT plan's model comes from its live list, never a catalog guess.
   const defaultModel =
     requestedModelId ??
-    defaultCatalogModelId(input.provider, input.plaintext) ??
-    usableModelId(deps.env.defaultModel);
+    (input.provider === CHATGPT_PLAN_PROVIDER
+      ? null
+      : (defaultCatalogModelId(input.provider, input.plaintext) ??
+        usableModelId(deps.env.defaultModel)));
   const allowedThinking = defaultModel
     ? await allowedThinkingLevels(deps, actor, input.provider, defaultModel)
     : undefined;
@@ -5985,6 +5992,9 @@ export async function saveChatGptPlan(
   credential: ChatGptPlanCredential,
 ): Promise<void> {
   const actor = await requireMembership(deps.prisma, userId);
+  const { catalog } = planModelSource(deps);
+  // Saved as the stand-in for runs when the plan's live list can't be read.
+  const plan = await resolvePlanModel(catalog, userId, credential);
   await persistModelCredential(
     deps,
     actor,
@@ -5992,9 +6002,9 @@ export async function saveChatGptPlan(
       provider: CHATGPT_PLAN_PROVIDER,
       plaintext: serializeModelSecret({ kind: "oauth", credential }),
       label: "ChatGPT",
-      modelId: CHATGPT_PLAN_DEFAULT_MODEL,
+      ...(plan.status === "ok" ? { modelId: plan.modelId } : {}),
     },
-    deps.codexCatalog ?? new CodexCatalogCache(),
+    catalog ?? sharedCodexCatalog,
   );
 }
 

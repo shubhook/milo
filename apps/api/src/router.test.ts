@@ -137,8 +137,9 @@ describe("model setup gate", () => {
     deploymentModelCredentialCipher?: string;
     isDeploymentOwner?: boolean;
     probeClaudeCode?: RouterDeps["probeClaudeCode"];
-    readCodexUsage?: RouterDeps["readCodexUsage"];
     chatgpt?: boolean;
+    /** Slugs the plan's live model list serves; undefined when it can't be read. */
+    planModels?: string[];
     usageLimits?: Array<{ provider: string; windows: unknown; updatedAt: Date }>;
   }) {
     const chatgpt = options.chatgpt
@@ -176,6 +177,9 @@ describe("model setup gate", () => {
       modelUsageLimit: {
         findMany: vi.fn().mockResolvedValue(options.usageLimits ?? []),
       },
+      secret: {
+        findFirst: vi.fn().mockResolvedValue({ id: "secret-1", ciphertext: "fake-cipher" }),
+      },
       deploymentSettings: {
         findUnique: vi
           .fn()
@@ -199,7 +203,25 @@ describe("model setup gate", () => {
       },
       dataDir: "/tmp/rakazo-router-test",
       probeClaudeCode: options.probeClaudeCode,
-      readCodexUsage: options.readCodexUsage ?? (async () => null),
+      secrets: {
+        load: () =>
+          JSON.stringify({
+            type: "oauth",
+            access: "fake-access-token",
+            refresh: "fake-refresh-token",
+            expires: Date.now() + 3_600_000,
+            accountId: "acct-test-1",
+          }),
+      },
+      codexCatalog: {
+        read: async () =>
+          options.planModels?.map((slug) => ({
+            slug,
+            reasoningEfforts: [],
+            supportsImages: true,
+            supportsFastTier: false,
+          })),
+      },
     } as unknown as RouterDeps;
     const actor = {
       spaceId: "workspace-1",
@@ -295,11 +317,12 @@ describe("model setup gate", () => {
       agentRuntime: "claude-code",
       probeClaudeCode,
       chatgpt: true,
+      planModels: ["gpt-6-sol", "gpt-6-luna"],
     });
 
     const me = await call(handler, actor, "me", null);
     await expect(me.json()).resolves.toMatchObject({
-      json: { modelManaged: true, defaultProvider: "chatgpt", defaultModel: "gpt-6-sol" },
+      json: { modelManaged: true, defaultProvider: "chatgpt", defaultModel: "gpt-6-luna" },
     });
     const status = await call(handler, actor, "agent/status", null);
     await expect(status.json()).resolves.toMatchObject({ json: { chatgpt: true } });
@@ -314,6 +337,7 @@ describe("model setup gate", () => {
     const { actor, handler } = modelGateDeps({
       agentRuntime: "claude-code",
       chatgpt: true,
+      planModels: ["gpt-5.5"],
       usageLimits: [{ provider: "claude-code", windows, updatedAt }],
     });
 
@@ -329,38 +353,30 @@ describe("model setup gate", () => {
           limits: windows,
           limitsUpdatedAt: updatedAt.toISOString(),
         },
-        expect.objectContaining({
+        {
           provider: "chatgpt",
           label: "ChatGPT",
+          model: "GPT-5.5",
           inUse: true,
           limits: [],
           limitsUpdatedAt: null,
-        }),
+        },
       ],
     });
   });
 
-  it("shows the server's Codex plan to its owner only", async () => {
-    const windows = [
-      { windowMinutes: 43_200, usedPercent: 3, resetsAt: "2026-11-12T12:00:00.000Z" },
-    ];
-    const readCodexUsage = vi.fn().mockResolvedValue({ plan: "go", windows });
-    for (const isDeploymentOwner of [true, false]) {
-      const { actor, handler } = modelGateDeps({
-        agentRuntime: "claude-code",
-        isDeploymentOwner,
-        readCodexUsage,
-      });
-      const response = await call(handler, actor, "agent/models", null);
-      const { json } = (await response.json()) as { json: Array<Record<string, unknown>> };
-      const codex = json.find((model) => model.provider === "codex");
-      if (isDeploymentOwner) {
-        expect(codex).toMatchObject({ label: "Codex", model: "ChatGPT Go", limits: windows });
-      } else {
-        expect(codex).toBeUndefined();
-      }
-    }
-    expect(readCodexUsage).toHaveBeenCalledTimes(1);
+  it("shows no plan model instead of guessing one when the plan's list can't be read", async () => {
+    const { actor, handler } = modelGateDeps({ agentRuntime: "claude-code", chatgpt: true });
+
+    const models = await call(handler, actor, "agent/models", null);
+    const { json } = (await models.json()) as { json: Array<Record<string, unknown>> };
+    expect(json.filter((model) => model.provider === "chatgpt")).toEqual([
+      expect.objectContaining({ model: null, inUse: true }),
+    ]);
+    const me = await call(handler, actor, "me", null);
+    await expect(me.json()).resolves.toMatchObject({
+      json: { modelManaged: true, defaultProvider: "chatgpt", defaultModel: null },
+    });
   });
 
   it("lists no agent models when people connect their own", async () => {

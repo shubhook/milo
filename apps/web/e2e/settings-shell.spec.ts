@@ -120,21 +120,13 @@ test("usage lists the agent's models with their plan limits", async ({ page }, t
           {
             provider: "chatgpt",
             label: "ChatGPT",
-            model: "GPT-6 Sol",
-            inUse: false,
-            limits: [],
-            limitsUpdatedAt: null,
-          },
-          {
-            provider: "codex",
-            label: "Codex",
-            model: "ChatGPT Plus",
+            model: "GPT-6 Luna",
             inUse: false,
             limits: [
               {
-                windowMinutes: 43_200,
+                windowMinutes: 10_080,
                 usedPercent: 92,
-                resetsAt: new Date(Date.now() + 240 * hour).toISOString(),
+                resetsAt: new Date(Date.now() + 120 * hour).toISOString(),
               },
             ],
             limitsUpdatedAt: new Date().toISOString(),
@@ -154,9 +146,8 @@ test("usage lists the agent's models with their plan limits", async ({ page }, t
   await expect(claude.getByText("47% used")).toBeVisible();
   await expect(claude.getByRole("progressbar", { name: "Weekly" })).toBeVisible();
   const chatgpt = settings.getByTestId("agent-model-chatgpt");
-  await expect(chatgpt.getByText("Limits show after the next run.")).toBeVisible();
-  const codex = settings.getByTestId("agent-model-codex");
-  await expect(codex.getByRole("progressbar", { name: "30-day" })).toHaveAttribute(
+  await expect(chatgpt.getByText("GPT-6 Luna")).toBeVisible();
+  await expect(chatgpt.getByRole("progressbar", { name: "Weekly" })).toHaveAttribute(
     "data-tone",
     "warning",
   );

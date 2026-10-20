@@ -1,3 +1,4 @@
+import type { OAuthCredential } from "@earendil-works/pi-ai";
 import type { AgentRunRequest } from "@milo/adapter-kit";
 import type { Actor } from "@milo/contracts";
 import { usableModelId } from "@milo/contracts";
@@ -7,7 +8,7 @@ import {
   findModelCredential,
   type PrismaClient,
 } from "@milo/db";
-import { CHATGPT_PLAN_DEFAULT_MODEL, CHATGPT_PLAN_PROVIDER } from "./chatgpt-plan.js";
+import { CHATGPT_PLAN_PROVIDER } from "./chatgpt-plan.js";
 import type { ModelCredentialAuthKind } from "./pi-catalog-availability.js";
 import {
   catalogModelAvailableForAuth,
@@ -16,7 +17,7 @@ import {
   UNAVAILABLE_MODEL_FOR_AUTH_MESSAGE,
 } from "./pi-catalog-availability.js";
 import type { CodexLiveCatalog, CodexLiveReadOptions } from "./pi-codex-catalog.js";
-import { codexLiveListsModel } from "./pi-codex-catalog.js";
+import { codexLiveListsModel, resolvePlanModel } from "./pi-codex-catalog.js";
 import { listPiCatalog, scriptedCatalogEntry } from "./pi-models.js";
 import { parseModelSecret } from "./pi-oauth.js";
 import { OPENAI_COMPATIBLE_PROVIDER_ID } from "./pi-openai-compatible-provider.js";
@@ -347,21 +348,60 @@ export async function validateConnectedModelChoice(
   return savedChoice ? undefined : "Unknown model for that provider";
 }
 
-/** Select configuration without loading secrets or applying a runtime-specific fallback. */
+/** Where the ChatGPT plan's live model list comes from. */
+export type PlanModelSource = {
+  secretStore: Pick<EncryptedSecretStore, "load">;
+  catalog?: CodexLiveCatalog;
+};
+
+export class PlanModelUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PlanModelUnavailableError";
+  }
+}
+
+/** The quick model the person's ChatGPT plan serves, from its live model list. */
+export async function resolveStoredPlanModel(
+  prisma: Pick<PrismaClient, "secret">,
+  scope: { userId: string },
+  credential: { secretId: string; defaultModel?: string | null },
+  source: PlanModelSource | undefined,
+) {
+  let oauth: OAuthCredential | undefined;
+  if (source?.catalog) {
+    const row = await prisma.secret.findFirst({
+      where: { id: credential.secretId, userId: scope.userId, spaceId: null },
+    });
+    try {
+      const secret = row ? parseModelSecret(source.secretStore.load(row.ciphertext, row.id)) : null;
+      if (secret?.kind === "oauth") oauth = secret.credential;
+    } catch {
+      // An unreadable secret leaves only the saved model.
+    }
+  }
+  return resolvePlanModel(source?.catalog, scope.userId, oauth, credential.defaultModel);
+}
+
 /**
  * A runtime that brings its own model (Claude Code) runs every bot, unless the
- * person signed in with ChatGPT: then their ChatGPT plan runs their bots.
- * Null when the runtime leaves model choice to the person.
+ * person signed in with ChatGPT: then their ChatGPT plan runs their bots on its
+ * quick model. Null when the runtime leaves model choice to the person. Throws
+ * `PlanModelUnavailableError` when the plan's model list can't be read and no
+ * model is saved.
  */
 export async function selectRuntimeModel(
   prisma: PrismaClient,
   scope: { userId: string; spaceId: string },
   runtimeModel: { provider: string; id: string } | undefined | null,
+  planSource?: PlanModelSource,
 ) {
   if (!runtimeModel) return null;
   const credential = await findModelCredential(prisma, scope, CHATGPT_PLAN_PROVIDER);
   if (!credential) return { ...runtimeModel, credential: null, thinkingLevel: null };
-  const id = usableModelId(credential.defaultModel) ?? CHATGPT_PLAN_DEFAULT_MODEL;
+  const plan = await resolveStoredPlanModel(prisma, scope, credential, planSource);
+  if (plan.status === "error") throw new PlanModelUnavailableError(plan.message);
+  const id = plan.modelId;
   return {
     provider: CHATGPT_PLAN_PROVIDER,
     id,
@@ -372,6 +412,7 @@ export async function selectRuntimeModel(
   };
 }
 
+/** Select configuration without loading secrets or applying a runtime-specific fallback. */
 export function selectConfiguredModel(input: {
   bot: {
     modelProvider: string | null;

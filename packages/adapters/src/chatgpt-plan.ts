@@ -15,8 +15,12 @@ import { createLocalJWKSet, jwtVerify } from "jose";
  */
 export const CHATGPT_PLAN_PROVIDER = "chatgpt";
 export const CHATGPT_PLAN_BASE_URL = "https://api.openai.com/v1";
-/** Used until the person picks another model; the plan serves every Codex model. */
-export const CHATGPT_PLAN_DEFAULT_MODEL = "gpt-6-sol";
+/**
+ * Quick models, fastest first. The plan runs the first one the account's live
+ * Codex list contains, or else the first model on that list. Ordered by the
+ * pi registry's per-token cost, the closest published signal for the small tier.
+ */
+export const CHATGPT_PLAN_QUICK_MODELS = ["gpt-6-luna", "gpt-5.6-luna", "gpt-5.6-terra"] as const;
 
 const ISSUER = "https://auth.openai.com";
 const SCOPES = "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct";
