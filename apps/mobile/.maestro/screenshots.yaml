@@ -154,6 +154,14 @@ tags:
 - takeScreenshot: "16-bot-actions"
 - back
 
+- openLink: "rakazo:///bot-profile?botId=${RAKAZO_SCREENSHOT_BOT_ID}"
+- extendedWaitUntil:
+    visible: "Chat settings"
+    timeout: 10000
+- assertVisible: "Activity"
+- takeScreenshot: "16b-bot-profile"
+- back
+
 - openLink: "rakazo:///bot-settings?botId=${RAKAZO_SCREENSHOT_BOT_ID}"
 - extendedWaitUntil:
     visible: "Researcher"
