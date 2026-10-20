@@ -117,15 +117,6 @@ export function applyThreadSendReceipt(
 }
 
 /** Reason the newest run stopped, until the reader dismisses that run's failure. */
-export function threadRunError(
-  snapshot: ThreadSnapshot | null,
-  dismissedRunIds?: ReadonlySet<string>,
-): string | null {
-  const run = snapshot?.run;
-  if (run?.status !== "failed" || dismissedRunIds?.has(run.id)) return null;
-  return run.error ?? null;
-}
-
 export function clearActiveThreadRuns(snapshot: ThreadSnapshot): ThreadSnapshot {
   const runIds = new Set(activeThreadRuns(snapshot).map((run) => run.id));
   const computer = snapshot.computer?.busyBotName

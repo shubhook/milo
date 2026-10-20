@@ -1,28 +1,7 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openNewSpace, signup } from "./helpers";
+import { expect, test } from "@playwright/test";
+import { captureScreenshot, completeOnboarding, signup } from "./helpers";
 
-function isPresented(error: Locator) {
-  return error.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    const topElement = document.elementFromPoint(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2,
-    );
-    return topElement === element || (topElement !== null && element.contains(topElement));
-  });
-}
-
-function seenRunErrorCount(page: Page) {
-  return page.evaluate(() => {
-    let count = 0;
-    for (let index = 0; index < localStorage.length; index += 1) {
-      if (localStorage.key(index)?.startsWith("rakazo:seen-run-error:")) count += 1;
-    }
-    return count;
-  });
-}
-
-test("a failed run is visible once without returning after reload", async ({ page }, testInfo) => {
+test("a failed run stays in the thread as a card", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `run-failure-${stamp}@rakazo.test`, "password12", "Run Failure");
   await completeOnboarding(page);
@@ -32,99 +11,50 @@ test("a failed run is visible once without returning after reload", async ({ pag
   await page.getByPlaceholder(/^Message /).fill("fail this run");
   await page.getByRole("button", { name: "Send" }).click();
 
-  const error = page.getByTestId("composer-error");
-  await expect(error).toBeVisible({ timeout: 30_000 });
-  await expect(error).toContainText("Scripted run failure");
-  await captureScreenshot(page, testInfo, "new-run-error-visible");
+  const transcript = page.getByTestId("transcript");
+  const card = transcript.getByTestId("run-failed-card");
+  await expect(card).toHaveCount(1, { timeout: 30_000 });
+  await expect(card).toContainText("Scripted run failure");
+  await expect(card.getByRole("button", { name: "Sign in again" })).toHaveCount(0);
+  await expect(page.getByTestId("composer-error")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "run-failed-card");
 
   await page.reload();
   await expect(page.getByTestId("shell-root")).toHaveAttribute("data-ready", "true");
-  await expect(
-    page.getByTestId("transcript").getByText("fail this run", { exact: true }),
-  ).toBeVisible();
-  await expect(error).toBeHidden();
-  await captureScreenshot(page, testInfo, "seen-run-error-hidden-after-reload");
+  await expect(card).toHaveCount(1);
+  await expect(card).toContainText("Scripted run failure");
 
   await page.getByPlaceholder(/^Message /).fill("fail this run");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(error).toBeVisible({ timeout: 30_000 });
-  await expect(error).toContainText("Scripted run failure");
-
-  const dismissError = page.getByTestId("composer-error-dismiss");
-  await dismissError.focus();
-  await expect(dismissError).toBeFocused();
-  await dismissError.press("Enter");
-  await expect(error).toBeHidden();
-  await expect(page.getByPlaceholder(/^Message /)).toBeFocused();
+  await expect(card).toHaveCount(2, { timeout: 30_000 });
 });
 
-test("a covered run error is not remembered until it is presented", async ({ page }, testInfo) => {
-  const stamp = Date.now();
-  await signup(page, `covered-run-failure-${stamp}@rakazo.test`, "password12", "Covered Failure");
+test("a signed-out agent failure offers Sign in again", async ({ page }, testInfo) => {
+  await signup(page, `run-signed-out-${Date.now()}@rakazo.test`, "password12", "Signed Out");
   await completeOnboarding(page);
-  await page.setViewportSize({ width: 390, height: 844 });
+  // Mocked after onboarding, which would otherwise stop on its agent step.
+  await page.route("**/rpc/agent/status", (route) =>
+    route.fulfill({
+      json: {
+        json: {
+          agent: "claude-code",
+          installed: true,
+          version: "2.0.0",
+          loggedIn: false,
+          platform: "linux",
+          chatgpt: false,
+        },
+      },
+    }),
+  );
 
-  await page.getByPlaceholder(/^Message /).fill("fail this run");
-  const sendButton = await page.getByRole("button", { name: "Send" }).elementHandle();
-  if (!sendButton) throw new Error("Send button not found");
-  await page.getByRole("button", { name: "Open navigation" }).click();
-  await expect(page.getByRole("button", { name: "Close navigation" })).toBeVisible();
-  await expect(page.locator("main")).toHaveAttribute("aria-hidden", "true");
-  await expect(page.locator("main")).toHaveJSProperty("inert", true);
-  await sendButton.evaluate((button) => (button as HTMLButtonElement).click());
-
-  const error = page.getByTestId("composer-error");
-  await expect(error).toContainText("Scripted run failure", { timeout: 30_000 });
-  expect(await isPresented(error)).toBe(false);
-  await captureScreenshot(page, testInfo, "run-error-covered-by-mobile-navigation");
-  await page.reload();
-  await expect(page.getByTestId("shell-root")).toHaveAttribute("data-ready", "true");
-  await expect(error).toBeVisible();
-  expect(await isPresented(error)).toBe(true);
-  await captureScreenshot(page, testInfo, "covered-run-error-presented-after-reload");
-
-  await page.reload();
-  await expect(page.getByTestId("shell-root")).toHaveAttribute("data-ready", "true");
-  await expect(error).toBeHidden();
-
-  const recordedErrorCount = await seenRunErrorCount(page);
-  await page.getByPlaceholder(/^Message /).fill("fail this run");
-  const nextSendButton = await page.getByRole("button", { name: "Send" }).elementHandle();
-  if (!nextSendButton) throw new Error("Send button not found");
-  await page.getByRole("button", { name: "Open navigation" }).click();
-  await nextSendButton.evaluate((button) => (button as HTMLButtonElement).click());
-  await expect(error).toContainText("Scripted run failure", { timeout: 30_000 });
-
-  await page.getByRole("button", { name: "Close navigation" }).click();
-  await expect.poll(() => isPresented(error)).toBe(true);
-  await expect.poll(() => seenRunErrorCount(page)).toBe(recordedErrorCount + 1);
-  await captureScreenshot(page, testInfo, "covered-run-error-presented-after-drawer-close");
-
-  await page.reload();
-  await expect(page.getByTestId("shell-root")).toHaveAttribute("data-ready", "true");
-  await expect(error).toBeHidden();
-
-  await page.getByRole("button", { name: "Open navigation" }).click();
-  await expect(page.locator("main")).toHaveJSProperty("inert", true);
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await expect(page.locator("main")).not.toHaveAttribute("aria-hidden", "true");
-  await expect(page.locator("main")).toHaveJSProperty("inert", false);
-  await page.getByPlaceholder(/^Message /).fill("fail this run");
-  const modalSendButton = await page.getByRole("button", { name: "Send" }).elementHandle();
-  if (!modalSendButton) throw new Error("Send button not found");
-  await openNewSpace(page);
-  const newSpaceDialog = page.getByRole("dialog", { name: "New space" });
-  await expect(newSpaceDialog).toBeVisible();
-  await modalSendButton.evaluate((button) => (button as HTMLButtonElement).click());
-  await expect(error).toContainText("Scripted run failure", { timeout: 30_000 });
-  expect(await isPresented(error)).toBe(false);
-  await expect.poll(() => seenRunErrorCount(page)).toBe(recordedErrorCount + 1);
-
-  await newSpaceDialog.getByRole("button", { name: "Cancel" }).click();
-  await expect(newSpaceDialog).toHaveCount(0);
-  await expect.poll(() => isPresented(error)).toBe(true);
-  await expect.poll(() => seenRunErrorCount(page)).toBe(recordedErrorCount + 2);
-  await page.reload();
-  await expect(page.getByTestId("shell-root")).toHaveAttribute("data-ready", "true");
-  await expect(error).toBeHidden();
+  await page.getByPlaceholder(/^Message /).fill("fail signed out");
+  await page.getByRole("button", { name: "Send" }).click();
+  const card = page.getByTestId("transcript").getByTestId("run-failed-card");
+  await expect(card).toContainText("Claude Code is not signed in", { timeout: 30_000 });
+  const signIn = card.getByRole("button", { name: "Sign in again" });
+  await expect(signIn).toBeVisible();
+  await signIn.click();
+  await expect(page.getByTestId("onboarding-agent-claude")).toBeVisible();
+  await captureScreenshot(page, testInfo, "run-failed-sign-in-again");
 });

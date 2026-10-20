@@ -3449,9 +3449,10 @@ msgstr "대화 기록 표시"
 msgid "Sign in"
 msgstr "로그인"
 
+#: src/components/RunFailedCard.tsx
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Sign in again"
-msgstr ""
+msgstr "다시 로그인"
 
 #: src/pages/Auth.tsx
 msgid "Sign in to Milo"

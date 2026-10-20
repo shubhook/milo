@@ -15,7 +15,6 @@ import {
   reconcileRefreshedThread,
   reduceComputerStatus,
   reduceThreadSnapshot,
-  threadRunError,
   userHoldsComputerControl,
 } from "./thread-events.js";
 
@@ -808,11 +807,6 @@ describe("thread event reduction", () => {
       status: "failed",
       error: "Provider is not configured: openrouter",
     });
-    expect(threadRunError(next)).toBe("Provider is not configured: openrouter");
-    expect(threadRunError(next, new Set([failing.id]))).toBeNull();
-    expect(threadRunError(next, new Set(["other-run"]))).toBe(
-      "Provider is not configured: openrouter",
-    );
   });
 
   it("keeps the error when a member run fails while another member is still running", () => {
@@ -837,7 +831,6 @@ describe("thread event reduction", () => {
 
     expect(next?.activeRuns).toEqual([runA]);
     expect(next?.run).toMatchObject({ id: runB.id, status: "failed", error: "member exploded" });
-    expect(threadRunError(next)).toBe("member exploded");
   });
 
   it("keeps a group failure visible when another member starts before dismiss", () => {
@@ -869,10 +862,9 @@ describe("thread event reduction", () => {
       runA,
       expect.objectContaining({ id: "run-c", botId: "bot-c", status: "running" }),
     ]);
-    expect(threadRunError(next)).toBe("member exploded");
   });
 
-  it("clears the run and reports no error when it completes or fails without a message", () => {
+  it("clears the run when it completes or fails without a message", () => {
     const finishing = threadRun("run-a");
     const initial: ThreadSnapshot = { ...snapshot([]), run: finishing };
 
@@ -886,9 +878,7 @@ describe("thread event reduction", () => {
     );
 
     expect(completed?.run).toBeNull();
-    expect(threadRunError(completed)).toBeNull();
     expect(blank?.run).toBeNull();
-    expect(threadRunError(blank)).toBeNull();
   });
 
   it("applies the durable waiting-input run transition without a refresh", () => {

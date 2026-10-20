@@ -5,6 +5,7 @@ import type {
   AgentRuntimeEvent,
 } from "@milo/adapter-kit";
 import { abortableDelay, inferHandoffTargetName } from "@milo/core";
+import { CLAUDE_CODE_SIGNED_OUT_MESSAGE } from "./claude-code-cli.js";
 
 const running = new Map<string, AbortController>();
 
@@ -30,6 +31,9 @@ export class ScriptedAgentRuntime implements AgentRuntime {
     running.set(request.runId, controller);
     const signal = context?.signal ?? controller.signal;
     try {
+      if (shouldFailSignedOut(request.prompt)) {
+        throw new Error(CLAUDE_CODE_SIGNED_OUT_MESSAGE);
+      }
       if (shouldFail(request.prompt)) {
         throw new Error("Scripted run failure");
       }
@@ -547,6 +551,10 @@ code-b
       complete: true,
     },
   ];
+}
+
+function shouldFailSignedOut(prompt: string): boolean {
+  return prompt.toLowerCase().includes("fail signed out");
 }
 
 function shouldFail(prompt: string): boolean {

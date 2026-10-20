@@ -12,6 +12,7 @@ import {
   projectMessages,
   reduceLiveMessageBlocks,
   responseStreamingEnabled,
+  runFailedBlock,
   runFailureError,
   sanitizeJsonValue,
   sanitizeUtf16ForJson,
@@ -138,6 +139,29 @@ describe("reduceLiveMessageBlocks", () => {
     expect(reduceLiveMessageBlocks(activity, { type: "tool", name: "shell" })).toEqual([
       { kind: "steps", steps: [{ label: "Shell", count: 1 }] },
     ]);
+  });
+});
+
+describe("runFailedBlock", () => {
+  it("offers sign-in when the agent is signed out", () => {
+    expect(
+      runFailedBlock(
+        "Claude Code is not signed in on the machine running Milo. Run `claude auth login` there, then try again.",
+      ),
+    ).toMatchObject({ kind: "run_failed", fix: "agent_sign_in" });
+    expect(runFailedBlock("Could not verify the ChatGPT account. Sign in again.")?.fix).toBe(
+      "agent_sign_in",
+    );
+  });
+
+  it("keeps other failures without a fix and skips empty errors", () => {
+    expect(runFailedBlock("provider missing")).toEqual({
+      kind: "run_failed",
+      error: "provider missing",
+      fix: null,
+    });
+    expect(runFailedBlock("  ")).toBeNull();
+    expect(runFailedBlock(null)).toBeNull();
   });
 });
 

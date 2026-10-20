@@ -14,6 +14,7 @@ import {
   isConversationalRun,
   isSecretAskBlock,
   resolveAskChoice,
+  runFailedBlock,
   sanitizeJsonValue,
 } from "@milo/core";
 import { getLogger } from "@milo/logging";
@@ -1121,6 +1122,26 @@ async function finalizeRunOnce(
           type: "thread.message.created",
           runId: input.runId,
           payload: { messageId: message.id, role: "bot", blocks: completedBlocks },
+        });
+      }
+    } else {
+      // The failure stays in the thread as a card, with its fix when the error names one.
+      const failed = runFailedBlock(input.error);
+      if (failed) {
+        const message = await createThreadMessageInTransaction(tx, {
+          threadId: input.threadId,
+          role: "bot",
+          blocks: [failed],
+          botId: input.botId,
+          runId: input.runId,
+        });
+        await appendEventInTransaction(tx, {
+          spaceId: input.spaceId,
+          threadId: input.threadId,
+          botId: input.botId,
+          type: "thread.message.created",
+          runId: input.runId,
+          payload: { messageId: message.id, role: "bot", blocks: [failed] },
         });
       }
     }

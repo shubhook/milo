@@ -98,6 +98,7 @@ describe("finalizeRun", () => {
         updateMany: vi.fn(async () => ({ count: 0 })),
       },
       bot: { update: vi.fn(async () => ({})) },
+      message: { create: vi.fn(async () => ({ id: "message-1" })) },
     };
     const transaction = vi
       .fn()
@@ -124,7 +125,15 @@ describe("finalizeRun", () => {
       ),
     ).resolves.toEqual({ continuationRunId: null });
     expect(transaction).toHaveBeenCalledTimes(2);
-    expect(createEvent).toHaveBeenCalledOnce();
+    // One committed attempt: the failure card's message event, then run.failed.
+    expect(createEvent).toHaveBeenCalledTimes(2);
+    expect(tx.message.create).toHaveBeenCalledOnce();
+    expect(tx.message.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        runId: "run-1",
+        blocks: [{ kind: "run_failed", error: "failed", fix: null }],
+      }),
+    });
     expect(publish).toHaveBeenCalledOnce();
   });
 });

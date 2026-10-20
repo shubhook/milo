@@ -1,4 +1,4 @@
-import type { MessageBlock, ThreadMessage } from "@milo/contracts";
+import type { MessageBlock, RunFailureFix, ThreadMessage } from "@milo/contracts";
 
 export function projectMessages(
   events: Array<{
@@ -223,6 +223,24 @@ export function runFailureError(event: {
   return message.length > RUN_FAILURE_ERROR_MAX
     ? `${message.slice(0, RUN_FAILURE_ERROR_MAX)}…`
     : message;
+}
+
+// Agent sign-in failures as the runtimes word them: Claude Code's signed-out message and the
+// ChatGPT plan's "Sign in again" errors.
+const AGENT_SIGN_IN_PATTERN = /is not signed in|sign in again/i;
+
+/** The action that fixes a failed run, when the error says what it is. */
+export function runFailureFix(error: string): RunFailureFix | null {
+  return AGENT_SIGN_IN_PATTERN.test(error) ? "agent_sign_in" : null;
+}
+
+/** The card a failed run leaves in its thread, or null when the run left no usable error. */
+export type RunFailedBlock = Extract<MessageBlock, { kind: "run_failed" }>;
+
+export function runFailedBlock(error: string | null | undefined): RunFailedBlock | null {
+  const message = runFailureError({ type: "run.failed", payload: { error } });
+  if (!message) return null;
+  return { kind: "run_failed", error: message, fix: runFailureFix(message) };
 }
 
 export type LiveMessageUpdate =
