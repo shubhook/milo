@@ -6,6 +6,7 @@ import {
   filterModelCatalog,
   pickCatalogModelId,
   selectedProviderOutsideSearchResults,
+  usageWindowTone,
 } from "./model-providers.js";
 
 function provider(provider: string): ModelCatalogEntry {
@@ -192,5 +193,14 @@ describe("filterModelCatalog", () => {
 
   it("returns nothing when no model matches", () => {
     expect(filterModelCatalog(models, "gemini")).toEqual([]);
+  });
+});
+
+describe("usageWindowTone", () => {
+  it("warns when a window is nearly used and turns destructive when full", () => {
+    expect(usageWindowTone(47)).toBe("normal");
+    expect(usageWindowTone(80)).toBe("warning");
+    expect(usageWindowTone(99.5)).toBe("warning");
+    expect(usageWindowTone(100)).toBe("destructive");
   });
 });

@@ -4410,6 +4410,7 @@ export function ShellPage() {
             isDeploymentOwner={bootstrapMe?.isDeploymentOwner === true}
             modelManaged={bootstrapMe?.modelManaged === true}
             sandboxProvider={bootstrapMe?.sandboxProvider}
+            onBotUpdated={() => void refreshBots().catch(() => undefined)}
             onAvatarStyleChange={async (avatarStyle) => {
               const nextMe = await rpc.preferences.update({ avatarStyle });
               setBootstrapMe(nextMe);

@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr ""
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "操作确认"
+msgid "Act"
+msgstr "直接执行"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "审批"
 msgid "Approval boundaries"
 msgstr "审批边界"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "审批"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "批准"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "购买操作前询问"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "购买前询问"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "发送外部邮件前询问"
+msgid "Ask first"
+msgstr "先询问"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "先编辑"
 msgid "Edit Profile"
 msgstr "编辑资料"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "邮箱"
@@ -2222,10 +2223,6 @@ msgstr "正在加载模型目录…"
 msgid "Loading preview…"
 msgstr "正在加载预览…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "正在加载规则…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr ""
@@ -2437,6 +2434,7 @@ msgstr "模型已更新。"
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "模型"
 
@@ -2559,6 +2557,7 @@ msgstr "无认证"
 msgid "No bot activity yet."
 msgstr "还没有机器人活动。"
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr ""
@@ -2660,6 +2659,7 @@ msgstr "没有仍在运行的任务"
 msgid "Nothing remembered yet"
 msgstr "暂无记忆"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "通知"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "提供方"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "购买"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "正在更新…"
 msgid "Upload"
 msgstr "上传"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "用量"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "视图"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "查看聊天"

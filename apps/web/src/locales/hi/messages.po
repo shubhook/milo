@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr ""
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "कार्रवाई की पुष्टि"
+msgid "Act"
+msgstr "करें"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "स्वीकृति"
 msgid "Approval boundaries"
 msgstr "अनुमोदन सीमाएं"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "स्वीकृतियाँ"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "अनुमोदित करें"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "खरीद कार्रवाइयों से पहले पूछें"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "खरीद से पहले पूछें"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "बाहरी ईमेल भेजने से पहले पूछें"
+msgid "Ask first"
+msgstr "पहले पूछें"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "पहले संपादित करें"
 msgid "Edit Profile"
 msgstr "प्रोफ़ाइल संपादित करें"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "ईमेल"
@@ -2222,10 +2223,6 @@ msgstr "मॉडल कैटलॉग लोड हो रहा है…"
 msgid "Loading preview…"
 msgstr "प्रीव्यू लोड हो रहा है…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "नियम लोड हो रहे हैं…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr ""
@@ -2437,6 +2434,7 @@ msgstr "मॉडल अपडेट किया गया।"
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "मॉडल्स"
 
@@ -2559,6 +2557,7 @@ msgstr "कोई प्रमाणीकरण नहीं"
 msgid "No bot activity yet."
 msgstr "अभी तक कोई बॉट गतिविधि नहीं।"
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr ""
@@ -2660,6 +2659,7 @@ msgstr "कुछ भी नहीं चल रहा"
 msgid "Nothing remembered yet"
 msgstr "अभी तक कुछ याद नहीं किया गया"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "सूचनाएं"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "प्रोवाइडर्स"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "खरीदारी"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "अपडेट हो रहा है…"
 msgid "Upload"
 msgstr "अपलोड"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "उपयोग"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "दृश्य"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "चैट देखें"

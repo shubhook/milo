@@ -132,3 +132,13 @@ export function currentUsageWindow(
   if (!window.resetsAt || Date.parse(window.resetsAt) > now) return window;
   return { ...window, usedPercent: 0, resetsAt: null };
 }
+
+/** At this share of a plan window the meter warns that the limit is close. */
+export const USAGE_WINDOW_HIGH_PERCENT = 80;
+
+/** A full window is out until it resets; a nearly full one warns. */
+export function usageWindowTone(usedPercent: number): "normal" | "warning" | "destructive" {
+  if (usedPercent >= 100) return "destructive";
+  if (usedPercent >= USAGE_WINDOW_HIGH_PERCENT) return "warning";
+  return "normal";
+}

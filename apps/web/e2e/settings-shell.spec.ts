@@ -48,6 +48,14 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await expect(settings.getByTestId("model-settings")).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-shell-usage-models");
 
+  await settings.getByTestId("settings-nav-notifications").click();
+  await expect(settings.getByRole("heading", { name: "Notifications", exact: true })).toBeVisible();
+  const chief = settings.getByRole("switch", { name: "Chief", exact: true });
+  await expect(chief).toBeChecked();
+  await chief.click();
+  await expect(chief).not.toBeChecked();
+  await captureScreenshot(page, testInfo, "settings-shell-notifications");
+
   await settings.getByTestId("settings-nav-memory").click();
   await expect(settings).toHaveAttribute("data-settings-section", "memory");
   await expect(settings.getByRole("heading", { name: "Memory", exact: true })).toBeVisible();
@@ -125,7 +133,7 @@ test("usage lists the agent's models with their plan limits", async ({ page }, t
             limits: [
               {
                 windowMinutes: 43_200,
-                usedPercent: 12,
+                usedPercent: 92,
                 resetsAt: new Date(Date.now() + 240 * hour).toISOString(),
               },
             ],
@@ -148,7 +156,14 @@ test("usage lists the agent's models with their plan limits", async ({ page }, t
   const chatgpt = settings.getByTestId("agent-model-chatgpt");
   await expect(chatgpt.getByText("Limits show after the next run.")).toBeVisible();
   const codex = settings.getByTestId("agent-model-codex");
-  await expect(codex.getByRole("progressbar", { name: "30-day" })).toBeVisible();
+  await expect(codex.getByRole("progressbar", { name: "30-day" })).toHaveAttribute(
+    "data-tone",
+    "warning",
+  );
+  await expect(claude.getByRole("progressbar", { name: "5-hour" })).toHaveAttribute(
+    "data-tone",
+    "normal",
+  );
   await expect(settings.getByTestId("model-settings")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "settings-agent-models");
 });

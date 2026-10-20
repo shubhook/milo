@@ -8,7 +8,7 @@ import {
   signup,
 } from "./helpers";
 
-test("actions run by default while optional confirmations live in advanced user settings", async ({
+test("actions run by default while optional confirmations live in Settings > Approvals", async ({
   page,
 }, testInfo) => {
   const stamp = Date.now();
@@ -26,28 +26,30 @@ test("actions run by default while optional confirmations live in advanced user 
   await expect(page.getByTestId("bot-settings").getByText("Action confirmations")).toHaveCount(0);
   await page.getByRole("button", { name: "Close panel" }).click();
 
-  const settings = await openUserSettings(page);
+  const settings = await openUserSettings(page, "approvals");
   await expect(settings).toHaveAttribute("role", "dialog");
-  await expect(settings).toBeFocused();
-  await expect(settings.getByText("Advanced", { exact: true })).toBeVisible();
-  await expect(settings.getByText("Optional controls most people never need")).toHaveCount(0);
-  await expect(settings.getByRole("heading", { name: "Action confirmations" })).not.toBeVisible();
-  await captureScreenshot(page, testInfo, "51-user-settings-advanced-collapsed");
-
-  await settings.getByText("Advanced", { exact: true }).click();
-  await expect(settings.getByRole("heading", { name: "Action confirmations" })).toBeVisible();
-  await expect(
-    settings.getByText(
-      "Bots act without asking by default. Add an exception only when you want to review a type of action first.",
-    ),
-  ).toHaveCount(0);
-  await expect(settings.getByText("No exceptions. Actions run automatically.")).toHaveCount(0);
+  await expect(settings.getByRole("heading", { name: "Approvals", exact: true })).toBeVisible();
+  const email = settings.getByRole("group", { name: "Email" });
+  await expect(email.getByRole("button", { name: "Act", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(settings.getByTestId("auto-review-toggle")).toBeVisible();
   await expect(settings.getByTestId("auto-review-toggle")).not.toBeChecked();
   await expect(settings.getByText("Flag unexpected actions")).toBeVisible();
-  await settings.getByRole("button", { name: "Ask before sending external email" }).click();
-  await expect(settings.getByText("Ask before email actions", { exact: true })).toBeVisible();
-  await captureScreenshot(page, testInfo, "52-advanced-action-confirmations");
+  await email.getByRole("button", { name: "Ask first", exact: true }).click();
+  await expect(email.getByRole("button", { name: "Ask first", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect
+    .poll(async () =>
+      (
+        await rpc<{ matchValue: string; effect: string }[]>(page, "approvalRules/list", undefined)
+      ).filter((rule) => rule.matchValue === "email" && rule.effect === "require_approval"),
+    )
+    .toHaveLength(1);
+  await captureScreenshot(page, testInfo, "52-settings-approvals");
   await settings.getByRole("button", { name: "Close user settings" }).click();
 
   await rpc(page, "approvalRules/set", {

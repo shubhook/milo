@@ -137,7 +137,15 @@ export async function createBotFromPicker(
 /** Open the user Settings overlay, optionally switching to a sidebar section. */
 export async function openUserSettings(
   page: Page,
-  section?: "general" | "memory" | "voice" | "usage" | "computer" | "updates",
+  section?:
+    | "general"
+    | "usage"
+    | "approvals"
+    | "notifications"
+    | "memory"
+    | "voice"
+    | "computer"
+    | "updates",
 ) {
   await page.getByTestId("sidebar-settings").click();
   const settings = page.getByTestId("user-settings");

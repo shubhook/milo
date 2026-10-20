@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr ""
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "İşlem onayları"
+msgid "Act"
+msgstr "Uygula"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "Onay"
 msgid "Approval boundaries"
 msgstr "Onay sınırları"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "Onaylar"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Onayla"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "Satın alma işlemlerinden önce sor"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "Satın almadan önce sor"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "Dışarıya e-posta göndermeden önce sor"
+msgid "Ask first"
+msgstr "Önce sor"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "Önce düzenle"
 msgid "Edit Profile"
 msgstr "Profili Düzenle"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "E-posta"
@@ -2222,10 +2223,6 @@ msgstr "Model kataloğu yükleniyor…"
 msgid "Loading preview…"
 msgstr "Önizleme yükleniyor…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "Kurallar yükleniyor…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr ""
@@ -2437,6 +2434,7 @@ msgstr "Model güncellendi."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "Modeller"
 
@@ -2559,6 +2557,7 @@ msgstr "Kimlik doğrulaması yok"
 msgid "No bot activity yet."
 msgstr "Henüz bot etkinliği yok."
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr ""
@@ -2660,6 +2659,7 @@ msgstr "Hâlâ çalışan bir şey yok"
 msgid "Nothing remembered yet"
 msgstr "Henüz hatırlanan bir şey yok"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "Bildirimler"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Sağlayıcılar"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "Satın almalar"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr ""
 msgid "Upload"
 msgstr "Yükle"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "Kullanım"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "Görünüm"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "Sohbeti görüntüle"

@@ -1,4 +1,5 @@
-import { AGENT_LOGOS, type AgentLogo as AgentLogoName } from "@milo/core";
+import type { AgentLogo as AgentLogoName } from "@milo/core";
+import { AGENT_LOGOS } from "@milo/core";
 
 /** The agent's mark on a bordered tile, as on the onboarding and model cards. */
 export function AgentLogo({ agent, size = 40 }: { agent: AgentLogoName; size?: number }) {

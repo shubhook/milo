@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr "Аккаунты"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "Подтверждения действий"
+msgid "Act"
+msgstr "Действовать"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "Подтверждение"
 msgid "Approval boundaries"
 msgstr "Границы одобрения"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "Подтверждения"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Утвердить"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "Спросите перед действиями по покупке"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "Спрашивайте перед покупкой"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "Спросите перед отправкой внешнего электронного письма"
+msgid "Ask first"
+msgstr "Сначала спросить"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "Сначала отредактируйте"
 msgid "Edit Profile"
 msgstr "Редактировать профиль"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "Электронная почта"
@@ -2222,10 +2223,6 @@ msgstr "Загрузка каталога моделей…"
 msgid "Loading preview…"
 msgstr "Загрузка предварительного просмотра…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "Загрузка правил…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr "Загрузка инструментов…"
@@ -2437,6 +2434,7 @@ msgstr "Модель обновлена."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "Модели"
 
@@ -2559,6 +2557,7 @@ msgstr "Нет аутентификации"
 msgid "No bot activity yet."
 msgstr "Активности бота пока нет."
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr "Нет ботов"
@@ -2660,6 +2659,7 @@ msgstr ""
 msgid "Nothing remembered yet"
 msgstr "Пока ничего не запомнено"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "Уведомления"
@@ -2872,6 +2872,10 @@ msgstr ""
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Провайдеры"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "Покупки"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "Обновление…"
 msgid "Upload"
 msgstr "Загрузить"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "Использование"
@@ -3914,6 +3917,7 @@ msgstr ""
 msgid "View"
 msgstr "Вид"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "Открыть чат"

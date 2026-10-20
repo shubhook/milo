@@ -198,8 +198,8 @@ msgid "Accounts"
 msgstr "Accounts"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Action confirmations"
-msgstr "Action confirmations"
+msgid "Act"
+msgstr "Act"
 
 #. placeholder {0}: bot.name
 #. placeholder {0}: group.spaceName
@@ -448,6 +448,10 @@ msgstr "Approval"
 msgid "Approval boundaries"
 msgstr "Approval boundaries"
 
+#: src/pages/SettingsOverlay.tsx
+msgid "Approvals"
+msgstr "Approvals"
+
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Approve"
@@ -505,12 +509,8 @@ msgid "Ask before purchase actions"
 msgstr "Ask before purchase actions"
 
 #: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before purchases"
-msgstr "Ask before purchases"
-
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Ask before sending external email"
-msgstr "Ask before sending external email"
+msgid "Ask first"
+msgstr "Ask first"
 
 #: src/components/integrations/IntegrationSetup.tsx
 msgid "Ask the server owner to configure this provider."
@@ -1780,6 +1780,7 @@ msgstr "Edit first"
 msgid "Edit Profile"
 msgstr "Edit Profile"
 
+#: src/components/ApprovalRulesSettings.tsx
 #: src/pages/Auth.tsx
 msgid "Email"
 msgstr "Email"
@@ -2222,10 +2223,6 @@ msgstr "Loading model catalog…"
 msgid "Loading preview…"
 msgstr "Loading preview…"
 
-#: src/components/ApprovalRulesSettings.tsx
-msgid "Loading rules…"
-msgstr "Loading rules…"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Loading tools…"
 msgstr "Loading tools…"
@@ -2437,6 +2434,7 @@ msgstr "Model updated."
 
 #: src/pages/LocalSettings.tsx
 #: src/pages/ModelSettingsOverlay.tsx
+#: src/pages/SettingsOverlay.tsx
 msgid "Models"
 msgstr "Models"
 
@@ -2559,6 +2557,7 @@ msgstr "No authentication"
 msgid "No bot activity yet."
 msgstr "No bot activity yet."
 
+#: src/components/NotificationSettings.tsx
 #: src/pages/shell/command-palette.tsx
 msgid "No bots"
 msgstr "No bots"
@@ -2660,6 +2659,7 @@ msgstr "Nothing is still running"
 msgid "Nothing remembered yet"
 msgstr "Nothing remembered yet"
 
+#: src/pages/SettingsOverlay.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Notifications"
 msgstr "Notifications"
@@ -2872,6 +2872,10 @@ msgstr "Protected input"
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Providers"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Purchases"
+msgstr "Purchases"
 
 #: src/pages/ActivityList.tsx
 msgid "Queued"
@@ -3863,7 +3867,6 @@ msgstr "Updating…"
 msgid "Upload"
 msgstr "Upload"
 
-#: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 msgid "Usage"
 msgstr "Usage"
@@ -3914,6 +3917,7 @@ msgstr "Version {0}"
 msgid "View"
 msgstr "View"
 
+#: src/pages/Artifacts.tsx
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "View chat"
