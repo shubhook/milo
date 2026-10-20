@@ -629,11 +629,11 @@ function Thread() {
       headerTitle: () => (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={!inGroup && botId ? t("Chat settings") : displayName || t("Thread")}
+          accessibilityLabel={displayName || t("Thread")}
           disabled={inGroup || !botId}
           onPress={() => {
             if (!botId || inGroup) return;
-            router.push({ pathname: "/bot-settings", params: { botId } });
+            router.push({ pathname: "/bot-profile", params: { botId } });
           }}
           style={{
             flexDirection: "row",
