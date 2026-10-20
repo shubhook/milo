@@ -279,9 +279,22 @@ class ScriptTest(unittest.TestCase):
                 "/profiles/other",
             ]
         )
+        def read_profile(proc):
+            # /proc cmdline can lag the fork; a single read races on a busy runner.
+            deadline = time.monotonic() + 1
+            found = None
+            while time.monotonic() < deadline:
+                if proc.poll() is not None:
+                    self.fail(f"python exited {proc.returncode} before its cmdline was readable")
+                found = helper.window_profile(str(proc.pid))
+                if found:
+                    return found
+                time.sleep(0.02)
+            return found
+
         try:
-            self.assertEqual(helper.window_profile(str(equals.pid)), "/profiles/mine")
-            self.assertEqual(helper.window_profile(str(separate.pid)), "/profiles/other")
+            self.assertEqual(read_profile(equals), "/profiles/mine")
+            self.assertEqual(read_profile(separate), "/profiles/other")
             self.assertIsNone(helper.window_profile("99999999"))
         finally:
             for proc in (equals, separate):
