@@ -46,8 +46,12 @@ test("+ opens the form, then an intro chat; sidebar collapses", async ({ page },
   await page.waitForURL(/\/app\/[^/]+$/);
   await expect(page.getByPlaceholder("Message New Bot")).toBeVisible();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
+  // Sidebar preview repeats the intro, so match the transcript bubble only.
   await expect(
-    page.getByText(/Hi, I'm New Bot\. I run on your own subscription/, { exact: false }),
+    page
+      .getByTestId("transcript")
+      .getByTestId("message-bot-bubble")
+      .getByText(/Hi, I'm New Bot\. I run on your own subscription/),
   ).toBeVisible();
   await expect(page.getByTestId("suggestion-chips")).toBeVisible();
   await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
