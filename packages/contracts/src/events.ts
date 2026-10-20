@@ -134,6 +134,11 @@ export const MessageBlock = z.discriminatedUnion("kind", [
     answerId: z.string().optional(),
   }),
   z.object({
+    /** Idea chips under a bot message; tapping one sends it as the user's message. */
+    kind: z.literal("suggestions"),
+    items: z.array(z.string().min(1).max(200)).min(1).max(6),
+  }),
+  z.object({
     /** Inline app authorization card (Composio-backed): logo, name, one-line
         description, and an Authorize button that flips to connected. */
     kind: z.literal("app_connect"),

@@ -1,4 +1,4 @@
-import { ChatMarkdown, LinkifiedText } from "@milo/chat-ui/native";
+import { ChatMarkdown, LinkifiedText, SuggestionChips } from "@milo/chat-ui/native";
 import type {
   AgentSkillCatalogEntry,
   Connection,
@@ -109,7 +109,6 @@ import { confirmDeleteBot } from "../lib/bot-lifecycle";
 import { setCallProviderTranscribe, startCall, useCallSession } from "../lib/call-session";
 import { loadDeviceVoiceEnabled } from "../lib/device-voice";
 import { available as dictationAvailable } from "../lib/dictation";
-import { cancelFocusPrompt, focusPromptThreadActive } from "../lib/focus-prompt";
 import { dateLocaleForUi, t, useI18n } from "../lib/i18n";
 import { saveLastBotId } from "../lib/last-bot";
 import {
@@ -921,25 +920,10 @@ function Thread() {
     void dismissThreadNotifications({ threadId: notificationThreadId }).catch(() => undefined);
   }, [botId, navigation, notificationThreadId]);
 
-  // Cancel delayed setup only when leaving this bot's thread (unmount or botId
-  // change). Blur alone is not leave — settings/computer push must keep the timer.
-  useEffect(() => {
-    if (!botId) return;
-    return () => {
-      cancelFocusPrompt(botId);
-    };
-  }, [botId]);
-
   // Covers returning from a pushed screen; the AppState listener covers returning from background.
   useFocusEffect(
     useCallback(() => {
-      if (botId) {
-        focusPromptThreadActive(botId);
-        void saveLastBotId(botId).catch(() => undefined);
-      } else {
-        // Group thread focus: prior bot screen may stay mounted, so clear any delayed setup.
-        cancelFocusPrompt();
-      }
+      if (botId) void saveLastBotId(botId).catch(() => undefined);
       if (AppState.currentState === "active" && notificationThreadId) {
         void setOpenNotificationThread({
           botId,
@@ -1197,11 +1181,6 @@ function Thread() {
     const groupTarget = plan.rerouteGroupId ?? initialGroupTarget;
     const botTarget = reroutedToGroup ? undefined : initialBotTarget;
     const trimmed = plan.trimmed;
-    const dropDelayedSetup = () => {
-      // Only after successful engagement so a failed upload/send keeps the setup card.
-      // Covers group-mention reroute while the bot thread stays mounted underneath.
-      if (initialBotTarget) cancelFocusPrompt(initialBotTarget);
-    };
     setSending(true);
     setError(null);
     try {
@@ -1230,7 +1209,6 @@ function Thread() {
         setAttachmentNotice(null);
       };
       if (!plan.shouldSend) {
-        dropDelayedSetup();
         clearOriginComposer();
         if (reroutedToGroup && groupTarget) {
           router.push({
@@ -1280,7 +1258,6 @@ function Thread() {
               replyQuote: replyQuote ?? undefined,
             },
       );
-      dropDelayedSetup();
       void loadSessionToken()
         .then((token) => resumeLiveNotifications(currentApiBase(), token, selectedSpaceId() ?? ""))
         .catch(() => undefined);
@@ -3177,6 +3154,7 @@ const MessageBubble = memo(function MessageBubble({
   const speaker =
     message.role === "bot" ? (memberName(members, message.botId) ?? botName) : undefined;
   const firstContent = segments.findIndex((segment) => segment.kind === "content");
+  const suggestions = message.blocks.find((block) => block.kind === "suggestions");
   return (
     <View style={{ gap: 8, width: "100%" }}>
       {segments.map((segment, index) => (
@@ -3188,6 +3166,7 @@ const MessageBubble = memo(function MessageBubble({
           actionProps={actionProps}
         />
       ))}
+      {suggestions ? <SuggestionsRow botId={cardBotId} items={suggestions.items} /> : null}
       {appConnectBlocks.map((block, index) => (
         <AppConnectCard
           key={`${block.provider}-${index}`}
@@ -3200,6 +3179,30 @@ const MessageBubble = memo(function MessageBubble({
     </View>
   );
 });
+
+/** Idea chips under a bot's intro; a tap sends the chip as the user's message. */
+function SuggestionsRow({ botId, items }: { botId: string; items: string[] }) {
+  const tokens = mobileTokens();
+  const [pending, setPending] = useState(false);
+  async function pick(text: string) {
+    setPending(true);
+    try {
+      await rpc("threads/send", { botId, clientNonce: newClientNonce(), text });
+    } catch (err) {
+      Alert.alert(err instanceof Error ? err.message : t("Failed to send message"));
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <SuggestionChips
+      items={items}
+      disabled={pending}
+      palette={tokens}
+      onPick={(item) => void pick(item)}
+    />
+  );
+}
 
 function MessageTextCard({
   message,

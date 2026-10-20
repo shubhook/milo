@@ -1,4 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
+import { SuggestionChips } from "@milo/chat-ui/web";
 import type { MessageBlock } from "@milo/contracts";
 import { abortableDelay } from "@milo/core";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
@@ -7,9 +8,50 @@ import { useEffect, useRef, useState } from "react";
 import { BuiCard, SuccessPop } from "../../components/ai/primitives";
 import { type ArtifactTarget, decodeArtifactBase64 } from "../../lib/artifact-open";
 import { chartViewport } from "../../lib/chart-viewport";
+import { newClientId } from "../../lib/client-id";
 import { connectMcpOauth } from "../../lib/mcp-connect";
 import { rpc } from "../../lib/rpc";
 
+/** Idea chips under a bot's intro. Picking one sends it to the bot as the user's message. */
+export function SuggestionsCard({
+  botId,
+  block,
+  onSent,
+}: {
+  botId: string;
+  block: Extract<MessageBlock, { kind: "suggestions" }>;
+  onSent: () => Promise<void>;
+}) {
+  const { t } = useLingui();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function pick(text: string) {
+    setPending(true);
+    setError(null);
+    try {
+      await rpc.threads.send({ botId, clientNonce: newClientId(), text });
+      await onSent();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t`Failed to send message`);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-1.5">
+      <SuggestionChips items={block.items} disabled={pending} onPick={(item) => void pick(item)} />
+      {error ? (
+        <p role="alert" className="text-small text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+// The focus card below is from the pre-v0 onboarding script; old threads still show it.
 export function ChoiceCard({
   botId,
   block,

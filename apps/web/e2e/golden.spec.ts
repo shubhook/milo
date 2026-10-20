@@ -1,5 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import {
+  activeBotId,
+  captureScreenshot,
+  completeOnboarding,
+  rpc,
+  signInWithChatGpt,
+  signup,
+} from "./helpers";
 
 function sidebarBotButton(page: Page, name: RegExp | string) {
   return page.locator("[data-sidebar-group] [data-roster-bot-id]").filter({
@@ -253,9 +260,7 @@ test("sign-in, spawn, and stop work in the shell", async ({ page }, testInfo) =>
 
   await page.context().clearCookies();
   await page.goto("/sign-in");
-  await page.getByPlaceholder("Your email address").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill("password12");
-  await page.getByRole("button", { name: "Continue with email" }).click();
+  await signInWithChatGpt(page, email, "Shell");
   await page.waitForURL(/\/app/, { timeout: 20_000 });
   await expect(sidebarBotButton(page, /^Chief/)).toBeVisible();
   await expect(sidebarBotButton(page, /Scout/)).toBeVisible();

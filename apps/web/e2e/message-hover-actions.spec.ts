@@ -52,17 +52,20 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
 
   const transcript = page.getByTestId("transcript");
+  const composer = page.getByRole("combobox", { name: /^Message/ });
+  await expect(composer).toBeVisible();
 
-  // Empty start: no Fresh-start greeting. Answer the focus card so a plain
-  // bot text bubble exists for hover layout checks.
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toBeVisible({
-    timeout: 20_000,
-  });
-  await page.getByRole("button", { name: /Day-to-day work/ }).click();
-  const botText = page.getByText(/Got it\./);
-  await expect(botText).toBeVisible({ timeout: 20_000 });
-  const botRow = transcript.locator(`[data-message-id]`).filter({ has: botText }).first();
-  await expect(botRow).toBeVisible();
+  // Intro chips sit in the same frame the rail centers on, so geometry uses the
+  // follow-up bot bubble. Scripted replies wrap the prompt ("done. i handled: …").
+  const layoutText = `hover-layout-${stamp}`;
+  await sendComposerMessage(page, composer, layoutText);
+  const botRow = transcript
+    .locator(`[data-message-id]`)
+    .filter({
+      has: page.getByTestId("message-bot-bubble").getByText(layoutText),
+    })
+    .first();
+  await expect(botRow).toBeVisible({ timeout: 20_000 });
   await expectRailAtRest(page, botRow);
   await captureScreenshot(page, testInfo, "message-actions-rest-desktop");
 
@@ -102,8 +105,6 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
 
   const parentText = `hover-parent-${stamp}`;
   const replyText = `hover-reply-${stamp}`;
-  const composer = page.getByRole("combobox", { name: /^Message/ });
-  await expect(composer).toBeVisible();
   await sendComposerMessage(page, composer, parentText);
 
   const parentRow = transcript.locator(`[data-message-id]`).filter({ hasText: parentText }).first();
@@ -366,17 +367,14 @@ test.describe("touch message actions", () => {
     expect(
       await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches),
     ).toBe(false);
-    await expect(page.getByText("What do you want me on first?", { exact: true })).toBeVisible({
-      timeout: 20_000,
-    });
-    await page.getByRole("button", { name: /Day-to-day work/ }).click();
-    const botText = page.getByText(/Got it\./);
-    await expect(botText).toBeVisible({ timeout: 20_000 });
-    const row = page
-      .getByTestId("transcript")
+    const transcript = page.getByTestId("transcript");
+    const row = transcript
       .locator("[data-message-id]")
-      .filter({ has: botText })
+      .filter({
+        has: page.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./),
+      })
       .first();
+    await expect(row).toBeVisible({ timeout: 20_000 });
     const rail = row.getByTestId("message-hover-rail");
     await expect(rail).toHaveCSS("opacity", "1");
     await expect(rail.getByRole("button", { name: "Reply", exact: true })).toBeVisible();

@@ -123,3 +123,5 @@ export const ChatMarkdown = memo(function ChatMarkdown({
 });
 
 export type { ChatMarkdownProps } from "./markdown";
+export type { SuggestionChipsProps } from "./suggestions";
+export { SuggestionChips } from "./suggestions.web";

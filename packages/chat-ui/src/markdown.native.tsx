@@ -245,3 +245,5 @@ const layout = StyleSheet.create({
 });
 
 export type { ChatMarkdownProps } from "./markdown";
+export type { SuggestionChipsProps } from "./suggestions";
+export { SuggestionChips } from "./suggestions.native";

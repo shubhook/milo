@@ -226,6 +226,7 @@ import { buildMcpUpdateMaterial } from "./mcp-material.js";
 import {
   chooseFocus,
   dismissFocus,
+  introduce,
   markAppConnected,
   promptFocus,
   startOnboarding,
@@ -4019,6 +4020,10 @@ export function createRouter(deps: RouterDeps) {
       },
     },
     onboarding: {
+      introduce: authed.onboarding.introduce.handler(async ({ context, input }) => {
+        await introduce(onboardingDeps, context.actor, input.botId);
+        return { ok: true as const };
+      }),
       start: authed.onboarding.start.handler(async ({ context, input }) => {
         await startOnboarding(onboardingDeps, context.actor, input.botId);
         return { ok: true as const };

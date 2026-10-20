@@ -1,15 +1,21 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import type { AgentStatus, ConnectionCatalogItem, IntegrationSetupState } from "@milo/contracts";
+import type { ConnectionCatalogItem } from "@milo/contracts";
 import { BOT_NAME_MAX_LENGTH } from "@milo/contracts";
-import { buildFeaturedConnectorTiles } from "@milo/core";
-import { BotAvatar, Button, DEFAULT_GROK_BOT_COLOR, Input } from "@milo/ui-web";
+import {
+  BOT_PALETTE_COLORS,
+  buildFeaturedConnectorTiles,
+  DEFAULT_GROK_BOT_COLOR,
+} from "@milo/core";
+import { BotAvatar, Button, Input } from "@milo/ui-web";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BotColorChoices } from "../components/BotAvatarChoices";
-import { IntegrationSetup } from "../components/integrations/IntegrationSetup";
+import type { ChatGptCapture } from "../lib/chatgpt-sign-in";
+import { chatGptAvailable } from "../lib/chatgpt-sign-in";
 import { rpc } from "../lib/rpc";
-import { agentReady, OnboardingAgentStep } from "./OnboardingAgent";
+import { agentReady } from "./OnboardingAgent";
 import { OnboardingAppsStep } from "./OnboardingApps";
+import { ChatGptStep, OnboardingDots } from "./OnboardingChatGpt";
 
 const FIRST_BOT_NAME = "Chief";
 const FIRST_BOT_SPAWN_KEY = "onboarding:first";
@@ -71,53 +77,49 @@ async function ensureFirstBot(first: FirstBot): Promise<{ id: string }> {
   return firstBotEnsure;
 }
 
+async function chatGptCapture(): Promise<ChatGptCapture> {
+  const response = await fetch("/api/auth/capabilities");
+  if (!response.ok) return null;
+  const capabilities = (await response.json()) as { chatgpt?: ChatGptCapture };
+  return capabilities.chatgpt ?? null;
+}
+
+/**
+ * Sign in with ChatGPT (when the account has no plan yet), meet the first bot,
+ * connect apps, then open the bot's chat with its intro.
+ */
 export function OnboardingPage() {
   const { t } = useLingui();
   const navigate = useNavigate();
-  const [step, setStep] = useState<"loading" | "agent" | "integrations" | "apps" | "meet">(
-    "loading",
-  );
+  const [step, setStep] = useState<"loading" | "chatgpt" | "meet" | "apps">("loading");
   const [catalog, setCatalog] = useState<ConnectionCatalogItem[]>([]);
   const [botName, setBotName] = useState(FIRST_BOT_NAME);
   const [botColor, setBotColor] = useState(DEFAULT_GROK_BOT_COLOR);
   const [creating, setCreating] = useState(false);
-  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
-  const [integrationSetup, setIntegrationSetup] = useState<IntegrationSetupState | null>(null);
-  const [integrationServers, setIntegrationServers] = useState<string[]>([]);
   const createStartedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const hasApps = buildFeaturedConnectorTiles(catalog).some((tile) => tile.item);
 
   useEffect(() => {
     void Promise.all([
       rpc.agent.status().catch(() => null),
-      rpc.integrationSetup.get().catch(() => null),
+      chatGptCapture().catch(() => null),
       rpc.connections.catalog({}).catch(() => []),
       rpc.bots.list().catch(() => []),
     ])
-      .then(([agent, integrations, apps, bots]) => {
+      .then(([agent, capture, apps, bots]) => {
         // A stale onboarding URL in a space that already met its first bot goes back to it.
         const existing = findFirstBot(bots);
         if (existing) {
           navigate(`/app/${existing.id}`, { replace: true });
           return;
         }
-        setAgentStatus(agent);
-        setIntegrationSetup(integrations);
         setCatalog(apps);
-        setStep(
-          agent && !agentReady(agent)
-            ? "agent"
-            : integrations?.needsSetup
-              ? "integrations"
-              : afterIntegrations(apps),
-        );
+        // Accounts made without ChatGPT (the desktop's local account) connect it here.
+        setStep(agent && !agentReady(agent) && chatGptAvailable(capture) ? "chatgpt" : "meet");
       })
       .catch(() => setStep("meet"));
   }, []);
-
-  function afterIntegrations(apps: ConnectionCatalogItem[]) {
-    return buildFeaturedConnectorTiles(apps).some((tile) => tile.item) ? "apps" : "meet";
-  }
 
   async function createFirstBot() {
     if (createStartedRef.current || !botName.trim()) return;
@@ -126,18 +128,7 @@ export function OnboardingPage() {
     setError(null);
     try {
       const bot = await ensureFirstBot({ name: botName.trim(), color: `${botColor}::shape_0` });
-      for (const serverId of integrationServers) {
-        await rpc.mcp.assignments.approve({ botId: bot.id, serverId });
-      }
-      // Onboarding continues conversationally in the thread: greeting first,
-      // then the focus choice (immediate for the first bot).
-      const started = await rpc.onboarding
-        .start({ botId: bot.id })
-        .then(() => true)
-        .catch(() => false);
-      if (started) {
-        await rpc.onboarding.promptFocus({ botId: bot.id }).catch(() => undefined);
-      }
+      await rpc.onboarding.introduce({ botId: bot.id }).catch(() => undefined);
       navigate(`/app/${bot.id}`);
     } catch (err) {
       createStartedRef.current = false;
@@ -154,46 +145,21 @@ export function OnboardingPage() {
             <Trans>Loading…</Trans>
           </p>
         ) : null}
-        {step === "agent" && agentStatus ? (
-          <OnboardingAgentStep
-            initialStatus={agentStatus}
-            onContinue={() =>
-              setStep(integrationSetup?.needsSetup ? "integrations" : afterIntegrations(catalog))
-            }
-          />
-        ) : null}
-        {step === "integrations" ? (
-          <div className="mx-auto max-w-[560px]">
-            <IntegrationSetup
-              serverSetup
-              initialState={integrationSetup}
-              onDone={() => {
-                // Server setup can turn on a catalog that was empty before.
-                void rpc.connections
-                  .catalog({})
-                  .catch(() => [])
-                  .then((apps) => {
-                    setCatalog(apps);
-                    setStep(afterIntegrations(apps));
-                  });
-              }}
-              onServerConnected={(id) =>
-                setIntegrationServers((current) => [...new Set([...current, id])])
-              }
-            />
+        {step === "chatgpt" ? (
+          <div className="mx-auto max-w-[460px]">
+            <ChatGptStep onConnected={() => setStep("meet")} />
           </div>
-        ) : null}
-        {step === "apps" ? (
-          <OnboardingAppsStep catalog={catalog} onContinue={() => setStep("meet")} />
         ) : null}
         {step === "meet" ? (
           <form
             className="flex flex-col items-center gap-6"
             onSubmit={(event) => {
               event.preventDefault();
-              void createFirstBot();
+              if (hasApps) setStep("apps");
+              else void createFirstBot();
             }}
           >
+            <OnboardingDots step={2} />
             <BotAvatar color={`${botColor}::shape_0`} identity="first-bot" size={148} />
             <h1 className="text-center text-title font-semibold tracking-tight text-foreground">
               <Trans>Meet your first bot</Trans>
@@ -205,7 +171,12 @@ export function OnboardingPage() {
               onChange={(event) => setBotName(event.target.value)}
               className="h-12 w-full max-w-[320px] text-center text-[18px] font-medium md:text-[18px]"
             />
-            <BotColorChoices value={botColor} onChange={setBotColor} className="justify-center" />
+            <BotColorChoices
+              colors={BOT_PALETTE_COLORS}
+              value={botColor}
+              onChange={setBotColor}
+              className="justify-center"
+            />
             {error ? (
               <p role="alert" className="text-small text-destructive">
                 {error}
@@ -217,9 +188,23 @@ export function OnboardingPage() {
               className="mt-2 px-6"
               disabled={!botName.trim() || creating}
             >
-              {creating ? <Trans>Opening chat…</Trans> : <Trans>Say hi</Trans>}
+              {hasApps ? (
+                <Trans>Continue</Trans>
+              ) : creating ? (
+                <Trans>Opening chat…</Trans>
+              ) : (
+                <Trans>Say hi</Trans>
+              )}
             </Button>
           </form>
+        ) : null}
+        {step === "apps" ? (
+          <OnboardingAppsStep
+            catalog={catalog}
+            busy={creating}
+            error={error}
+            onContinue={() => void createFirstBot()}
+          />
         ) : null}
       </div>
     </div>

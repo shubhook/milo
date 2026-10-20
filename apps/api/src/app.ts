@@ -10,6 +10,7 @@ import type {
 } from "@milo/adapter-kit";
 import type {
   ChatGptPlanCredential,
+  ChatGptSignInFlow,
   ComposioProvider,
   ConnectorRegistry,
   DestinationEmulator,
@@ -123,6 +124,8 @@ export async function createApp(
     composio?: ComposioProvider;
     pipedream?: ManagedConnectorProvider;
     email?: TransactionalEmailProvider;
+    /** Replaces the OpenAI sign-in flow, for offline tests. */
+    chatgpt?: ChatGptSignInFlow;
     remoteConnectors?: RemoteConnectorDependencies;
     logger?: Logger;
   } = {},
@@ -134,6 +137,7 @@ export async function createApp(
     composio: composioOverride,
     pipedream: pipedreamOverride,
     email: emailOverride,
+    chatgpt: chatgptOverride,
     remoteConnectors,
     logger: loggerOverride,
     ...envOverrides
@@ -305,8 +309,8 @@ export async function createApp(
       ? ("desktop" as const)
       : ("browser" as const)
     : null;
-  const chatgpt = chatgptCapture
-    ? new ChatGptSignIn({ hostId: chatGptHostId(env.authSecret) })
+  const chatgpt: ChatGptSignInFlow | undefined = chatgptCapture
+    ? (chatgptOverride ?? new ChatGptSignIn({ hostId: chatGptHostId(env.authSecret) }))
     : undefined;
   const auth = createAuth(prisma, {
     secret: env.authSecret,

@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, signupWithEmail } from "./helpers";
 
 /** The sidebar has no account menu, so sign out through the auth API and reload. */
 async function signOut(page: Page) {
@@ -48,7 +48,7 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   const password = "password12";
   const userName = "Auth Lifecycle";
 
-  await page.goto("/sign-up");
+  await page.goto("/sign-up?with=email");
   await expect(page.getByLabel("Name")).toHaveAttribute("autocomplete", "name");
   await expect(page.getByLabel("Email")).toHaveAttribute("autocomplete", "username");
   await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute(
@@ -56,7 +56,7 @@ test("logout protects bot deep links and sign-in restores the session", async ({
     "new-password",
   );
 
-  await signup(page, email, password, userName);
+  await signupWithEmail(page, email, password, userName);
   await completeOnboarding(page);
 
   await page.waitForURL(/\/app\/[^/]+$/);
@@ -66,21 +66,24 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await expect(page.getByTestId("user-menu-trigger")).toHaveCount(0);
 
   await signOut(page);
-  await expect(page.getByRole("heading", { name: "Sign in to Milo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in with ChatGPT" })).toBeVisible();
   await page.goto("/");
   await expect(page.locator('[data-rakazo-surface="welcome"]')).toBeVisible();
   await expect(page.getByText(/Your team of always-on agents/)).toBeVisible();
   await page.getByRole("button", { name: /Sign up/ }).click();
   await expect(page).toHaveURL(/\/sign-up$/);
-  await expect(page.getByRole("heading", { name: "Create your Milo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in with ChatGPT" })).toBeVisible();
   await page.goto("/");
   await captureScreenshot(page, testInfo, "37-logged-out-welcome");
 
   await page.goto(protectedBotPath);
   await page.waitForURL((url) => url.pathname === "/sign-in");
-  await expect(page.getByRole("heading", { name: "Sign in to Milo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in with ChatGPT" })).toBeVisible();
   await expect(page.getByText("Chief", { exact: true })).toHaveCount(0);
   await expect(page.getByText(userName, { exact: true })).toHaveCount(0);
+  // Accounts made with a password still sign in by email.
+  await page.goto("/sign-in?with=email");
+  await expect(page.getByRole("heading", { name: "Sign in to Milo" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("autocomplete", "username");
   await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute(
     "autocomplete",
@@ -96,7 +99,7 @@ test("logout protects bot deep links and sign-in restores the session", async ({
       .locator("form")
       .getByText(/invalid email or password|invalid credentials|incorrect password/i),
   ).toBeVisible();
-  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(page).toHaveURL(/\/sign-in\?with=email$/);
   await captureScreenshot(page, testInfo, "39-invalid-credentials");
 
   await page.getByLabel("Password", { exact: true }).fill(password);
@@ -143,7 +146,7 @@ test("recovers an email password from the sign-in screen", async ({ page }, test
   const resetPassword = "reset-password12";
   const userName = "Password Recovery";
 
-  await signup(page, email, originalPassword, userName);
+  await signupWithEmail(page, email, originalPassword, userName);
   await completeOnboarding(page);
   await page.waitForURL(/\/app\/[^/]+$/);
 
@@ -156,6 +159,7 @@ test("recovers an email password from the sign-in screen", async ({ page }, test
   await settings.getByRole("button", { name: "Close user settings" }).click();
 
   await signOut(page);
+  await page.goto("/sign-in?with=email");
   await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
   await page.getByRole("link", { name: "Forgot password?" }).click();
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();

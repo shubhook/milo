@@ -34,10 +34,12 @@ export function BotShapeChoices({
 }
 
 export function BotColorChoices({
+  colors = GROK_BOT_COLORS,
   value,
   onChange,
   className,
 }: {
+  colors?: readonly string[];
   value: string | null;
   onChange: (color: string) => void;
   className?: string;
@@ -48,7 +50,7 @@ export function BotColorChoices({
       aria-label={t`Color`}
       className={cn("m-0 flex flex-wrap gap-2.5 border-0 p-0", className)}
     >
-      {GROK_BOT_COLORS.map((color) => {
+      {colors.map((color) => {
         const selected = value?.toLowerCase() === color.toLowerCase();
         return (
           <button

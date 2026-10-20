@@ -1,6 +1,6 @@
 import type * as db from "@milo/db";
 import { describe, expect, it, vi } from "vitest";
-import { chooseFocus, markAppConnected } from "./onboarding.js";
+import { chooseFocus, introduce, markAppConnected } from "./onboarding.js";
 
 const posted = vi.hoisted(() => [] as Array<{ blocks: unknown[] }>);
 vi.mock("@milo/db", async (original) => ({
@@ -90,5 +90,74 @@ it("marks only the authorized connector when provider slugs collide", async () =
   expect(tx.message.update).toHaveBeenCalledWith({
     where: { id: "cards" },
     data: { blocks: [blocks[0], { ...blocks[1], status: "connected" }] },
+  });
+});
+
+describe("introduce", () => {
+  function introFixture(catalog: unknown[], existing = 0) {
+    const { deps, actor, tx } = fixture(catalog);
+    let count = existing;
+    (deps.prisma.bot.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: "bot",
+      name: "Chief",
+      thread: { id: "thread" },
+    });
+    deps.prisma.message = { count: vi.fn(async () => count) } as never;
+    Object.assign(tx.message, {
+      count: vi.fn(async () => count),
+    });
+    return {
+      deps,
+      actor,
+      afterPost: () => {
+        count = posted.length;
+      },
+    };
+  }
+
+  it("posts the intro and three chips, naming connected apps", async () => {
+    const { deps, actor } = introFixture([
+      { slug: "slack", name: "Slack", connected: true },
+      { slug: "gmail", name: "Gmail", connected: true },
+      { slug: "notion", name: "Notion", connected: false },
+    ]);
+    await introduce(deps, actor, "bot");
+    expect(posted).toHaveLength(1);
+    expect(posted[0]?.blocks).toEqual([
+      {
+        kind: "text",
+        text: "Hi, I'm Chief. I run on your own subscription and work on my own computer. I can already reach Gmail and Slack. What should I take off your plate first?",
+      },
+      {
+        kind: "suggestions",
+        items: ["Summarize my inbox", "Find something for me", "Make another bot"],
+      },
+    ]);
+  });
+
+  it("offers to plan the week when Gmail is not connected", async () => {
+    const { deps, actor } = introFixture([]);
+    await introduce(deps, actor, "bot");
+    expect(posted[0]?.blocks).toEqual([
+      {
+        kind: "text",
+        text: "Hi, I'm Chief. I run on your own subscription and work on my own computer. What should I take off your plate first?",
+      },
+      { kind: "suggestions", items: ["Plan my week", "Find something for me", "Make another bot"] },
+    ]);
+  });
+
+  it("posts once when called twice", async () => {
+    const { deps, actor, afterPost } = introFixture([]);
+    await introduce(deps, actor, "bot");
+    afterPost();
+    await introduce(deps, actor, "bot");
+    expect(posted).toHaveLength(1);
+  });
+
+  it("leaves a thread that already has messages alone", async () => {
+    const { deps, actor } = introFixture([], 1);
+    await introduce(deps, actor, "bot");
+    expect(posted).toHaveLength(0);
   });
 });

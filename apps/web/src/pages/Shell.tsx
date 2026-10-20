@@ -189,7 +189,6 @@ import {
 } from "../lib/computer-screen";
 import { publishComputerCommand } from "../lib/computer-workspace";
 import { desktopBridge } from "../lib/desktop";
-import { scheduleFocusPrompt } from "../lib/focus-prompt";
 import { localTimezone } from "../lib/local-timezone";
 import { copyableMessageText } from "../lib/message-text";
 import {
@@ -274,6 +273,7 @@ import {
   ChartBlockView,
   ChoiceCard,
   McpApprovalCard,
+  SuggestionsCard,
 } from "./shell/message-cards";
 import { WindowChrome } from "./WindowChrome";
 
@@ -560,8 +560,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   const [draggedBotId, setDraggedBotId] = useState<string | null>(null);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [botsSidebarCollapsed, setBotsSidebarCollapsed] = useState(false);
-  const focusPromptAbortRef = useRef<AbortController | null>(null);
-  const focusPromptBotIdRef = useRef<string | null>(null);
   const botsSidebarEdgeDragRef = useRef<{ startX: number; mode: "expand" | "collapse" } | null>(
     null,
   );
@@ -2141,12 +2139,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
       sendingRef.current = true;
       setSending(true);
       setSendError(null);
-      const dropDelayedSetup = () => {
-        // Only after successful engagement so a failed upload/send keeps the setup card.
-        if (initialBotTarget && focusPromptBotIdRef.current === initialBotTarget) {
-          cancelFocusPrompt();
-        }
-      };
       try {
         if (plan.shouldRunRoutines) {
           const sendNonce = newClientNonce();
@@ -2160,7 +2152,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
           );
         }
         if (!plan.shouldSend) {
-          dropDelayedSetup();
           clearReply();
           revokePendingAttachmentPreviews(attachments);
           setPendingAttachments((current) =>
@@ -2227,7 +2218,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
             );
           }
         }
-        dropDelayedSetup();
         clearReply();
         revokePendingAttachmentPreviews(attachments);
         setPendingAttachments((current) =>
@@ -2389,12 +2379,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
     await refreshBots().catch(() => undefined);
   }
 
-  function cancelFocusPrompt() {
-    focusPromptAbortRef.current?.abort();
-    focusPromptAbortRef.current = null;
-    focusPromptBotIdRef.current = null;
-  }
-
   function setBotsSidebarCollapsedPref(collapsed: boolean) {
     setBotsSidebarCollapsed(collapsed);
     writeBotsSidebarCollapsed(userId, collapsed);
@@ -2406,7 +2390,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   }
 
   async function createBot(input: CreateBotInputDraft) {
-    const isFirstBot = botsRef.current.length === 0;
     const bot = await rpc.bots.create({
       ...normalizeCreateBotProfile(input),
       notifyOnFinish: true,
@@ -2418,38 +2401,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
     );
     navigate(`/app/${bot.id}`);
     setPanel(null);
-    // Register cancellation before awaiting start so leaving the bot during
-    // startup cannot miss the abort and still schedule a late focus card.
-    cancelFocusPrompt();
-    const controller = new AbortController();
-    focusPromptAbortRef.current = controller;
-    focusPromptBotIdRef.current = bot.id;
-    const started = await rpc.onboarding
-      .start({ botId: bot.id })
-      .then(() => true)
-      .catch(() => false);
-    if (!started || controller.signal.aborted || focusPromptBotIdRef.current !== bot.id) {
-      if (focusPromptAbortRef.current === controller) {
-        focusPromptAbortRef.current = null;
-        focusPromptBotIdRef.current = null;
-      }
-      await refreshBots().catch(() => undefined);
-      return;
-    }
-    void scheduleFocusPrompt({
-      immediate: isFirstBot,
-      signal: controller.signal,
-      shouldSkip: () => sendingRef.current,
-      prompt: async () => {
-        if (focusPromptBotIdRef.current !== bot.id || activeBotId.current !== bot.id) return;
-        await rpc.onboarding.promptFocus({ botId: bot.id }).catch(() => undefined);
-      },
-    }).finally(() => {
-      if (focusPromptAbortRef.current === controller) {
-        focusPromptAbortRef.current = null;
-        focusPromptBotIdRef.current = null;
-      }
-    });
     await refreshBots().catch(() => undefined);
   }
 
@@ -2552,14 +2503,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
     setComputerErrorFromScreen(false);
     setComputerBotId(active?.id);
   }, [active?.id]);
-
-  useEffect(() => {
-    if (focusPromptBotIdRef.current && focusPromptBotIdRef.current !== active?.id) {
-      cancelFocusPrompt();
-    }
-  }, [active?.id]);
-
-  useEffect(() => () => cancelFocusPrompt(), []);
 
   useEffect(() => {
     if (!computer?.busyBotName) {
@@ -6487,6 +6430,11 @@ const MessageView = memo(function MessageView({
           const botId = "botId" in artifactTarget ? artifactTarget.botId : message.botId;
           if (!botId) return null;
           return <ChoiceCard key={i} botId={botId} block={block} onBotChanged={onBotChanged} />;
+        }
+        if (block.kind === "suggestions") {
+          const botId = "botId" in artifactTarget ? artifactTarget.botId : message.botId;
+          if (!botId) return null;
+          return <SuggestionsCard key={i} botId={botId} block={block} onSent={onRefresh} />;
         }
         if (block.kind === "app_connect") {
           const botId = "botId" in artifactTarget ? artifactTarget.botId : message.botId;

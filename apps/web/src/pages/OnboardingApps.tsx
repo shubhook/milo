@@ -2,17 +2,23 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import type { ConnectionCatalogItem } from "@milo/contracts";
 import { buildFeaturedConnectorTiles } from "@milo/core";
 import { Button } from "@milo/ui-web";
-import { Check, Plug } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Shimmer } from "../components/ai/primitives";
 import { connectCatalogApp } from "../lib/connect-app";
+import { OnboardingDots } from "./OnboardingChatGpt";
 
 /** The featured catalog apps, each with Connect. Skipping is always allowed. */
 export function OnboardingAppsStep({
   catalog,
+  busy = false,
+  error: continueError = null,
   onContinue,
 }: {
   catalog: ConnectionCatalogItem[];
+  /** Set while continuing, so the step cannot be left twice. */
+  busy?: boolean;
+  error?: string | null;
   onContinue: () => void;
 }) {
   const { t } = useLingui();
@@ -52,6 +58,7 @@ export function OnboardingAppsStep({
 
   return (
     <div className="flex flex-col items-center gap-7">
+      <OnboardingDots step={3} />
       <h1 className="text-center text-title font-semibold tracking-tight text-foreground">
         <Trans>Connect your apps</Trans>
       </h1>
@@ -63,12 +70,12 @@ export function OnboardingAppsStep({
           >
             <span
               aria-hidden="true"
-              className="flex size-9 shrink-0 items-center justify-center rounded-[10px] border border-border bg-card text-muted-foreground"
+              className="flex size-9 shrink-0 items-center justify-center rounded-[10px] border border-border bg-card font-semibold text-muted-foreground"
             >
               {item.logo ? (
                 <img src={item.logo} alt="" className="size-5 object-contain" />
               ) : (
-                <Plug size={18} strokeWidth={1.8} />
+                label.charAt(0).toUpperCase()
               )}
             </span>
             <span className="flex-1 font-medium text-foreground">{label}</span>
@@ -94,16 +101,21 @@ export function OnboardingAppsStep({
           </li>
         ))}
       </ul>
-      {error ? (
+      {error || continueError ? (
         <p role="alert" className="text-small text-destructive">
-          {error}
+          {error ?? continueError}
         </p>
       ) : null}
       <div className="flex gap-2">
-        <Button variant="ghost" size="lg" onClick={onContinue}>
+        <Button variant="ghost" size="lg" disabled={busy} onClick={onContinue}>
           <Trans>Skip for now</Trans>
         </Button>
-        <Button size="lg" className="px-5" disabled={connected.size === 0} onClick={onContinue}>
+        <Button
+          size="lg"
+          className="px-5"
+          disabled={busy || connected.size === 0}
+          onClick={onContinue}
+        >
           <Trans>Continue</Trans>
         </Button>
       </div>
