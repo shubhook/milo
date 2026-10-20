@@ -54,7 +54,8 @@ test("message hover shows beside-bubble actions; reply links to parent", async (
   const transcript = page.getByTestId("transcript");
 
   // Onboarding posts Chief's intro; use that bot bubble for hover layout checks.
-  const botText = page.getByText(/Hi, I'm Chief\./);
+  // Scope to the transcript: the sidebar preview repeats the same text.
+  const botText = transcript.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./);
   await expect(botText).toBeVisible({ timeout: 20_000 });
   const botRow = transcript.locator(`[data-message-id]`).filter({ has: botText }).first();
   await expect(botRow).toBeVisible();
@@ -361,13 +362,10 @@ test.describe("touch message actions", () => {
     expect(
       await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches),
     ).toBe(false);
-    const botText = page.getByText(/Hi, I'm Chief\./);
+    const transcript = page.getByTestId("transcript");
+    const botText = transcript.getByTestId("message-bot-bubble").getByText(/Hi, I'm Chief\./);
     await expect(botText).toBeVisible({ timeout: 20_000 });
-    const row = page
-      .getByTestId("transcript")
-      .locator("[data-message-id]")
-      .filter({ has: botText })
-      .first();
+    const row = transcript.locator("[data-message-id]").filter({ has: botText }).first();
     const rail = row.getByTestId("message-hover-rail");
     await expect(rail).toHaveCSS("opacity", "1");
     await expect(rail.getByRole("button", { name: "Reply", exact: true })).toBeVisible();
