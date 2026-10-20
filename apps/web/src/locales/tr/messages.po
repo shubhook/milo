@@ -2505,10 +2505,12 @@ msgstr "Gruba bir ad ver"
 msgid "Name this routine"
 msgstr ""
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs input"
 msgstr "Girdi bekliyor"
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "Devralma bekliyor"

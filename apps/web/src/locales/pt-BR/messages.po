@@ -2505,10 +2505,12 @@ msgstr "Dar nome ao grupo"
 msgid "Name this routine"
 msgstr ""
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs input"
 msgstr "Precisa de entrada"
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "Requer assumir o controle"

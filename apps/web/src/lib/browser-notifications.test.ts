@@ -5,9 +5,14 @@ import {
   browserNotificationMessage,
   deliverBrowserNotification,
   requestBrowserNotificationPermission,
+  rosterNotices,
   shouldNotifyBrowser,
 } from "./browser-notifications.js";
 import { i18n } from "./i18n.js";
+
+vi.mock("@lingui/core/macro", () => ({
+  t: (strings: TemplateStringsArray, ...values: unknown[]) => String.raw(strings, ...values),
+}));
 
 function event(
   overrides: Partial<{
@@ -158,5 +163,48 @@ describe("browser notifications", () => {
     await Promise.resolve();
     requestBrowserNotificationPermission(api);
     expect(requestPermission).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("rosterNotices", () => {
+  const bot = (id: string, status: string, notifyOnFinish = true) => ({
+    id,
+    status,
+    notifyOnFinish,
+  });
+
+  it("alerts when another bot goes idle after a run or starts waiting on the person", () => {
+    const previous = new Map([
+      ["a", "running"],
+      ["b", "waiting_input"],
+      ["c", "running"],
+      ["d", "queued"],
+    ]);
+    expect(
+      rosterNotices(
+        previous,
+        [bot("a", "idle"), bot("b", "idle"), bot("c", "waiting_input"), bot("d", "running")],
+        null,
+      ),
+    ).toEqual([
+      { botId: "a", status: "ended" },
+      { botId: "b", status: "ended" },
+      { botId: "c", status: "waiting_input" },
+    ]);
+  });
+
+  it("skips the open chat, muted bots, unchanged and first-seen bots", () => {
+    const previous = new Map([
+      ["open", "running"],
+      ["muted", "running"],
+      ["same", "idle"],
+    ]);
+    expect(
+      rosterNotices(
+        previous,
+        [bot("open", "idle"), bot("muted", "idle", false), bot("same", "idle"), bot("new", "idle")],
+        "open",
+      ),
+    ).toEqual([]);
   });
 });
