@@ -15,3 +15,14 @@ export const AGENT_LOGOS = {
 } as const;
 
 export type AgentLogo = keyof typeof AGENT_LOGOS;
+
+const PROVIDER_LOGOS: Partial<Record<string, AgentLogo>> = {
+  "claude-code": "claude",
+  chatgpt: "openai",
+  codex: "openai",
+};
+
+/** The mark for an agent model's provider, when there is one. */
+export function agentLogoForProvider(provider: string): AgentLogo | null {
+  return PROVIDER_LOGOS[provider] ?? null;
+}
