@@ -22,7 +22,7 @@ test("account settings avatar style previews differ for robot and organic", asyn
   await expect(organic.locator(".rakazo-bot-avatar")).toHaveCount(0);
 
   const robotMarkup = await robot
-    .locator("svg")
+    .locator(".rakazo-bot-avatar")
     .first()
     .evaluate((el) => el.outerHTML);
   const organicMarkup = await organic

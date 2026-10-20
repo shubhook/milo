@@ -737,6 +737,10 @@ msgstr "Выбрать файл"
 msgid "Choose which connected model Milo uses."
 msgstr "Выберите, какую подключенную модель использует Milo."
 
+#: src/pages/shell/avatar-studio-popover.tsx
+msgid "Circle"
+msgstr ""
+
 #: src/pages/shell/dialogs.tsx
 msgid "Clear"
 msgstr "Очистить"
@@ -1665,6 +1669,10 @@ msgstr "Docker"
 #: src/pages/HostComputerPrompt.tsx
 msgid "Docker limits access to your computer for added security. Using {hostLabel} lets bots work with your local files and tools."
 msgstr "Docker ограничивает доступ к вашему компьютеру для дополнительной безопасности. С помощью {hostLabel} боты могут работать с локальными файлами и инструментами."
+
+#: src/pages/shell/avatar-studio-popover.tsx
+msgid "Dome"
+msgstr ""
 
 #: src/pages/Auth.tsx
 msgid "Don’t have an account?"
@@ -3091,6 +3099,10 @@ msgstr "Робот"
 msgid "Rotate key"
 msgstr "Сменить ключ"
 
+#: src/pages/shell/avatar-studio-popover.tsx
+msgid "Rounded square"
+msgstr ""
+
 #: src/pages/RoutineEditor.tsx
 #: src/pages/Shell.tsx
 msgid "Routine"
@@ -3628,6 +3640,10 @@ msgstr "Вход по этой подписке пока недоступен в
 
 #: src/pages/Artifacts.tsx
 msgid "This week"
+msgstr ""
+
+#: src/pages/shell/avatar-studio-popover.tsx
+msgid "Tile"
 msgstr ""
 
 #: src/pages/RoutineSchedule.tsx
