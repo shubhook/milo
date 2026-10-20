@@ -24,15 +24,16 @@ test("a hidden tab alerts when another bot finishes", async ({ page }) => {
   await createNamedBot(page, "Atlas");
 
   let atlasStatus = "running";
+  let atlasId = "";
   const withAtlasStatus = (value: unknown): unknown => {
     if (Array.isArray(value)) return value.map(withAtlasStatus);
     if (!value || typeof value !== "object") return value;
     const record = Object.fromEntries(
       Object.entries(value).map(([key, entry]) => [key, withAtlasStatus(entry)]),
     );
-    return record.name === "Atlas" && "status" in record
-      ? { ...record, status: atlasStatus }
-      : record;
+    if (record.name !== "Atlas" || !("status" in record)) return record;
+    atlasId = String(record.id);
+    return { ...record, status: atlasStatus };
   };
   const rewrite = async (route: Route) => {
     const response = await route.fetch();
@@ -40,11 +41,21 @@ test("a hidden tab alerts when another bot finishes", async ({ page }) => {
   };
   await page.route("**/rpc/spaces/list", rewrite);
   await page.route("**/rpc/bootstrap", rewrite);
+  // The roster only shows active runs, so a finished run reads as idle there and its outcome
+  // comes from the recent runs list.
+  await page.route("**/rpc/runs/list", async (route) => {
+    const response = await route.fetch();
+    const body = (await response.json()) as { json?: { runs?: unknown[] } };
+    if (atlasStatus === "idle" && body.json?.runs) {
+      body.json.runs.unshift({ botId: atlasId, status: "completed" });
+    }
+    await route.fulfill({ response, json: body });
+  });
   // Watch Atlas from Chief's chat: the open chat alerts from its own stream instead.
   await page.goto(`/app/${chiefId}`);
   await expect(page.getByTestId("bots-sidebar").getByText("Atlas", { exact: true })).toBeVisible();
 
-  atlasStatus = "completed";
+  atlasStatus = "idle";
   await expect
     .poll(
       () =>
