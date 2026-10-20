@@ -10,6 +10,10 @@ import {
 } from "./browser-notifications.js";
 import { i18n } from "./i18n.js";
 
+vi.mock("@lingui/core/macro", () => ({
+  t: (strings: TemplateStringsArray, ...values: unknown[]) => String.raw(strings, ...values),
+}));
+
 function event(
   overrides: Partial<{
     type:

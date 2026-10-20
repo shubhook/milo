@@ -2505,10 +2505,12 @@ msgstr "그룹 이름"
 msgid "Name this routine"
 msgstr "이 루틴의 이름을 정하세요"
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs input"
 msgstr "입력 필요"
 
+#: src/lib/browser-notifications.ts
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "인수 필요"

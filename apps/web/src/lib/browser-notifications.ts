@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { ProductEvent } from "@milo/contracts";
 import { plainTextFromMarkdown } from "@milo/core";
 import { i18n } from "./i18n";
@@ -176,10 +177,10 @@ export function rosterNoticeMessage(
     };
   }
   if (status === "waiting_input") {
-    return { title: name, body: i18n._({ id: "Needs input", message: "Needs input" }) };
+    return { title: name, body: t`Needs input` };
   }
   if (status === "waiting_takeover") {
-    return { title: name, body: i18n._({ id: "Needs takeover", message: "Needs takeover" }) };
+    return { title: name, body: t`Needs takeover` };
   }
   return {
     title: i18n._({ id: "{name} finished", message: "{name} finished", values: { name } }),
