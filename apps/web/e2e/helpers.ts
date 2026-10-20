@@ -71,7 +71,6 @@ export async function captureScreenshot(page: Page, testInfo: TestInfo, name: st
 export async function openNewBot(page: Page) {
   await page.getByTestId("create-menu-trigger").click();
   await page.getByTestId("create-new-bot").click();
-  await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "create");
   await expect(page.getByTestId("create-bot-form")).toBeVisible();
 }
 
@@ -103,7 +102,7 @@ export async function createBotFromPicker(
     await form.locator("label:has-text('Title') input").fill(options.title);
   }
   if (options.description != null) {
-    await form.locator("label:has-text('Description') textarea").fill(options.description);
+    await form.locator("label:has-text('What this bot is for') textarea").fill(options.description);
   }
   if (options.computerMode === "dedicated") {
     await form.getByTestId("create-bot-private").click();
