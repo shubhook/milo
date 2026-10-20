@@ -1985,6 +1985,15 @@ msgstr "그룹 설정"
 msgid "Groups"
 msgstr ""
 
+#. placeholder {0}: rule.matchValue
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand {0} to me"
+msgstr "{0}은(는) 나에게 넘기기"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand to me"
+msgstr "나에게 넘기기"
+
 #: src/components/call/CallCard.tsx
 msgid "Hang up"
 msgstr "통화 종료"

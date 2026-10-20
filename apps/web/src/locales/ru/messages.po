@@ -1985,6 +1985,15 @@ msgstr "Настройки группы"
 msgid "Groups"
 msgstr "Группы"
 
+#. placeholder {0}: rule.matchValue
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand {0} to me"
+msgstr "Передавать мне {0}"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand to me"
+msgstr "Передать мне"
+
 #: src/components/call/CallCard.tsx
 msgid "Hang up"
 msgstr "Завершить звонок"

@@ -1985,6 +1985,15 @@ msgstr "Configuración del grupo"
 msgid "Groups"
 msgstr ""
 
+#. placeholder {0}: rule.matchValue
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand {0} to me"
+msgstr "Pásame {0}"
+
+#: src/components/ApprovalRulesSettings.tsx
+msgid "Hand to me"
+msgstr "Pásamelo a mí"
+
 #: src/components/call/CallCard.tsx
 msgid "Hang up"
 msgstr "Colgar"

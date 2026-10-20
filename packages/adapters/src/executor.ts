@@ -60,6 +60,7 @@ import {
   expandSkillReferencesInPrompt,
   formatSkillRunPrompt,
   formatSkillsCatalogInstruction,
+  HAND_OFF_TOOL_RESULT,
   humanizeToolName,
   inferAttachmentMimeType,
   isCallClientNonce,
@@ -4052,6 +4053,8 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 autoReviewEnabled: autoReviewPref,
                 checkerConfigured,
               });
+          // Hand to me: never perform it, and have the bot give the person what it prepared.
+          if (plan === "hand") return { error: HAND_OFF_TOOL_RESULT };
           let reviewReason: string | undefined;
           let gateDecision: "ask" | "allow" = plan === "ask" ? "ask" : "allow";
           const needsApprovalEarly = plan === "ask" || plan === "judge";

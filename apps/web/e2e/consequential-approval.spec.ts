@@ -104,6 +104,41 @@ test("actions run by default while optional confirmations live in Settings > App
   await expect(page.getByRole("button", { name: "Allow once", exact: true })).toHaveCount(0);
 });
 
+test("Hand to me never asks: the action is handed back to the person", async ({
+  page,
+}, testInfo) => {
+  await signup(page, `hand-to-me-${Date.now()}@rakazo.test`, "password12", "Hand To Me");
+  await completeOnboarding(page);
+
+  const settings = await openUserSettings(page, "approvals");
+  const email = settings.getByRole("group", { name: "Email" });
+  await email.getByRole("button", { name: "Hand to me", exact: true }).click();
+  await expect(email.getByRole("button", { name: "Hand to me", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect
+    .poll(async () =>
+      (await rpc<{ matchValue: string; effect: string }[]>(page, "approvalRules/list", undefined))
+        .filter((rule) => rule.matchValue === "email")
+        .map((rule) => rule.effect),
+    )
+    .toEqual(["hand_off"]);
+  await captureScreenshot(page, testInfo, "57-settings-approvals-hand-to-me");
+  await settings.getByRole("button", { name: "Close user settings" }).click();
+
+  // The same level on the destination connector: the write is never performed or asked about.
+  await rpc(page, "approvalRules/set", {
+    effect: "hand_off",
+    matchKind: "connector",
+    matchValue: "destination.write",
+  });
+  await sendDestinationWrite(page, "write this to the destination crm as a note");
+  await waitForRunIdle(page);
+  await expectComposerReady(page);
+  await expect(page.getByRole("button", { name: "Allow once", exact: true })).toHaveCount(0);
+});
+
 async function sendDestinationWrite(page: Page, prompt: string) {
   await expectComposerReady(page);
   const composer = page.getByPlaceholder(/Message/);
