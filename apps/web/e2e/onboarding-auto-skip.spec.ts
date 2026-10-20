@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, reachMeetStep, signup } from "./helpers";
+import { captureScreenshot, reachMeetStep, sayHiToFirstBot, signup } from "./helpers";
 
 test("meet the first bot offers six colors and creates Chief", async ({ page }, testInfo) => {
   const createRequest = page.waitForRequest("**/rpc/bots/create");

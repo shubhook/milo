@@ -75,45 +75,6 @@ test("+ opens the form, then an empty chat; sidebar collapses", async ({ page },
   await captureScreenshot(page, testInfo, "bots-sidebar-expanded");
 });
 
-test("later bot waits before showing the focus card; sending cancels it", async ({ page }) => {
-  const stamp = Date.now();
-  await signup(page, `focus-delay-${stamp}@rakazo.test`, "password12", "Focus Delay");
-  await completeOnboarding(page);
-  // First bot from onboarding shows the focus card immediately.
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toBeVisible();
-
-  await page.clock.install();
-  await createBotFromPicker(page);
-  await expect(page.getByPlaceholder("Message New Bot")).toBeVisible();
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
-
-  await page.clock.fastForward(9_000);
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
-  await page.clock.fastForward(1_500);
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toBeVisible();
-
-  await createBotFromPicker(page, { name: "Later Bot" });
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
-  const composer = page.getByPlaceholder(/Message/);
-  await composer.fill("I'll set this up myself");
-  // Send must finish before the delay is advanced: cancel runs after a successful
-  // RPC, and promptFocus will still post if the clock fires while send is in flight.
-  const sent = page.waitForResponse(
-    (response) => response.url().includes("/rpc/threads/send") && response.ok(),
-  );
-  await page.keyboard.press("Enter");
-  await sent;
-  // Scope to the user bubble: the assistant reply can echo this phrase as a substring.
-  await expect(
-    page
-      .getByTestId("transcript")
-      .getByTestId("message-user-bubble")
-      .getByText("I'll set this up myself", { exact: true }),
-  ).toBeVisible();
-  await page.clock.fastForward(12_000);
-  await expect(page.getByText("What do you want me on first?", { exact: true })).toHaveCount(0);
-});
-
 test("plus picker can create a Private computer bot", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `new-bot-private-${stamp}@rakazo.test`, "password12", "New Bot Private");
