@@ -173,43 +173,36 @@ describe("rosterNotices", () => {
     notifyOnFinish,
   });
 
-  it("alerts when another bot finishes, fails or starts waiting on the person", () => {
+  it("alerts when another bot goes idle after a run or starts waiting on the person", () => {
     const previous = new Map([
       ["a", "running"],
-      ["b", "running"],
+      ["b", "waiting_input"],
       ["c", "running"],
       ["d", "queued"],
     ]);
     expect(
       rosterNotices(
         previous,
-        [bot("a", "completed"), bot("b", "failed"), bot("c", "waiting_input"), bot("d", "running")],
+        [bot("a", "idle"), bot("b", "idle"), bot("c", "waiting_input"), bot("d", "running")],
         null,
       ),
     ).toEqual([
-      { botId: "a", status: "completed" },
-      { botId: "b", status: "failed" },
+      { botId: "a", status: "ended" },
+      { botId: "b", status: "ended" },
       { botId: "c", status: "waiting_input" },
     ]);
   });
 
-  it("skips the open chat, muted bots, unchanged and first-seen bots, and stops", () => {
+  it("skips the open chat, muted bots, unchanged and first-seen bots", () => {
     const previous = new Map([
       ["open", "running"],
       ["muted", "running"],
-      ["same", "completed"],
-      ["stopped", "running"],
+      ["same", "idle"],
     ]);
     expect(
       rosterNotices(
         previous,
-        [
-          bot("open", "completed"),
-          bot("muted", "completed", false),
-          bot("same", "completed"),
-          bot("new", "completed"),
-          bot("stopped", "cancelled"),
-        ],
+        [bot("open", "idle"), bot("muted", "idle", false), bot("same", "idle"), bot("new", "idle")],
         "open",
       ),
     ).toEqual([]);

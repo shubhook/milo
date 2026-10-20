@@ -728,23 +728,40 @@ export function ShellPage() {
     if (!previous || typeof Notification === "undefined") return;
     if (Notification.permission !== "granted") return;
     if (document.visibilityState === "visible" && document.hasFocus()) return;
-    for (const notice of rosterNotices(previous, bots, openBotId)) {
-      const name = bots.find((bot) => bot.id === notice.botId)?.name ?? "";
-      const message = rosterNoticeMessage(notice.status, name);
+    const notices = rosterNotices(previous, bots, openBotId);
+    if (notices.length === 0) return;
+    const show = (botId: string, status: Parameters<typeof rosterNoticeMessage>[0]) => {
+      const name = bots.find((bot) => bot.id === botId)?.name ?? "";
+      const message = rosterNoticeMessage(status, name);
       try {
         const shown = new Notification(message.title, {
           body: message.body,
-          tag: `bot:${notice.botId}`,
+          tag: `bot:${botId}`,
         });
         shown.onclick = () => {
           window.focus();
-          navigate(`/app/${notice.botId}`);
+          navigate(`/app/${botId}`);
           shown.close();
         };
       } catch {
         // Some browsers only allow notifications from a service worker; skip quietly.
       }
+    };
+    for (const notice of notices) {
+      if (notice.status !== "ended") show(notice.botId, notice.status);
     }
+    const ended = notices.filter((notice) => notice.status === "ended");
+    if (ended.length === 0) return;
+    // The roster only says the bot is idle again; the latest finished run says how it ended.
+    void rpc.runs
+      .list({ filter: "recent" })
+      .then(({ runs }) => {
+        for (const notice of ended) {
+          const status = runs.find((run) => run.botId === notice.botId)?.status;
+          if (status === "completed" || status === "failed") show(notice.botId, status);
+        }
+      })
+      .catch(() => undefined);
   }, [bots, openBotId, navigate]);
   const computerBot =
     (computerBotId ? bots.find((bot) => bot.id === computerBotId) : undefined) ?? active;

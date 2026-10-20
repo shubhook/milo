@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import type { ProductEvent } from "@milo/contracts";
-import { plainTextFromMarkdown } from "@milo/core";
+import { ACTIVE_RUN_STATUSES, plainTextFromMarkdown } from "@milo/core";
 import { i18n } from "./i18n";
 
 export type BrowserNotificationPermission = "default" | "denied" | "granted";
@@ -135,38 +135,39 @@ export function deliverBrowserNotification(
 
 export type RosterNotice = {
   botId: string;
-  status: "completed" | "failed" | "waiting_input" | "waiting_takeover";
+  /** `ended`: the bot went back to idle; the run's own status says whether it finished or failed. */
+  status: "ended" | "waiting_input" | "waiting_takeover";
 };
 
-const NOTICE_STATUSES: ReadonlySet<string> = new Set([
-  "completed",
-  "failed",
-  "waiting_input",
-  "waiting_takeover",
-]);
+const ACTIVE_STATUSES: ReadonlySet<string> = new Set(ACTIVE_RUN_STATUSES);
 
 /**
  * Bots other than the open chat have no event stream here, so their alerts come from roster
- * refreshes: a bot whose run just finished, failed, or stopped to wait for the person.
- * The open chat's stream already alerts for its own bot, and a first sighting is not a change.
+ * refreshes. The roster only carries active run statuses, so a run that finished or failed shows
+ * as the bot going back to idle. The open chat's stream already alerts for its own bot, and a
+ * first sighting is not a change.
  */
 export function rosterNotices(
   previous: ReadonlyMap<string, string>,
   bots: readonly { id: string; status: string; notifyOnFinish: boolean }[],
   openBotId: string | null,
 ): RosterNotice[] {
-  return bots.flatMap((bot) => {
+  return bots.flatMap((bot): RosterNotice[] => {
     const before = previous.get(bot.id);
     if (before === undefined || before === bot.status) return [];
-    if (!NOTICE_STATUSES.has(bot.status) || !bot.notifyOnFinish || bot.id === openBotId) {
-      return [];
+    if (!bot.notifyOnFinish || bot.id === openBotId) return [];
+    if (bot.status === "waiting_input" || bot.status === "waiting_takeover") {
+      return [{ botId: bot.id, status: bot.status }];
     }
-    return [{ botId: bot.id, status: bot.status as RosterNotice["status"] }];
+    if (bot.status === "idle" && ACTIVE_STATUSES.has(before)) {
+      return [{ botId: bot.id, status: "ended" }];
+    }
+    return [];
   });
 }
 
 export function rosterNoticeMessage(
-  status: RosterNotice["status"],
+  status: "completed" | "failed" | "waiting_input" | "waiting_takeover",
   botName: string,
 ): { title: string; body: string } {
   const name = botName.trim() || i18n._({ id: "Bot", message: "Bot" });
