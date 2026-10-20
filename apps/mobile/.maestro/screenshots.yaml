@@ -107,12 +107,6 @@ tags:
     direction: DOWN
 - takeScreenshot: "11b-all-providers"
 
-- openLink: "rakazo:///voice"
-- extendedWaitUntil:
-    visible: "Scripted"
-    timeout: 10000
-- takeScreenshot: "12-voice"
-
 - openLink: "rakazo:///integrations"
 - extendedWaitUntil:
     visible: "Search apps"

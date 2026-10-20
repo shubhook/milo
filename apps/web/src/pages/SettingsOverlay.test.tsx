@@ -35,7 +35,6 @@ vi.mock("./AccountSettingsOverlay", () => ({
   UpdatesSettingsPanel: () => null,
 }));
 vi.mock("./AgentModelsPanel", () => ({ AgentModelsPanel: () => null }));
-vi.mock("./VoiceSettingsOverlay", () => ({ VoiceSettingsOverlay: () => null }));
 
 import { SettingsOverlay } from "./SettingsOverlay";
 
@@ -64,7 +63,7 @@ async function navIds() {
   );
   await act(async () => root.unmount());
   container.remove();
-  return ids.filter((id) => id !== "voice");
+  return ids;
 }
 
 it("lists Usage, General, Allow list and Updates in the desktop app", async () => {

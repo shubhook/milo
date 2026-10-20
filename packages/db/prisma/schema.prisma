@@ -36,7 +36,6 @@ model User {
   members                     Member[]
   invitations                 Invitation[]
   modelCredentials            UserModelCredential[]
-  voiceCredentials            UserVoiceCredential[]
   secrets                     Secret[]
   mcpServers                  McpServer[]
   botSections                 BotSection[]
@@ -231,7 +230,6 @@ model SpaceMember {
   role             String                 @default("member")
   createdAt        DateTime
   modelPreferences SpaceModelPreference[]
-  voicePreferences SpaceVoicePreference[]
   aiDataConsents AiDataConsent[]
 
   @@unique([spaceId, userId])
@@ -290,20 +288,6 @@ model UserModelCredential {
   @@map("user_model_credentials")
 }
 
-model UserVoiceCredential {
-  id          String                 @id @default(cuid())
-  userId      String
-  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider    String
-  secretId    String
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  preferences SpaceVoicePreference[]
-
-  @@unique([id, userId])
-  @@index([userId, provider, updatedAt])
-  @@map("user_voice_credentials")
-}
 
 model SpaceModelPreference {
   id           String              @id @default(cuid())
@@ -325,26 +309,6 @@ model SpaceModelPreference {
   @@map("space_model_preferences")
 }
 
-model SpaceVoicePreference {
-  id           String              @id @default(cuid())
-  spaceId      String
-  userId       String
-  spaceMember  SpaceMember         @relation(fields: [spaceId, userId], references: [spaceId, userId], onDelete: Cascade)
-  credentialId String
-  credential   UserVoiceCredential @relation(fields: [credentialId, userId], references: [id, userId], onDelete: Cascade)
-  voiceId      String              @default("")
-  // Fish speech-model override. Null keeps the deployment default.
-  speechModel  String?
-  isDefault    Boolean             @default(false)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-
-  @@unique([spaceId, userId, credentialId])
-  @@index([spaceId, userId, isDefault, updatedAt])
-  @@index([credentialId])
-  // Partial unique index space_voice_preferences_default_key is created in SQL.
-  @@map("space_voice_preferences")
-}
 
 model Bot {
   screenGeneration Int @default(0)
@@ -373,8 +337,6 @@ model Bot {
   computerId        String?
   computer          Computer?         @relation(fields: [computerId], references: [id], onDelete: SetNull)
   computerSwitching Boolean           @default(false)
-  voiceId           String?
-  autoSpeak         Boolean           @default(false)
   modelProvider     String?
   modelId           String?
   thinkingLevel     String?

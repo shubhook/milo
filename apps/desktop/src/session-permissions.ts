@@ -46,17 +46,6 @@ export function installSessionPermissions(
       return;
     }
 
-    if (permission === "media") {
-      // Dictation needs only the microphone. OS consent still applies after this grant.
-      callback(
-        "securityOrigin" in details &&
-          httpOrigin(details.securityOrigin) === app.origin &&
-          "mediaTypes" in details &&
-          (details.mediaTypes?.length ?? 0) > 0 &&
-          details.mediaTypes?.every((type) => type === "audio") === true,
-      );
-      return;
-    }
     callback(permission === "notifications" || permission === "clipboard-sanitized-write");
   });
 
@@ -84,7 +73,6 @@ export function installSessionPermissions(
       return false;
     }
 
-    if (permission === "media") return details.mediaType === "audio";
     return permission === "notifications" || permission === "clipboard-sanitized-write";
   });
 }

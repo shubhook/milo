@@ -49,14 +49,8 @@ import type {
   ScreenSession,
   SecretRecord,
   SnapshotRef,
-  SpeechClip,
   TerminalRequest,
   TransactionalEmail,
-  VoiceCapabilities,
-  VoiceInfo,
-  VoiceSynthesizeRequest,
-  VoiceTranscribeRequest,
-  VoiceVerifyResult,
   WebFetchCapabilities,
   WebFetchRequest,
   WebFetchResult,
@@ -287,14 +281,6 @@ export interface TransactionalEmailProvider {
 export interface ExecutionRunner {
   describe(): AdapterDescriptor<{ cloud: boolean; selfHosted: boolean; desktop: boolean }>;
   dispatch(runId: string, target: "cloud" | "self-hosted" | "desktop"): Promise<void>;
-}
-
-export interface VoiceProvider {
-  describe(): AdapterDescriptor<VoiceCapabilities>;
-  verify(apiKey: string, context: AdapterContext): Promise<VoiceVerifyResult>;
-  listVoices(apiKey: string, context: AdapterContext): Promise<VoiceInfo[]>;
-  synthesize(request: VoiceSynthesizeRequest, context: AdapterContext): Promise<SpeechClip>;
-  transcribe?(request: VoiceTranscribeRequest, context: AdapterContext): Promise<{ text: string }>;
 }
 
 /**

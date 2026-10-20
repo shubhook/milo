@@ -59,8 +59,6 @@ export const BotSchema = z.object({
   computerMode: ComputerModeSchema,
   updatedAt: z.string(),
   createdAt: z.string(),
-  voiceId: z.string().nullable(),
-  autoSpeak: z.boolean(),
   modelProvider: z.string().nullable(),
   modelId: z.string().nullable(),
   thinkingLevel: ThinkingLevelSchema.nullable(),
@@ -253,8 +251,6 @@ export const UpdateBotInput = z
     color: BotAvatarValueSchema.optional(),
     pinned: z.boolean().optional(),
     sectionId: Id.nullable().optional(),
-    voiceId: z.string().max(120).nullable().optional(),
-    autoSpeak: z.boolean().optional(),
     modelProvider: z.string().trim().min(1).max(80).nullable().optional(),
     modelId: z.string().trim().min(1).max(200).nullable().optional(),
     thinkingLevel: ThinkingLevelSchema.nullable().optional(),
@@ -927,42 +923,6 @@ export const ModelCatalogEntrySchema = z.object({
   placeholder: z.boolean().optional(),
 });
 export type ModelCatalogEntry = z.infer<typeof ModelCatalogEntrySchema>;
-
-export const VoiceCatalogEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  transcribe: z.boolean(),
-});
-export type VoiceCatalogEntry = z.infer<typeof VoiceCatalogEntrySchema>;
-
-export const VoiceInfoSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  description: z.string().optional(),
-});
-export type VoiceInfo = z.infer<typeof VoiceInfoSchema>;
-
-export const VoiceCredentialSchema = z.object({
-  id: Id,
-  provider: z.string(),
-  hasKey: z.boolean(),
-  isDefault: z.boolean(),
-  voiceId: z.string(),
-  /** Fish speech-model override. Empty uses the deployment default. */
-  speechModel: z.string(),
-  transcribe: z.boolean(),
-});
-export type VoiceCredential = z.infer<typeof VoiceCredentialSchema>;
-
-export const VoiceStatusSchema = z.object({
-  configured: z.boolean(),
-  ready: z.boolean(),
-  transcribe: z.boolean(),
-  provider: z.string().nullable(),
-  voiceId: z.string(),
-});
-export type VoiceStatus = z.infer<typeof VoiceStatusSchema>;
 
 export const DeploymentSettingsSchema = z.object({
   ownerUserId: Id.nullable(),

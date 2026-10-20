@@ -53,7 +53,6 @@ import {
   computerSupportsTerminal,
   computerSupportsUpdate,
   computerUpdateView,
-  createVoiceProvider,
   defaultCatalogModelId,
   deletePushToken,
   deploymentAutoReviewDefault,
@@ -147,8 +146,6 @@ import {
 import {
   ACTIVE_RUN_STATUSES,
   AttachmentValidationError,
-  CALL_CLIENT_NONCE_PREFIX,
-  callClientNonce,
   clampCatalogThinkingLevel,
   containsSecret,
   expandSkillReferencesInPrompt,
@@ -173,13 +170,11 @@ import {
   deleteEmptySpaceForMember,
   deleteUnreferencedCredentialSecret,
   findDefaultModelCredential,
-  findDefaultVoiceCredential,
   findModelCredential,
   InvalidSpaceNameError,
   IsolationError,
   lockOwnedGroup,
   newestModelCredentialOrder,
-  newestVoiceCredentialOrder,
   Prisma,
   parseComputerMode,
   releaseSpaceDeletionClaim,
@@ -192,7 +187,6 @@ import {
   SpaceNotEmptyError,
   SpaceNotFoundError,
   selectSpaceModelPreference,
-  selectSpaceVoicePreference,
   touchGroupUpdatedAt,
 } from "@milo/db";
 import { getLogger } from "@milo/logging";
@@ -259,18 +253,6 @@ import {
   threadHead,
   threadSnapshot,
 } from "./thread-target.js";
-import {
-  disconnectVoiceCredential,
-  listVoiceCatalog,
-  loadDefaultVoiceCredential,
-  loadVoiceCredential,
-  persistVoiceCredential,
-  prepareVoice,
-  toVoiceCredential,
-  toVoiceStatus,
-  updateVoiceSpeechModel,
-  voiceContext,
-} from "./voice.js";
 
 const MAX_COMPUTER_TEXT_FILE_BYTES = 2 * 1024 * 1024;
 /** Each command writes a running and a done event, so this keeps about 100 commands. */
@@ -590,17 +572,6 @@ export interface RouterDeps {
 const SPACE_TEARDOWN_TIMEOUT_MS = 120_000;
 /** Catalog for helpers outside `createRouter` when the deps bring none. */
 const sharedCodexCatalog = new CodexCatalogCache();
-
-/** The card is closed by a marker; the run that follows finishes whatever the call left open. */
-/** Deterministic nonce for a call's marker message. The unique (threadId, clientNonce)
- * index makes it the hang-up idempotency key, and the "call:" prefix lets clients derive
- * the marker's callId. User turns carry a uuid suffix, so they never collide. */
-export function callMarkerClientNonce(callId: string): string {
-  return `${CALL_CLIENT_NONCE_PREFIX}${callId}:marker`;
-}
-
-const HANG_UP_PROMPT =
-  "The voice call just ended because the user hung up. First call end_call with a short title for the call (leave farewell empty). Then, if anything the user asked for during the call is still unfinished, complete it now as a normal chat reply with full formatting. If nothing is pending, reply with one short sentence.";
 
 function spaceTeardownTimeoutMs(): number {
   const override = Number(process.env.SPACE_TEARDOWN_TIMEOUT_MS ?? "");
@@ -1367,8 +1338,8 @@ export function createRouter(deps: RouterDeps) {
               if (existing.length === 0) return;
               const ids = existing.map((row) => row.id);
               // Credentials belong to the account, not the space — disconnecting
-              // removes them everywhere, matching voice.disconnect. Linked
-              // preferences in other spaces go with their credential.
+              // removes them everywhere. Linked preferences in other spaces go
+              // with their credential.
               await tx.spaceModelPreference.deleteMany({
                 where: { userId: context.actor.userId, credentialId: { in: ids } },
               });
@@ -1574,8 +1545,6 @@ export function createRouter(deps: RouterDeps) {
             color: input.color,
             pinned: input.pinned,
             sectionId: input.sectionId,
-            voiceId: input.voiceId,
-            autoSpeak: input.autoSpeak,
             ...(input.modelProvider !== undefined
               ? { modelProvider: input.modelProvider, modelId: input.modelId ?? null }
               : {}),
@@ -2109,86 +2078,6 @@ export function createRouter(deps: RouterDeps) {
             });
           }
         }
-        return { ok: true as const };
-      }),
-      endCall: authed.threads.endCall.handler(async ({ context, input }) => {
-        const target = await resolveThreadTarget(deps.prisma, context.actor, input);
-        if (target.kind !== "bot") throw new IsolationError();
-        await assertTeachingSendAllowed(deps.prisma, context.actor.spaceId, target.botId);
-        const { botId, threadId } = target;
-        const blocks = [
-          { kind: "voice_call" as const, callId: input.callId, title: "", farewell: "" },
-        ];
-        const committed = await deps.prisma
-          .$transaction(async (tx) => {
-            // The marker's deterministic nonce is the idempotency key: the unique
-            // (threadId, clientNonce) index rejects a second hang-up, concurrent or not.
-            const message = await createThreadMessageInTransaction(tx, {
-              threadId,
-              role: "bot",
-              botId,
-              blocks,
-              clientNonce: callMarkerClientNonce(input.callId),
-            });
-            await appendEventInTransaction(tx, {
-              spaceId: context.actor.spaceId,
-              threadId,
-              botId,
-              type: "thread.message.created",
-              payload: { messageId: message.id, role: "bot", blocks, callId: input.callId },
-            });
-            const task = await tx.task.create({
-              data: {
-                spaceId: context.actor.spaceId,
-                botId,
-                threadId,
-                userId: context.actor.userId,
-                prompt: HANG_UP_PROMPT,
-                status: "queued",
-              },
-            });
-            const run = await tx.run.create({
-              data: {
-                spaceId: context.actor.spaceId,
-                botId,
-                threadId,
-                taskId: task.id,
-                userId: context.actor.userId,
-                status: "queued",
-                trigger: "call_end",
-                clientNonce: callClientNonce(input.callId),
-              },
-              select: { id: true },
-            });
-            const ended = await appendEventInTransaction(tx, {
-              spaceId: context.actor.spaceId,
-              threadId,
-              botId,
-              type: "thread.call.ended",
-              runId: run.id,
-              payload: {
-                botId,
-                threadId,
-                callId: input.callId,
-                title: "",
-                farewell: "",
-                messageId: message.id,
-              },
-            });
-            return { runId: run.id, eventSeq: ended.seq };
-          })
-          .catch((error) => {
-            if (!isUniqueViolation(error)) throw error;
-            return null;
-          });
-        if (!committed) return { ok: true as const };
-        await deps.events.notify(threadId, committed.eventSeq).catch((error) => {
-          getLogger().error("call end realtime notification", error);
-        });
-        // The queued run is durable; a missed wake is repaired by the reconciler.
-        await deps.jobs.enqueue(runContinueJob(committed.runId)).catch((error) => {
-          getLogger().error("call end enqueue", error);
-        });
         return { ok: true as const };
       }),
       answer: authed.threads.answer.handler(async ({ context, input }) => {
@@ -5195,97 +5084,6 @@ export function createRouter(deps: RouterDeps) {
         runs: await listSpaceRuns(deps.prisma, context.actor, input.filter),
       })),
     },
-    voice: {
-      catalog: authed.voice.catalog.handler(async () => listVoiceCatalog()),
-      status: authed.voice.status.handler(async ({ context }) => {
-        const cred = await findDefaultVoiceCredential(deps.prisma, context.actor);
-        return toVoiceStatus(cred);
-      }),
-      credentials: authed.voice.credentials.handler(async ({ context }) => {
-        const rows = await deps.prisma.userVoiceCredential.findMany({
-          where: { userId: context.actor.userId },
-          include: {
-            preferences: {
-              where: { userId: context.actor.userId, spaceId: context.actor.spaceId },
-            },
-          },
-          orderBy: newestVoiceCredentialOrder,
-        });
-        return rows.map((row) => {
-          const preference = row.preferences[0];
-          return toVoiceCredential({
-            ...row,
-            isDefault: preference?.isDefault ?? false,
-            voiceId: preference?.voiceId ?? "",
-            speechModel: preference?.speechModel ?? "",
-          });
-        });
-      }),
-      connect: authed.voice.connect.handler(async ({ context, input }) =>
-        persistVoiceCredential(deps, context.actor, {
-          provider: input.provider,
-          plaintext: input.apiKey,
-          voiceId: input.voiceId,
-          speechModel: input.speechModel,
-          signal: context.signal,
-        }),
-      ),
-      disconnect: authed.voice.disconnect.handler(async ({ context, input }) =>
-        disconnectVoiceCredential(deps, context.actor, { provider: input.provider }),
-      ),
-      setVoice: authed.voice.setVoice.handler(async ({ context, input }) => {
-        const cred = await withSerializableRetry(() =>
-          deps.prisma.$transaction(
-            async (tx) => {
-              const found = input.provider
-                ? await tx.userVoiceCredential.findFirst({
-                    where: { userId: context.actor.userId, provider: input.provider },
-                    orderBy: newestVoiceCredentialOrder,
-                  })
-                : (
-                    await tx.spaceVoicePreference.findFirst({
-                      where: {
-                        userId: context.actor.userId,
-                        spaceId: context.actor.spaceId,
-                        isDefault: true,
-                      },
-                      include: { credential: true },
-                      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-                    })
-                  )?.credential;
-              if (!found) {
-                throw new ORPCError("BAD_REQUEST", { message: "Connect a voice provider first." });
-              }
-              // Picking a voice also makes its provider the one speak/transcribe use.
-              await selectSpaceVoicePreference(tx, context.actor, found.id, input.voiceId);
-              return { ...found, voiceId: input.voiceId, isDefault: true };
-            },
-            { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-          ),
-        );
-        return toVoiceStatus(cred);
-      }),
-      setSpeechModel: authed.voice.setSpeechModel.handler(async ({ context, input }) =>
-        updateVoiceSpeechModel(deps, context.actor, input),
-      ),
-      voices: authed.voice.voices.handler(async ({ context, input }) => {
-        const loaded = await loadDefaultVoiceCredential(deps, context.actor);
-        if (!loaded) return [];
-        const providerId = input.provider ?? loaded.cred.provider;
-        const row =
-          providerId === loaded.cred.provider
-            ? loaded
-            : await loadVoiceCredential(deps, context.actor, providerId);
-        if (!row) return [];
-        return createVoiceProvider(row.cred.provider).listVoices(
-          row.apiKey,
-          voiceContext(context.actor, context.signal),
-        );
-      }),
-      prepare: authed.voice.prepare.handler(async ({ context, input }) =>
-        prepareVoice(deps, context.actor, input),
-      ),
-    },
   });
 }
 
@@ -6108,10 +5906,6 @@ function withViewOnly(url: string, viewOnly: boolean) {
 
 function duplicateBotName(name: string) {
   return `${name.slice(0, 75)} copy`;
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return Boolean(error && typeof error === "object" && "code" in error && error.code === "P2002");
 }
 
 function isRecordNotFound(error: unknown): boolean {

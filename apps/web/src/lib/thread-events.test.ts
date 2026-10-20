@@ -1394,9 +1394,9 @@ describe("thread event reduction", () => {
     expect(next?.messages[0]?.blocks[0]).toMatchObject({ status: "answered", answer: "Paris" });
   });
 
-  it("titles the call marker in place when the wrap-up run names it", () => {
+  it("titles a historical voice_call marker in place when the wrap-up run names it", () => {
     const initial = snapshot([
-      { ...message("marker-1", [{ kind: "voice_call", title: "", farewell: "" }]), callId: "c-1" },
+      message("marker-1", [{ kind: "voice_call", title: "", farewell: "" }]),
     ]);
     const next = reduceThreadSnapshot(
       initial,
@@ -1413,7 +1413,6 @@ describe("thread event reduction", () => {
 
     expect(next?.messages).toHaveLength(1);
     expect(next?.messages[0]?.blocks[0]).toMatchObject({ title: "Flight booked" });
-    expect(next?.messages[0]?.callId).toBe("c-1");
   });
 
   it("preserves botId on durable bot messages", () => {

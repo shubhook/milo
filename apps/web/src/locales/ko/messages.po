@@ -193,10 +193,6 @@ msgstr "액세스 토큰(선택 사항)"
 msgid "Account"
 msgstr "계정"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Account default"
-msgstr "계정 기본값"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Account label"
 msgstr ""
@@ -437,7 +433,6 @@ msgstr "API가 다시 작동하지만 업데이트가 완료되지 않았습니�
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/lib/localized-provider-hint.ts
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "API key"
 msgstr "API 키"
 
@@ -841,11 +836,6 @@ msgstr ""
 msgid "Close user settings"
 msgstr "계정 설정 닫기"
 
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Close voice settings"
-msgstr "음성 설정 닫기"
-
 #: src/components/AskCard.tsx
 msgid "Code"
 msgstr "코드"
@@ -934,7 +924,6 @@ msgstr "비밀번호 확인"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/OnboardingApps.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "연결"
 
@@ -979,7 +968,6 @@ msgstr "앱 연결"
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
 msgstr "연결됨"
 
@@ -987,11 +975,6 @@ msgstr "연결됨"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connected · {0}"
 msgstr "연결됨 · {0}"
-
-#. placeholder {0}: selected.name
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Connected {0}."
-msgstr "{0}에 연결했습니다."
 
 #. placeholder {0}: selected.label
 #. placeholder {0}: selectedLabelRef.current ?? "this model"
@@ -1007,7 +990,6 @@ msgstr "연결되었습니다. 다음 메시지부터 이 도구를 사용할 �
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
 msgstr "연결 중…"
 
@@ -1108,10 +1090,6 @@ msgstr "연결하지 못했습니다."
 msgid "Could not connect this provider"
 msgstr "AI 서비스에 연결하지 못했습니다."
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not connect this voice provider"
-msgstr "음성 서비스에 연결하지 못했습니다."
-
 #: src/pages/Shell.tsx
 msgid "Could not connect to the computer screen"
 msgstr ""
@@ -1176,10 +1154,6 @@ msgstr "OAuth 연결을 해제하지 못했습니다."
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not disconnect this provider"
 msgstr ""
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not disconnect this voice provider"
-msgstr "음성 서비스 연결을 해제하지 못했습니다."
 
 #: src/pages/shell/message-cards.tsx
 msgid "Could not dismiss"
@@ -1275,10 +1249,6 @@ msgstr "파일을 불러오지 못했습니다."
 msgid "Could not load update status"
 msgstr "업데이트 상태를 불러올 수 없습니다"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not load voice settings"
-msgstr "음성 설정을 불러오지 못했습니다."
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not open file"
 msgstr ""
@@ -1290,10 +1260,6 @@ msgstr ""
 #: src/components/computer/TerminalApp.tsx
 msgid "Could not open terminal"
 msgstr "터미널을 열 수 없습니다"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not play a test clip"
-msgstr "샘플 음성을 재생하지 못했습니다."
 
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Auth.tsx
@@ -1383,14 +1349,6 @@ msgstr "스킬을 저장하지 못했습니다"
 msgid "Could not save that choice"
 msgstr "선택 내용을 저장하지 못했습니다."
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that speech model"
-msgstr "음성 모델을 저장하지 못했습니다."
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that voice"
-msgstr "목소리를 저장하지 못했습니다."
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Could not save the credential"
 msgstr ""
@@ -1406,10 +1364,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Could not send reset email"
 msgstr "재설정 이메일을 보낼 수 없습니다"
-
-#: src/lib/call-session.ts
-msgid "Could not send that"
-msgstr "메시지를 보내지 못했습니다."
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not start OAuth"
@@ -1672,7 +1626,6 @@ msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
 msgstr "연결 해제"
 
@@ -1686,7 +1639,6 @@ msgid "Disconnected {0}."
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
 msgstr "연결 해제 중…"
 
@@ -1989,18 +1941,6 @@ msgstr "{0}은(는) 나에게 넘기기"
 msgid "Hand to me"
 msgstr "나에게 넘기기"
 
-#: src/components/call/CallCard.tsx
-msgid "Hang up"
-msgstr "통화 종료"
-
-#: src/lib/call-session.ts
-msgid "Hang up first, then enter the code on screen."
-msgstr "먼저 전화를 끊은 다음 화면에 표시된 코드를 입력하세요."
-
-#: src/lib/call-session.ts
-msgid "Hang up, then enter the code on screen."
-msgstr "전화를 끊은 다음 화면에 표시된 코드를 입력하세요."
-
 #: src/pages/RoutineEditor.tsx
 msgid "header"
 msgstr "header"
@@ -2019,14 +1959,6 @@ msgstr "헤더 이름"
 msgid "Header value"
 msgstr "헤더 값"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hear a sample"
-msgstr "샘플 듣기"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hi, this is how I'll sound when I read replies out loud."
-msgstr "안녕하세요. 답변을 소리 내어 읽을 때 이런 목소리로 들립니다."
-
 #: src/pages/Shell.tsx
 msgid "Hide bots"
 msgstr ""
@@ -2034,10 +1966,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Hide password"
 msgstr "비밀번호 숨기기"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Hide transcript"
-msgstr "대화 기록 숨기기"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "High"
@@ -2067,10 +1995,6 @@ msgstr "완료 확인 방법"
 #: src/pages/Shell.tsx
 msgid "I’m done"
 msgstr "조작 끝내기"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "If you heard that, voice is ready."
-msgstr "샘플이 들렸다면 음성 설정이 완료되었습니다."
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2241,10 +2165,6 @@ msgstr "미리보기를 불러오는 중…"
 msgid "Loading tools…"
 msgstr ""
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Loading voice providers…"
-msgstr "음성 서비스를 불러오는 중…"
-
 #: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
@@ -2396,10 +2316,6 @@ msgstr "메시지를 입력하세요"
 msgid "Messaged {peer}"
 msgstr "{peer}에게 메시지 보냄"
 
-#: src/lib/call-session.ts
-msgid "Microphone failed"
-msgstr "마이크를 사용할 수 없습니다."
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
 msgstr "최소"
@@ -2479,10 +2395,6 @@ msgstr "공용 기억으로 옮깁니다."
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "섹션으로 이동"
-
-#: src/components/call/CallCard.tsx
-msgid "Mute"
-msgstr "음소거"
 
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Artifacts.tsx
@@ -2707,11 +2619,6 @@ msgstr "OAuth 연결 실패"
 msgid "OAuth expired"
 msgstr ""
 
-#. placeholder {0}: call.botName
-#: src/components/call/CallCard.tsx
-msgid "On a call with {0}"
-msgstr "{0}님과 통화 중"
-
 #: src/pages/RoutineEditor.tsx
 msgid "On a schedule"
 msgstr "일정에 따라"
@@ -2782,7 +2689,6 @@ msgid "Opening your Space…"
 msgstr "작업공간을 여는 중…"
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Optional"
 msgstr "선택 사항"
 
@@ -2831,17 +2737,9 @@ msgstr "비밀번호가 업데이트되었습니다"
 msgid "Passwords do not match"
 msgstr "비밀번호가 일치하지 않습니다"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste a replacement key"
-msgstr "새 API 키를 붙여넣으세요"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Paste the OpenAI-compatible address from your server. Milo adds /v1 if needed."
 msgstr "서버의 OpenAI 호환 주소를 붙여넣으세요. 필요하면 Milo가 /v1을 추가합니다."
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste your API key"
-msgstr "API 키를 붙여넣으세요"
 
 #: src/pages/RoutineEditor.tsx
 #: src/pages/Routines.tsx
@@ -2851,10 +2749,6 @@ msgstr "일시 중지됨"
 #: src/pages/BotContextMenu.tsx
 msgid "Pin"
 msgstr "고정"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Playing…"
-msgstr "재생 중…"
 
 #: src/pages/RoutineEditor.tsx
 msgid "POST to"
@@ -2887,7 +2781,6 @@ msgid "Protected input"
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "서비스"
 
@@ -2910,10 +2803,6 @@ msgstr "반응하기"
 #: src/pages/Shell.tsx
 msgid "Reactions"
 msgstr "반응"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Read replies aloud"
-msgstr "답변을 자동으로 읽기"
 
 #: src/pages/KnowledgeSection.tsx
 msgid "read-only"
@@ -3075,10 +2964,6 @@ msgstr "다시 열기"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Replace API key"
 msgstr "API 키 교체"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Replace key"
-msgstr "키 교체"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Replace value"
@@ -3294,10 +3179,6 @@ msgstr "저장 중…"
 msgid "Say hi"
 msgstr "인사하기"
 
-#: src/lib/call-session.ts
-msgid "Say yes or no, or answer in a sentence."
-msgstr "예 또는 아니요로 답하거나 문장으로 답해 주세요."
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/Shell.tsx
@@ -3384,7 +3265,6 @@ msgstr "서버 이름"
 msgid "Server URL"
 msgstr "서버 URL"
 
-#: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-profile.tsx
@@ -3441,10 +3321,6 @@ msgstr "비밀번호 표시"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"
 msgstr ""
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Show transcript"
-msgstr "대화 기록 표시"
 
 #: src/lib/localized-provider-hint.ts
 #: src/pages/Auth.tsx
@@ -3528,26 +3404,6 @@ msgstr "스페이스 기본값"
 msgid "Spaces"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Speak"
-msgstr "읽기"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak + transcribe"
-msgstr "음성 출력·받아쓰기"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak only"
-msgstr "음성 출력만"
-
-#: src/pages/Shell.tsx
-msgid "Speak this reply"
-msgstr "이 답변 읽기"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speech model"
-msgstr "음성 모델"
-
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Start recording"
 msgstr "작업 녹화 시작"
@@ -3570,10 +3426,6 @@ msgstr "실행 단계"
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "중지"
-
-#: src/pages/Shell.tsx
-msgid "Stop speaking"
-msgstr "읽기 중지"
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Stop teaching"
@@ -3769,10 +3621,6 @@ msgstr "도구 소스"
 msgid "Tools"
 msgstr ""
 
-#: src/components/call/CallCard.tsx
-msgid "Transcript"
-msgstr "대화 기록"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg 토큰"
@@ -3805,10 +3653,6 @@ msgstr "사용할 수 없음"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr ""
-
-#: src/components/call/CallCard.tsx
-msgid "Unmute"
-msgstr "음소거 해제"
 
 #: src/pages/BotContextMenu.tsx
 msgid "Unpin"
@@ -3939,17 +3783,6 @@ msgstr "보기"
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "채팅 보기"
-
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Voice"
-msgstr "음성"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Voice chat"
-msgstr "음성 대화"
 
 #: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx

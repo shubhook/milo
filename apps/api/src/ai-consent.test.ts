@@ -17,10 +17,6 @@ function setup() {
       spaceModelPreference: { findMany: vi.fn(async () => []), findFirst: vi.fn(async () => null) },
       secret: { findMany: vi.fn(async () => []) },
       bot: { findMany: vi.fn(async () => []) },
-      spaceVoicePreference: {
-        findFirst: vi.fn(async () => ({ credential: { provider: "openai" }, voiceId: "alloy" })),
-        findMany: vi.fn(async () => [{ credential: { provider: "openai" } }]),
-      },
       deploymentSettings: { findUnique: vi.fn(async () => null) },
       aiDataConsent: { findMany: vi.fn(async () => []), upsert },
       $transaction: vi.fn(async (queries) => Promise.all(queries)),
@@ -43,7 +39,6 @@ describe("consent grants", () => {
     expect(status.recipients.map((recipient) => recipient.name)).toEqual(
       expect.arrayContaining(["Anthropic"]),
     );
-    expect(deps.prisma.spaceVoicePreference.findMany).not.toHaveBeenCalled();
     expect(deps.prisma.bot.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expect.objectContaining({ id: { in: ["bot"] } }) }),
     );
@@ -55,17 +50,6 @@ describe("consent grants", () => {
     expect(status.recipients.map((recipient) => recipient.name)).toEqual(["Claude Code"]);
     expect(status.recipients[0]?.privacyUrl).toBe("https://www.anthropic.com/legal/privacy");
   });
-  it("discloses only the selected voice provider before a voice action", async () => {
-    const { deps, actor } = setup();
-    vi.mocked(deps.prisma.spaceVoicePreference.findMany).mockResolvedValue([
-      { credential: { provider: "openai" } },
-      { credential: { provider: "elevenlabs" } },
-    ] as never);
-    const status = await aiConsentStatus(deps, actor, { uses: ["voice"] });
-    expect(status.recipients).toHaveLength(1);
-    expect(status.recipients[0]?.name).toBe("OpenAI");
-    expect(deps.prisma.spaceVoicePreference.findMany).not.toHaveBeenCalled();
-  });
   it("returns an operator policy without requiring a hosted provider", async () => {
     const { deps, actor } = setup();
     deps.env.privacyPolicyUrl = "https://example.com/privacy";
@@ -73,6 +57,7 @@ describe("consent grants", () => {
   });
   it("rejects stale disclosures, unknown recipients, and a changed account or Space", async () => {
     const { deps, actor, upsert } = setup();
+    deps.env.agentRuntime = "claude-code";
     const current = await aiConsentStatus(deps, actor);
     const input = {
       scope: current.scope,

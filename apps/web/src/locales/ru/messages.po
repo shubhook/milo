@@ -193,10 +193,6 @@ msgstr "Токен доступа (необязательно)"
 msgid "Account"
 msgstr "Аккаунт"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Account default"
-msgstr "Учетная запись по умолчанию"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Account label"
 msgstr "Ярлык аккаунта"
@@ -437,7 +433,6 @@ msgstr "API вернулся, но обновление не завершило�
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/lib/localized-provider-hint.ts
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "API key"
 msgstr "API-ключ"
 
@@ -841,11 +836,6 @@ msgstr ""
 msgid "Close user settings"
 msgstr "Закрыть настройки пользователя"
 
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Close voice settings"
-msgstr "Закрыть настройки голоса"
-
 #: src/components/AskCard.tsx
 msgid "Code"
 msgstr "Код"
@@ -934,7 +924,6 @@ msgstr "Подтвердите пароль"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/OnboardingApps.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "Подключить"
 
@@ -979,7 +968,6 @@ msgstr "Подключите приложения"
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
 msgstr "Подключено"
 
@@ -987,11 +975,6 @@ msgstr "Подключено"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connected · {0}"
 msgstr "Подключено · {0}"
-
-#. placeholder {0}: selected.name
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Connected {0}."
-msgstr "Подключено: {0}."
 
 #. placeholder {0}: selected.label
 #. placeholder {0}: selectedLabelRef.current ?? "this model"
@@ -1007,7 +990,6 @@ msgstr "Подключено. Его инструменты доступны и�
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
 msgstr "Подключение…"
 
@@ -1108,10 +1090,6 @@ msgstr "Не удалось подключиться"
 msgid "Could not connect this provider"
 msgstr "Не удалось подключить этого провайдера"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not connect this voice provider"
-msgstr "Не удалось подключить этого голосового провайдера."
-
 #: src/pages/Shell.tsx
 msgid "Could not connect to the computer screen"
 msgstr "Не удалось подключиться к экрану компьютера"
@@ -1176,10 +1154,6 @@ msgstr "Не удалось отключить OAuth"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not disconnect this provider"
 msgstr ""
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not disconnect this voice provider"
-msgstr "Не удалось отключить этого голосового провайдера."
 
 #: src/pages/shell/message-cards.tsx
 msgid "Could not dismiss"
@@ -1275,10 +1249,6 @@ msgstr "Не удалось загрузить этот файл."
 msgid "Could not load update status"
 msgstr "Не удалось загрузить статус обновления"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not load voice settings"
-msgstr "Не удалось загрузить голосовые настройки."
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not open file"
 msgstr ""
@@ -1290,10 +1260,6 @@ msgstr "Не удалось открыть локальные настройки
 #: src/components/computer/TerminalApp.tsx
 msgid "Could not open terminal"
 msgstr "Не удалось открыть терминал"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not play a test clip"
-msgstr "Не удалось воспроизвести тестовый клип."
 
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Auth.tsx
@@ -1383,14 +1349,6 @@ msgstr "Не удалось сохранить навык"
 msgid "Could not save that choice"
 msgstr "Не удалось сохранить этот выбор"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that speech model"
-msgstr "Не удалось сохранить речевую модель"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that voice"
-msgstr "Не удалось сохранить этот голос"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Could not save the credential"
 msgstr ""
@@ -1406,10 +1364,6 @@ msgstr "Не удалось выполнить поиск по каталогу"
 #: src/pages/Auth.tsx
 msgid "Could not send reset email"
 msgstr "Не удалось отправить электронное письмо для сброса"
-
-#: src/lib/call-session.ts
-msgid "Could not send that"
-msgstr "Не удалось отправить это"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not start OAuth"
@@ -1672,7 +1626,6 @@ msgstr "Прямой MCP"
 
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
 msgstr "Отключить"
 
@@ -1686,7 +1639,6 @@ msgid "Disconnected {0}."
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
 msgstr "Отключение…"
 
@@ -1989,18 +1941,6 @@ msgstr "Передавать мне {0}"
 msgid "Hand to me"
 msgstr "Передать мне"
 
-#: src/components/call/CallCard.tsx
-msgid "Hang up"
-msgstr "Завершить звонок"
-
-#: src/lib/call-session.ts
-msgid "Hang up first, then enter the code on screen."
-msgstr "Сначала повесьте трубку, затем введите код на экране."
-
-#: src/lib/call-session.ts
-msgid "Hang up, then enter the code on screen."
-msgstr "Повесьте трубку, затем введите код на экране."
-
 #: src/pages/RoutineEditor.tsx
 msgid "header"
 msgstr "заголовок"
@@ -2019,14 +1959,6 @@ msgstr "Название заголовка"
 msgid "Header value"
 msgstr "Значение заголовка"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hear a sample"
-msgstr "Прослушать образец"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hi, this is how I'll sound when I read replies out loud."
-msgstr "Привет, вот как я буду звучать, когда буду читать ответы вслух."
-
 #: src/pages/Shell.tsx
 msgid "Hide bots"
 msgstr "Скрыть ботов"
@@ -2034,10 +1966,6 @@ msgstr "Скрыть ботов"
 #: src/pages/Auth.tsx
 msgid "Hide password"
 msgstr "Скрыть пароль"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Hide transcript"
-msgstr "Скрыть расшифровку"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "High"
@@ -2067,10 +1995,6 @@ msgstr "Как проверить"
 #: src/pages/Shell.tsx
 msgid "I’m done"
 msgstr "Готово"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "If you heard that, voice is ready."
-msgstr "Если вы это услышали, голос готов."
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2241,10 +2165,6 @@ msgstr "Загрузка предварительного просмотра…"
 msgid "Loading tools…"
 msgstr "Загрузка инструментов…"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Loading voice providers…"
-msgstr "Загрузка поставщиков голосовой связи…"
-
 #: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
@@ -2396,10 +2316,6 @@ msgstr "Сообщение…"
 msgid "Messaged {peer}"
 msgstr "Отправлено сообщение {peer}"
 
-#: src/lib/call-session.ts
-msgid "Microphone failed"
-msgstr "Ошибка микрофона"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
 msgstr "Минимальный"
@@ -2479,10 +2395,6 @@ msgstr "Переместите их в свою общую память."
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Переместить в"
-
-#: src/components/call/CallCard.tsx
-msgid "Mute"
-msgstr "Выключить микрофон"
 
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Artifacts.tsx
@@ -2707,11 +2619,6 @@ msgstr "Соединение OAuth не удалось"
 msgid "OAuth expired"
 msgstr "Срок действия OAuth истек"
 
-#. placeholder {0}: call.botName
-#: src/components/call/CallCard.tsx
-msgid "On a call with {0}"
-msgstr "Звонок с {0}"
-
 #: src/pages/RoutineEditor.tsx
 msgid "On a schedule"
 msgstr "По расписанию"
@@ -2782,7 +2689,6 @@ msgid "Opening your Space…"
 msgstr "Открытие вашего пространства…"
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Optional"
 msgstr "Необязательно"
 
@@ -2831,17 +2737,9 @@ msgstr "Пароль обновлён"
 msgid "Passwords do not match"
 msgstr "Пароли не совпадают"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste a replacement key"
-msgstr "Вставьте запасной ключ"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Paste the OpenAI-compatible address from your server. Milo adds /v1 if needed."
 msgstr "Вставьте OpenAI-совместимый адрес со своего сервера. При необходимости Milo добавляет /v1."
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste your API key"
-msgstr "Вставьте свой ключ API"
 
 #: src/pages/RoutineEditor.tsx
 #: src/pages/Routines.tsx
@@ -2851,10 +2749,6 @@ msgstr "Приостановлено"
 #: src/pages/BotContextMenu.tsx
 msgid "Pin"
 msgstr "Закрепить"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Playing…"
-msgstr "Воспроизведение…"
 
 #: src/pages/RoutineEditor.tsx
 msgid "POST to"
@@ -2887,7 +2781,6 @@ msgid "Protected input"
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Провайдеры"
 
@@ -2910,10 +2803,6 @@ msgstr ""
 #: src/pages/Shell.tsx
 msgid "Reactions"
 msgstr ""
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Read replies aloud"
-msgstr "Читать ответы вслух"
 
 #: src/pages/KnowledgeSection.tsx
 msgid "read-only"
@@ -3075,10 +2964,6 @@ msgstr "Открыть заново"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Replace API key"
 msgstr "Заменить ключ API"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Replace key"
-msgstr "Заменить ключ"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Replace value"
@@ -3294,10 +3179,6 @@ msgstr "Сохранение…"
 msgid "Say hi"
 msgstr "Поздороваться"
 
-#: src/lib/call-session.ts
-msgid "Say yes or no, or answer in a sentence."
-msgstr "Скажите «да» или «нет» или ответьте предложением."
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/Shell.tsx
@@ -3384,7 +3265,6 @@ msgstr "Имя сервера"
 msgid "Server URL"
 msgstr "URL-адрес сервера"
 
-#: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-profile.tsx
@@ -3441,10 +3321,6 @@ msgstr "Показать пароль"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"
 msgstr ""
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Show transcript"
-msgstr "Показать расшифровку"
 
 #: src/lib/localized-provider-hint.ts
 #: src/pages/Auth.tsx
@@ -3528,26 +3404,6 @@ msgstr "Пространство по умолчанию"
 msgid "Spaces"
 msgstr "Пространства"
 
-#: src/pages/Shell.tsx
-msgid "Speak"
-msgstr "Озвучить"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak + transcribe"
-msgstr "Озвучить + расшифровать"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak only"
-msgstr "Только озвучить"
-
-#: src/pages/Shell.tsx
-msgid "Speak this reply"
-msgstr "Озвучить этот ответ"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speech model"
-msgstr "Речевая модель"
-
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Start recording"
 msgstr "Начать запись"
@@ -3570,10 +3426,6 @@ msgstr "Шаги"
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "Остановить"
-
-#: src/pages/Shell.tsx
-msgid "Stop speaking"
-msgstr "Остановить озвучивание"
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Stop teaching"
@@ -3769,10 +3621,6 @@ msgstr "Источники инструментов"
 msgid "Tools"
 msgstr "Инструменты"
 
-#: src/components/call/CallCard.tsx
-msgid "Transcript"
-msgstr "Расшифровка"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Токен Treg"
@@ -3805,10 +3653,6 @@ msgstr "Недоступно"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr "Удалить"
-
-#: src/components/call/CallCard.tsx
-msgid "Unmute"
-msgstr "Включить микрофон"
 
 #: src/pages/BotContextMenu.tsx
 msgid "Unpin"
@@ -3939,17 +3783,6 @@ msgstr "Вид"
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "Открыть чат"
-
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Voice"
-msgstr "Голос"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Voice chat"
-msgstr "Голосовой чат"
 
 #: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx

@@ -69,7 +69,6 @@ type SpaceClient = Pick<
   | "space"
   | "spaceMember"
   | "spaceModelPreference"
-  | "spaceVoicePreference"
   | "memoryDocument"
   | "notificationPreference"
   | "bot"
@@ -132,43 +131,21 @@ async function copyProviderPreferences(
   prisma: SpaceClient,
   input: { sourceSpaceId: string; targetSpaceId: string; userId: string; createdAt: Date },
 ): Promise<void> {
-  const [modelPreferences, voicePreferences] = await Promise.all([
-    prisma.spaceModelPreference.findMany({
-      where: { spaceId: input.sourceSpaceId, userId: input.userId },
-    }),
-    prisma.spaceVoicePreference.findMany({
-      where: { spaceId: input.sourceSpaceId, userId: input.userId },
-    }),
-  ]);
-  await Promise.all([
-    modelPreferences.length
-      ? prisma.spaceModelPreference.createMany({
-          data: modelPreferences.map((preference) => ({
-            spaceId: input.targetSpaceId,
-            userId: input.userId,
-            credentialId: preference.credentialId,
-            modelId: preference.modelId,
-            isDefault: preference.isDefault,
-            createdAt: input.createdAt,
-            updatedAt: input.createdAt,
-          })),
-        })
-      : Promise.resolve(),
-    voicePreferences.length
-      ? prisma.spaceVoicePreference.createMany({
-          data: voicePreferences.map((preference) => ({
-            spaceId: input.targetSpaceId,
-            userId: input.userId,
-            credentialId: preference.credentialId,
-            voiceId: preference.voiceId,
-            speechModel: preference.speechModel,
-            isDefault: preference.isDefault,
-            createdAt: input.createdAt,
-            updatedAt: input.createdAt,
-          })),
-        })
-      : Promise.resolve(),
-  ]);
+  const modelPreferences = await prisma.spaceModelPreference.findMany({
+    where: { spaceId: input.sourceSpaceId, userId: input.userId },
+  });
+  if (modelPreferences.length === 0) return;
+  await prisma.spaceModelPreference.createMany({
+    data: modelPreferences.map((preference) => ({
+      spaceId: input.targetSpaceId,
+      userId: input.userId,
+      credentialId: preference.credentialId,
+      modelId: preference.modelId,
+      isDefault: preference.isDefault,
+      createdAt: input.createdAt,
+      updatedAt: input.createdAt,
+    })),
+  });
 }
 
 /** Create a sibling privacy boundary for a member of the active organization. */

@@ -16,15 +16,24 @@ function readMobileAppConfig(): MobileAppConfig {
 }
 
 describe("Android permission config", () => {
-  it("does not block microphone permission through expo-image-picker", () => {
+  it("does not declare voice-only microphone or speech recognition permissions", () => {
     const plugins = readMobileAppConfig().expo.plugins;
     const imagePicker = plugins.find(
       (plugin): plugin is [string, Record<string, unknown>] =>
         Array.isArray(plugin) && plugin[0] === "expo-image-picker",
     );
+    const audio = plugins.find(
+      (plugin) => plugin === "expo-audio" || (Array.isArray(plugin) && plugin[0] === "expo-audio"),
+    );
+    const speechRecognition = plugins.find(
+      (plugin) =>
+        plugin === "expo-speech-recognition" ||
+        (Array.isArray(plugin) && plugin[0] === "expo-speech-recognition"),
+    );
 
     expect(imagePicker).toBeDefined();
-    expect(typeof imagePicker?.[1].microphonePermission).toBe("string");
-    expect(imagePicker?.[1].microphonePermission).not.toBe("");
+    expect(imagePicker?.[1].microphonePermission).toBeUndefined();
+    expect(audio).toBeUndefined();
+    expect(speechRecognition).toBeUndefined();
   });
 });

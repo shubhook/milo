@@ -7,13 +7,11 @@ import type {
   Routine,
 } from "@milo/contracts";
 import { canReactToThreadMessage, MESSAGE_REACTIONS, type MessageReaction } from "@milo/contracts";
-import type { ThreadItem } from "@milo/core";
+import type { ComposerMention, SlashActionId } from "@milo/core";
 import {
   abortableDelay,
   attachmentsForThread,
   buildComposerMentionOptions,
-  type ComposerMention,
-  groupVoiceChats,
   isApprovalAskBlock,
   isRunTerminalEvent,
   isSecretAskBlock,
@@ -23,7 +21,6 @@ import {
   projectMessageReactions,
   resolveComposerSendPlan,
   SLASH_ACTIONS,
-  type SlashActionId,
   selectedAskActionLabel,
   serializeComposerPrompt,
   truncateSlashDescription,
@@ -81,19 +78,20 @@ import {
 } from "../components/markdown-artifact-preview";
 import { NativeSymbol } from "../components/native-symbol";
 import { UsageLimitNotice } from "../components/usage-limit-notice";
-import { VoiceChatCard } from "../components/VoiceChatCard";
 import { WorkingIndicator } from "../components/WorkingIndicator";
+import type {
+  MobileBot,
+  MobileGroup,
+  MobileMessage,
+  MobileMessagePage,
+  MobileSnapshot,
+} from "../lib/api";
 import {
   applyMobileThreadEvent,
   blockText,
   copyableMobileMessageText,
   currentApiBase,
   loadSessionToken,
-  type MobileBot,
-  type MobileGroup,
-  type MobileMessage,
-  type MobileMessagePage,
-  type MobileSnapshot,
   mergeMobileSnapshot,
   mobileThreadRefreshResult,
   prependMobileMessagePage,
@@ -103,12 +101,9 @@ import {
   subscribeThread,
 } from "../lib/api";
 import { mobileTokens } from "../lib/appearance";
-import { type MobileArtifactTarget, openMobileArtifact } from "../lib/artifact-open";
-import { nextAutoSpeakAction } from "../lib/auto-speak";
+import type { MobileArtifactTarget } from "../lib/artifact-open";
+import { openMobileArtifact } from "../lib/artifact-open";
 import { confirmDeleteBot } from "../lib/bot-lifecycle";
-import { setCallProviderTranscribe, startCall, useCallSession } from "../lib/call-session";
-import { loadDeviceVoiceEnabled } from "../lib/device-voice";
-import { available as dictationAvailable } from "../lib/dictation";
 import { dateLocaleForUi, t, useI18n } from "../lib/i18n";
 import { saveLastBotId } from "../lib/last-bot";
 import {
@@ -130,24 +125,15 @@ import {
   threadSpaceRequest,
   threadSpaceSwitchResult,
 } from "../lib/notification-open";
-import {
-  type PickedAttachment,
-  pickDocuments,
-  pickFromLibrary,
-  takePhoto,
-} from "../lib/pick-attachments";
+import type { PickedAttachment } from "../lib/pick-attachments";
+import { pickDocuments, pickFromLibrary, takePhoto } from "../lib/pick-attachments";
 import { threadRefreshDelayMs } from "../lib/refresh";
 import {
   getCachedResponseStreamingEnabled,
   subscribeResponseStreaming,
 } from "../lib/response-streaming";
-import {
-  type ThreadScrollAction,
-  ThreadScrollBehavior,
-  type ThreadScrollState,
-} from "../lib/thread-scroll";
-import { speakText } from "../lib/voice";
-import { probeProviderTranscribe, resolveVoiceCallPlan } from "../lib/voice-call-entry";
+import type { ThreadScrollAction, ThreadScrollState } from "../lib/thread-scroll";
+import { ThreadScrollBehavior } from "../lib/thread-scroll";
 
 type PendingAttachment = PickedAttachment & { threadKey: string };
 type AskAction = NonNullable<Extract<MessageBlock, { kind: "ask" }>["actions"]>[number];
@@ -294,10 +280,7 @@ function Thread() {
   }>();
   const requestedThreadId = typeof threadId === "string" && threadId ? threadId : undefined;
   const inGroup = Boolean(groupId);
-  const call = useCallSession();
-  const onCall = Boolean(botId) && call?.botId === botId;
-  const voiceCallStarting = useRef(false);
-  const scroll = useRef<FlatList<ThreadItem<MobileMessage>>>(null);
+  const scroll = useRef<FlatList<MobileMessage>>(null);
   const pinnedScroll = useRef<ScrollView>(null);
   const scrollBehavior = useRef(new ThreadScrollBehavior());
   const userDragging = useRef(false);
@@ -326,8 +309,6 @@ function Thread() {
   const mentionBotsRefreshGeneration = useRef(0);
   const mentionBotsAppliedGeneration = useRef(0);
   const readVisibleTarget = useRef<string | null>(null);
-  const autoSpoken = useRef<string | null>(null);
-  const autoSpokenBotId = useRef<string | null>(null);
   const threadKey = groupId ?? botId;
   const [threadScrollState, setThreadScrollState] = useState<ThreadScrollState>(() =>
     scrollBehavior.current.state(),
@@ -481,35 +462,6 @@ function Thread() {
     });
   }, [inGroup, snap?.activeRuns, snap?.members, snap?.run]);
   const working = inGroup ? workingGroupBots.length > 0 : isWorkingStatus(currentBotStatus);
-
-  const speakFinishedReply = useCallback(() => {
-    if (!botId || inGroup || !currentBot) return;
-    const decision = nextAutoSpeakAction({
-      botId: currentBot.id,
-      autoSpeak: currentBot.autoSpeak,
-      focused: AppState.currentState === "active" && navigation.isFocused(),
-      snapshotReady: snap?.botId === currentBot.id,
-      lastSpokenBotId: autoSpokenBotId.current,
-      lastSpokenMessageId: autoSpoken.current,
-      runStatus: snap?.run?.status,
-      messages: snap?.messages ?? [],
-    });
-    if (decision.action === "seed") {
-      autoSpokenBotId.current = currentBot.id;
-      autoSpoken.current = decision.messageId;
-      return;
-    }
-    if (decision.action !== "speak") return;
-    autoSpokenBotId.current = currentBot.id;
-    autoSpoken.current = decision.messageId;
-    void speakText(decision.text, { botId: currentBot.id }).catch(() => undefined);
-  }, [botId, inGroup, currentBot, navigation, snap?.botId, snap?.messages, snap?.run?.status]);
-
-  useEffect(() => {
-    speakFinishedReply();
-    const appState = AppState.addEventListener("change", speakFinishedReply);
-    return () => appState.remove();
-  }, [speakFinishedReply]);
 
   useEffect(() => {
     void rpc<AgentSkillCatalogEntry[]>("agentSkills/list")
@@ -932,11 +884,10 @@ function Thread() {
       }
       void refreshMentionBots();
       markReadIfVisible();
-      speakFinishedReply();
       return () => {
         void setOpenNotificationThread(null).catch(() => undefined);
       };
-    }, [botId, markReadIfVisible, notificationThreadId, refreshMentionBots, speakFinishedReply]),
+    }, [botId, markReadIfVisible, notificationThreadId, refreshMentionBots]),
   );
 
   useEffect(() => {
@@ -1149,14 +1100,6 @@ function Thread() {
     });
   }
 
-  // An empty composer offers a call in the send button's place; typing swaps it back.
-  const showCall =
-    Boolean(botId) &&
-    !onCall &&
-    draft.trim().length === 0 &&
-    !selectedSkill &&
-    selectedMentions.length === 0 &&
-    activePendingAttachments.length === 0;
   const canSend =
     Boolean(draft.trim()) ||
     selectedSkill !== null ||
@@ -1339,62 +1282,6 @@ function Thread() {
     [router],
   );
 
-  const speak = useCallback(
-    (message: MobileMessage) =>
-      void speakMessage(message.botId ?? botId ?? snap?.members?.[0]?.botId ?? "", message).catch(
-        (err) =>
-          Alert.alert(t("Could not speak"), err instanceof Error ? err.message : t("Try again.")),
-      ),
-    [botId, snap?.members],
-  );
-
-  async function startVoiceCall() {
-    const targetBotId = botId;
-    if (!targetBotId || voiceCallStarting.current) return;
-    voiceCallStarting.current = true;
-    const loadVoiceStatus = () => rpc<{ ready: boolean; transcribe: boolean }>("voice/status");
-    try {
-      const plan = await resolveVoiceCallPlan({
-        loadDeviceVoiceEnabled,
-        dictationAvailable,
-        loadVoiceStatus,
-      });
-      if (activeBotId.current !== targetBotId) return;
-      if (plan.kind === "settings") {
-        router.push("/voice");
-        return;
-      }
-      if (plan.kind === "dictation") {
-        Alert.alert(
-          t("Calls need transcription"),
-          t("Allow speech recognition in Settings, or connect ElevenLabs, OpenAI, or Fish Audio."),
-          [
-            { text: t("Not now"), style: "cancel" },
-            { text: t("Open Voice"), onPress: () => router.push("/voice") },
-          ],
-        );
-        return;
-      }
-      const startedCallId = startCall({
-        botId: targetBotId,
-        botName: displayName ?? t("Bot"),
-        botColor: mentionBots.find((bot) => bot.id === targetBotId)?.color,
-        transcribe: plan.transcribe,
-      });
-      if (plan.kind === "device") {
-        void probeProviderTranscribe(loadVoiceStatus)
-          .then((enabled) => {
-            if (enabled) setCallProviderTranscribe(true, startedCallId);
-          })
-          .catch(() => undefined);
-      }
-    } catch {
-      if (activeBotId.current === targetBotId) router.push("/voice");
-    } finally {
-      voiceCallStarting.current = false;
-    }
-  }
-
   function showAttachMenu() {
     Alert.alert(t("Attach"), undefined, [
       {
@@ -1446,8 +1333,7 @@ function Thread() {
     )
       ? (snap.run.error ?? null)
       : null;
-  // Group calls in reading order, then reverse for the inverted list.
-  const liveItems = useMemo(() => groupVoiceChats(visibleMessages).reverse(), [visibleMessages]);
+  const liveItems = useMemo(() => [...visibleMessages].reverse(), [visibleMessages]);
   const messagesById = useMemo(
     () => new Map((snap?.messages ?? []).map((message) => [message.id, message])),
     [snap?.messages],
@@ -1524,10 +1410,6 @@ function Thread() {
                 }),
             },
           ]
-        : []),
-      // The call already reads replies aloud; a second voice would talk over it.
-      ...(message.role === "bot" && !onCall && blockText(message)
-        ? [{ name: "speak", text: t("Speak message"), onPress: () => void speak(message) }]
         : []),
       {
         name: "copy",
@@ -1772,7 +1654,7 @@ function Thread() {
             ref={scroll}
             data={liveItems}
             inverted
-            keyExtractor={(item) => (item.kind === "voiceChat" ? item.key : item.message.id)}
+            keyExtractor={(item) => item.id}
             extraData={answerableAskMessageId}
             style={{ flex: 1, marginTop: 8 }}
             maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
@@ -1807,15 +1689,7 @@ function Thread() {
             }}
             ListFooterComponent={loadEarlierControl}
             ListHeaderComponent={workingFooter}
-            renderItem={({ item }) =>
-              item.kind === "voiceChat" ? (
-                <View style={{ marginTop: 12, width: "100%" }}>
-                  <VoiceChatCard group={item} />
-                </View>
-              ) : (
-                renderMessageRow(item.message)
-              )
-            }
+            renderItem={({ item }) => renderMessageRow(item)}
           />
         )}
         {!showPinnedPage && threadScrollState.detached ? (
@@ -2228,51 +2102,27 @@ function Thread() {
               }}
             />
           </View>
-          {showCall ? (
-            <Pressable
-              accessibilityLabel={t("Call")}
-              onPress={() => void startVoiceCall()}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                borderWidth: 1,
-                borderColor: tokens.border,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <NativeSymbol
-                ios="waveform"
-                android="pulse-outline"
-                size={18}
-                color={tokens.mutedForeground}
-              />
-            </Pressable>
-          ) : null}
-          {showCall ? null : (
-            <Pressable
-              accessibilityLabel={t("Send")}
-              disabled={sending || !canSend}
-              onPress={() => void send()}
-              style={{
-                backgroundColor: tokens.primary,
-                borderRadius: 22,
-                width: 44,
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: sending || !canSend ? 0.5 : 1,
-              }}
-            >
-              <NativeSymbol
-                ios="arrow.up"
-                android="arrow-up"
-                size={18}
-                color={tokens.primaryForeground}
-              />
-            </Pressable>
-          )}
+          <Pressable
+            accessibilityLabel={t("Send")}
+            disabled={sending || !canSend}
+            onPress={() => void send()}
+            style={{
+              backgroundColor: tokens.primary,
+              borderRadius: 22,
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: sending || !canSend ? 0.5 : 1,
+            }}
+          >
+            <NativeSymbol
+              ios="arrow.up"
+              android="arrow-up"
+              size={18}
+              color={tokens.primaryForeground}
+            />
+          </Pressable>
           {working ? (
             <Pressable
               accessibilityLabel={t("Stop")}
@@ -2595,14 +2445,6 @@ function memberName(
 ): string | undefined {
   if (!botId || !members) return undefined;
   return members.find((member) => member.botId === botId)?.name;
-}
-
-async function speakMessage(botId: string, message: MobileMessage) {
-  const text = blockText(message);
-  if (!text.trim()) return;
-  if (!(await speakText(text, { botId }))) {
-    throw new Error(t("Add a voice provider in Voice settings."));
-  }
 }
 
 type MessageActionProps = Pick<

@@ -86,7 +86,6 @@ import { mountApiRequestBodyLimits } from "./request-body-limit.js";
 import type { RouterDeps } from "./router.js";
 import { createRouter, saveChatGptPlan } from "./router.js";
 import { mountScreenTarget } from "./screen-proxy.js";
-import { mountVoiceHttpRoutes } from "./voice.js";
 import { mountWebhookHttpRoutes } from "./webhook.js";
 
 /**
@@ -513,17 +512,6 @@ export async function createApp(
     });
     if (matched) return c.newResponse(response.body, response);
     await next();
-  });
-  mountVoiceHttpRoutes(app, { prisma, secrets }, async (c) => {
-    const session = await auth.api.getSession({ headers: sessionHeaders(c.req.raw) });
-    if (!session?.user) return null;
-    const actor = await requireMembership(
-      prisma,
-      session.user.id,
-      c.req.header("x-rakazo-space-id"),
-    ).catch(() => null);
-    if (actor) enrichLogContext({ "user.id": actor.userId, "space.id": actor.spaceId });
-    return actor;
   });
   mountWebhookHttpRoutes(app, { prisma, secrets, events, jobs });
 

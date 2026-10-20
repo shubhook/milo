@@ -72,10 +72,6 @@ import {
   UpdateBotInput,
   UpdateGroupInput,
   UsageRecordSchema,
-  VoiceCatalogEntrySchema,
-  VoiceCredentialSchema,
-  VoiceInfoSchema,
-  VoiceStatusSchema,
 } from "./domain.js";
 import { ComputerEgressPolicySchema, ComputerEgressSchema } from "./egress.js";
 import { ComputerCommandSchema, ProductEventSchema } from "./events.js";
@@ -337,21 +333,7 @@ export const appContract = {
       .input(
         threadTarget.safeExtend({
           text: z.string().min(1),
-          /** Carries the call id, so a turn taken mid-run stays in the call's card. */
           clientNonce: z.string().min(1).max(200).optional(),
-        }),
-      )
-      .output(z.object({ ok: z.literal(true) })),
-    /** The client hung up: close the call card and let the bot finish what was asked on it. */
-    endCall: oc
-      // ":" separates the call id from the nonce suffix, so it can never appear inside one.
-      .input(
-        botId.safeExtend({
-          callId: z
-            .string()
-            .min(1)
-            .max(200)
-            .regex(/^[^:]+$/),
         }),
       )
       .output(z.object({ ok: z.literal(true) })),
@@ -784,42 +766,6 @@ export const appContract = {
   },
   runs: {
     list: oc.input(z.object({ filter: z.enum(["active", "recent"]) })).output(RunsListOutputSchema),
-  },
-  voice: {
-    catalog: oc.output(z.array(VoiceCatalogEntrySchema)),
-    status: oc.output(VoiceStatusSchema),
-    credentials: oc.output(z.array(VoiceCredentialSchema)),
-    connect: oc
-      .input(
-        z.object({
-          provider: z.string(),
-          apiKey: z.string().min(8),
-          voiceId: z.string().max(120).optional(),
-          speechModel: z.string().max(64).optional(),
-        }),
-      )
-      .output(VoiceCredentialSchema),
-    disconnect: oc
-      .input(z.object({ provider: z.string().min(1) }))
-      .output(z.object({ ok: z.literal(true) })),
-    setVoice: oc
-      .input(z.object({ voiceId: z.string().min(1).max(120), provider: z.string().optional() }))
-      .output(VoiceStatusSchema),
-    setSpeechModel: oc
-      .input(z.object({ provider: z.string().min(1), speechModel: z.string().max(64) }))
-      .output(VoiceCredentialSchema),
-    voices: oc
-      .input(z.object({ provider: z.string().optional() }))
-      .output(z.array(VoiceInfoSchema)),
-    prepare: oc
-      .input(
-        z.object({
-          text: z.string().max(20000),
-          voiceId: z.string().max(120).optional(),
-          botId: Id.optional(),
-        }),
-      )
-      .output(z.object({ ready: z.boolean(), utterances: z.array(z.string()) })),
   },
   agentSecrets: {
     list: oc.output(z.array(AgentSecretSchema)),

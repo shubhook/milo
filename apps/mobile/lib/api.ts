@@ -805,7 +805,6 @@ export type MobileBot = Pick<
   | "modelProvider"
   | "modelId"
   | "thinkingLevel"
-  | "autoSpeak"
 > &
   Partial<Pick<Bot, "parentBotId" | "spaceId" | "statusLine">>;
 
@@ -834,8 +833,6 @@ export type MobileMessage = {
   seq?: number;
   runId?: string;
   role: "user" | "bot" | "system";
-  /** Set when the message was sent from a live voice call; groups one call's transcript. */
-  callId?: string;
   botId?: string;
   replyToMessageId?: string;
   replyQuote?: string;
@@ -1206,12 +1203,6 @@ export function applyMobileThreadEvent(
       id,
       runId: event.runId ? String(event.runId) : undefined,
       role: (event.payload?.role as MobileMessage["role"]) ?? "bot",
-      // An update can leave the call id out — the `end_call` marker does — so keep the one
-      // the message already carries instead of dropping it out of its call.
-      callId:
-        typeof event.payload?.callId === "string"
-          ? event.payload.callId
-          : prev.messages.find((message) => message.id === id)?.callId,
       blocks: (event.payload?.blocks as MobileMessage["blocks"]) ?? [],
       botId: event.botId ?? (event.payload?.botId ? String(event.payload.botId) : undefined),
       replyToMessageId: event.payload?.replyToMessageId

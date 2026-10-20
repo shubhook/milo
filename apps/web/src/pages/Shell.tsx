@@ -19,7 +19,6 @@ import type {
   TaughtSkill,
   ThreadMessage,
   ThreadSnapshot,
-  VoiceStatus,
 } from "@milo/contracts";
 import {
   ATTACHMENT_ALLOWED_MIME_TYPES,
@@ -37,7 +36,6 @@ import {
   type ComposerMention,
   clampMentionHighlightIndex,
   groupBotsForSidebar,
-  groupVoiceChats,
   inferAttachmentMimeType,
   isActive,
   isPeerReceiptBlocks,
@@ -58,7 +56,6 @@ import {
   type SlashActionId,
   searchHitThreadTarget,
   serializeComposerPrompt,
-  speechFromBlocks,
   truncateSlashDescription,
   userVisibleMessages,
   withLiveStreamingProgress,
@@ -85,7 +82,6 @@ import {
 import {
   ArrowDown,
   ArrowUp,
-  AudioLines,
   Bell,
   Box,
   ChevronDown,
@@ -146,8 +142,6 @@ import {
   computersAreUnavailable,
 } from "../components/ComputersUnavailableHint";
 import { ComputerUpdateProgress } from "../components/ComputerUpdateProgress";
-import { CallCard } from "../components/call/CallCard";
-import { VoiceChatCard } from "../components/call/VoiceChatCard";
 import { BOT_BUBBLE_CLASS, USER_BUBBLE_CLASS } from "../components/chat-bubble";
 import { ComputerWorkspace } from "../components/computer/ComputerWorkspace";
 import { MessageHoverMetadata } from "../components/MessageHoverMetadata";
@@ -180,7 +174,6 @@ import {
   rosterNotices,
   shouldNotifyBrowser,
 } from "../lib/browser-notifications";
-import { startCall, useCallSession } from "../lib/call-session";
 import { newClientId } from "../lib/client-id";
 import {
   embeddableScreenUrl,
@@ -239,7 +232,6 @@ import {
   transcriptIsNearEnd,
   transcriptMovedDown,
 } from "../lib/transcript-scroll";
-import { speaker } from "../lib/tts";
 import { ActivityList } from "./ActivityList";
 import type { ContextMenuPosition } from "./BotContextMenu";
 import { CreateGroupForm, GroupSettings, memberName } from "./GroupPanel";
@@ -323,21 +315,11 @@ const ATTACHMENT_ACCEPT = ATTACHMENT_ALLOWED_MIME_TYPES.join(",");
 /** Identity colour for bots the roster no longer knows about. */
 const FALLBACK_BOT_COLOR = "#85858A";
 const THREAD_SNAPSHOT_TIMEOUT_MS = 2_000;
-/** Bound Settings leave so a hung voice status refresh cannot block dismissal. */
-const VOICE_STATUS_REFRESH_TIMEOUT_MS = 10_000;
 const MOBILE_SIDEBAR_SWIPE_EDGE_PX = 32;
 const MOBILE_SIDEBAR_SWIPE_DISTANCE_PX = 56;
 
 function threadSnapshotSignal(parent: AbortSignal): AbortSignal {
   return AbortSignal.any([parent, AbortSignal.timeout(THREAD_SNAPSHOT_TIMEOUT_MS)]);
-}
-
-function voiceStatusRefreshTimeout(): Promise<never> {
-  return new Promise((_, reject) => {
-    AbortSignal.timeout(VOICE_STATUS_REFRESH_TIMEOUT_MS).addEventListener("abort", () => {
-      reject(new DOMException("Voice status refresh timed out", "TimeoutError"));
-    });
-  });
 }
 
 const SIDEBAR_NAV_ROW_CLASS =
@@ -551,9 +533,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   const [mcpOpen, setMcpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
-  const call = useCallSession();
-  const [voiceStatus, setVoiceStatus] = useState<VoiceStatus | null>(null);
-  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const mobileSidebarSwipeRef = useRef<{ startX: number; startY: number } | null>(null);
@@ -720,8 +699,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   const pendingBrowserNotifications = useRef(new Map<string, PendingBrowserNotification>());
   const computerVisible = useRef(false);
   computerVisible.current = panel === "computer" || computerOpen;
-  const autoSpoken = useRef<string | null>(null);
-  const autoSpokenBotId = useRef<string | null>(null);
 
   const inGroup = Boolean(groupId);
   const active = inGroup || view ? undefined : (bots.find((b) => b.id === botId) ?? bots[0]);
@@ -1253,46 +1230,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
   }, []);
 
   useEffect(() => {
-    void rpc.voice
-      .status()
-      .then(setVoiceStatus)
-      .catch(() => undefined);
-    const unsubSpeech = speaker.subscribe((state) => {
-      setSpeakingMessageId(state.status === "idle" ? null : (state.messageId ?? null));
-    });
-    return () => {
-      unsubSpeech();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!active || !snapshot || snapshot.botId !== active.id) return;
-    const lastBot = [...snapshot.messages].reverse().find((message) => message.role === "bot");
-    if (autoSpokenBotId.current !== active.id) {
-      autoSpokenBotId.current = active.id;
-      autoSpoken.current = lastBot?.id ?? null;
-      return;
-    }
-    if (call?.botId === active.id || !active.autoSpeak) {
-      autoSpoken.current = lastBot?.id ?? null;
-      return;
-    }
-    if (snapshot.run && ["running", "queued", "leased"].includes(snapshot.run.status)) return;
-    if (!lastBot || lastBot.id === autoSpoken.current) return;
-    const text = speechFromBlocks(lastBot.blocks);
-    if (!text) return;
-    autoSpoken.current = lastBot.id;
-    void speaker.speak(text, { botId: active.id, messageId: lastBot.id });
-  }, [
-    snapshot?.messages,
-    snapshot?.run?.status,
-    snapshot?.botId,
-    active?.autoSpeak,
-    active?.id,
-    call?.botId,
-  ]);
-
-  useEffect(() => {
     if (!active) return;
     // Opening a bot clears the manual unread flag so it can auto-read again.
     manuallyUnread.current.delete(active.id);
@@ -1591,7 +1528,7 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
     (spaceId: string, path: string) => {
       setMobileSidebarOpen(false);
       const previousSpaceId = selectedSpaceId();
-      // Persist the active space (including primary) so voice/RPC headers match the chat.
+      // Persist the active space (including primary) so RPC headers match the chat.
       const selectionStored = selectSpace(spaceId);
       if (!selectionStored) return;
       const previousEffective = previousSpaceId ?? bootstrapMe?.spaceId;
@@ -2357,18 +2294,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
     setEditingRoutine(null);
     setPanel("routine");
   }, []);
-  const speakingMessageIdRef = useRef(speakingMessageId);
-  speakingMessageIdRef.current = speakingMessageId;
-  const speakMessage = useCallback((message: ThreadMessage) => {
-    if (speakingMessageIdRef.current === message.id) {
-      speaker.stop();
-      return;
-    }
-    const text = speechFromBlocks(message.blocks);
-    const id = message.botId ?? activeBotId.current;
-    if (text && id) void speaker.speak(text, { botId: id, messageId: message.id });
-  }, []);
-
   async function createGroup(input: { name: string; botIds: string[] }) {
     const group = await rpc.groups.create(input);
     setGroups((current) =>
@@ -3699,9 +3624,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
               onRefresh={refreshActiveThread}
               onBotChanged={refreshBots}
               onAddRoutine={addSkillRoutine}
-              voiceReady={Boolean(voiceStatus?.ready)}
-              speakingMessageId={speakingMessageId}
-              onSpeak={speakMessage}
               onOpenComputer={onOpenComputer}
             />
           )}
@@ -3727,22 +3649,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
               onRemoveAttachment={removeAttachment}
               onSend={sendMessage}
               onStop={stopRun}
-              onVoice={
-                !inGroup && active
-                  ? () => {
-                      if (!voiceStatus?.ready) {
-                        openSettings("voice");
-                        return;
-                      }
-                      startCall({
-                        botId: active.id,
-                        botName: active.name,
-                        botColor: active.color,
-                        transcribe: Boolean(voiceStatus?.transcribe),
-                      });
-                    }
-                  : undefined
-              }
               replyTarget={activeReplyTarget}
               replyQuote={activeReplyQuote}
               replyTargetName={replyTargetName}
@@ -3771,8 +3677,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
           ) : null}
         </main>
       )}
-
-      <CallCard onSettings={() => openSettings("voice")} />
 
       {panel === "create" ? (
         <CreateBotDialog
@@ -4442,16 +4346,6 @@ export function ShellPage({ view }: { view?: ShellView } = {}) {
               const nextMe = await rpc.preferences.update({ avatarStyle });
               setBootstrapMe(nextMe);
             }}
-            onVoiceStatusMaybeChanged={async () => {
-              try {
-                setVoiceStatus(
-                  await Promise.race([rpc.voice.status(), voiceStatusRefreshTimeout()]),
-                );
-              } catch {
-                // Prefer reopening Voice settings over starting a call with stale readiness.
-                setVoiceStatus(null);
-              }
-            }}
             onClose={() => {
               setSettingsOpen(false);
               setSettingsSection("general");
@@ -4671,9 +4565,6 @@ const Transcript = memo(function Transcript({
   onRefresh,
   onBotChanged,
   onAddRoutine,
-  voiceReady,
-  speakingMessageId,
-  onSpeak,
   onOpenComputer,
 }: {
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -4700,9 +4591,6 @@ const Transcript = memo(function Transcript({
   onRefresh: () => Promise<void>;
   onBotChanged: () => Promise<void>;
   onAddRoutine: (name: string, prompt: string) => void;
-  voiceReady: boolean;
-  speakingMessageId: string | null;
-  onSpeak: (message: ThreadMessage) => void;
   onOpenComputer: (botId?: string) => void;
 }) {
   const { t } = useLingui();
@@ -4961,17 +4849,7 @@ const Transcript = memo(function Transcript({
             {loadingOlder ? t`Loading…` : t`Load earlier messages`}
           </button>
         ) : null}
-        {groupVoiceChats(reactionView.visibleMessages).map((item) => {
-          if (item.kind === "voiceChat") {
-            return (
-              <VoiceChatCard
-                key={item.key}
-                group={item}
-                revealMessageId={scrollRequest?.messageId}
-              />
-            );
-          }
-          const message = item.message;
+        {reactionView.visibleMessages.map((message) => {
           if (!messageHasVisibleBlocks(message.blocks, showToolActivity)) return null;
           const peerReceipt = isPeerReceiptBlocks(message.blocks);
           const messageReactions = reactionView.reactions.get(message.id);
@@ -5041,9 +4919,6 @@ const Transcript = memo(function Transcript({
                     onRefresh={onRefresh}
                     onBotChanged={onBotChanged}
                     onAddRoutine={onAddRoutine}
-                    voiceReady={voiceReady}
-                    speaking={speakingMessageId === message.id}
-                    onSpeak={() => onSpeak(message)}
                     onOpenComputer={onOpenComputer}
                     showToolActivity={showToolActivity}
                   />
@@ -5207,7 +5082,6 @@ const Composer = memo(function Composer({
   onRemoveAttachment,
   onSend,
   onStop,
-  onVoice,
   replyTarget,
   replyQuote,
   replyTargetName,
@@ -5232,7 +5106,6 @@ const Composer = memo(function Composer({
   onRemoveAttachment: (attachment: PendingAttachment) => void;
   onSend: (text: string, mentions?: ComposerMention[]) => Promise<void>;
   onStop: () => Promise<void>;
-  onVoice?: () => void;
   replyTarget?: ThreadMessage | null;
   replyQuote?: string | null;
   replyTargetName?: string;
@@ -5832,19 +5705,6 @@ const Composer = memo(function Composer({
             <Paperclip size={18} strokeWidth={1.8} />
           </Button>
           <span className="flex-1" />
-          {onVoice && draft.trim().length === 0 ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t`Voice`}
-              title={t`Voice`}
-              disabled={disabled}
-              onClick={onVoice}
-              className="size-[34px] shrink-0 text-muted-foreground hover:text-foreground"
-            >
-              <AudioLines size={18} strokeWidth={1.8} />
-            </Button>
-          ) : null}
           {running ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <Button
@@ -6129,9 +5989,6 @@ const MessageView = memo(function MessageView({
   onRefresh,
   onBotChanged,
   onAddRoutine,
-  voiceReady,
-  speaking,
-  onSpeak,
   onOpenComputer,
   showToolActivity,
 }: {
@@ -6150,9 +6007,6 @@ const MessageView = memo(function MessageView({
   onRefresh: () => Promise<void>;
   onBotChanged: () => Promise<void>;
   onAddRoutine: (name: string, prompt: string) => void;
-  voiceReady: boolean;
-  speaking: boolean;
-  onSpeak: () => void;
   onOpenComputer: (botId?: string) => void;
   showToolActivity: boolean;
 }) {
@@ -6262,16 +6116,6 @@ const MessageView = memo(function MessageView({
               }
               return null;
             })}
-            {!isLive && voiceReady && message.blocks.some((block) => block.kind === "text") ? (
-              <button
-                type="button"
-                aria-label={speaking ? t`Stop speaking` : t`Speak this reply`}
-                onClick={onSpeak}
-                className="text-[12px] text-muted-foreground hover:text-foreground"
-              >
-                {speaking ? <Trans>Stop</Trans> : <Trans>Speak</Trans>}
-              </button>
-            ) : null}
           </div>
         </div>
       </>
@@ -6518,16 +6362,6 @@ const MessageView = memo(function MessageView({
                 <div data-quote-message-id={quoteMessageId}>
                   <ChatMarkdown>{block.text}</ChatMarkdown>
                 </div>
-                {voiceReady ? (
-                  <button
-                    type="button"
-                    aria-label={speaking ? t`Stop speaking` : t`Speak this reply`}
-                    onClick={onSpeak}
-                    className="mt-2 text-[12px] text-muted-foreground hover:text-foreground"
-                  >
-                    {speaking ? <Trans>Stop</Trans> : <Trans>Speak</Trans>}
-                  </button>
-                ) : null}
               </div>
             </div>
           );

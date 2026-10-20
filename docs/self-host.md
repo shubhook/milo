@@ -374,20 +374,13 @@ Product contracts stay compatible across cloud and self-hosted.
 ### Space privacy-boundary migration
 
 Before upgrading across migration `20260830200000_space_scope_names_and_user_credentials`, check
-that every existing model and voice credential still belongs to a member of its Space. This query
+that every existing model credential still belongs to a member of its Space. This query
 uses the pre-migration `workspaceId` column name and must return no rows:
 
 ```sql
 SELECT 'model' AS credential_type, credential."id", credential."userId",
        credential."workspaceId" AS "spaceId"
 FROM "user_model_credentials" AS credential
-LEFT JOIN "space_members" AS membership
-  ON membership."spaceId" = credential."workspaceId"
- AND membership."userId" = credential."userId"
-WHERE membership."id" IS NULL
-UNION ALL
-SELECT 'voice', credential."id", credential."userId", credential."workspaceId"
-FROM "user_voice_credentials" AS credential
 LEFT JOIN "space_members" AS membership
   ON membership."spaceId" = credential."workspaceId"
  AND membership."userId" = credential."userId"

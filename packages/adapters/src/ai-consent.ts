@@ -4,7 +4,6 @@ import { CHATGPT_PLAN_PROVIDER } from "./chatgpt-plan.js";
 import { CLAUDE_CODE_PROVIDER } from "./claude-code-cli.js";
 import { localBaseUrl } from "./pi-local-provider.js";
 import { listPiCatalog } from "./pi-models.js";
-import { voiceCatalogEntry } from "./voice-factory.js";
 
 const PRIVACY_URLS: Record<string, string> = {
   openrouter: "https://openrouter.ai/privacy",
@@ -15,9 +14,6 @@ const PRIVACY_URLS: Record<string, string> = {
   [CLAUDE_CODE_PROVIDER]: "https://www.anthropic.com/legal/privacy",
   google: "https://policies.google.com/privacy",
   "vercel-ai-gateway": "https://vercel.com/legal/privacy-policy",
-  elevenlabs: "https://elevenlabs.io/privacy-policy",
-  cartesia: "https://cartesia.ai/legal/privacy",
-  "fish-audio": "https://fish.audio/privacy/",
 };
 
 /** Never expose endpoint paths, query parameters, user info, or credentials in a disclosure. */
@@ -30,7 +26,7 @@ export function aiRecipient(input: {
   if (input.provider === "scripted") return null;
   const endpoint = input.baseUrl ?? (input.provider === "local" ? localBaseUrl() : undefined);
   const origin = endpoint ? new URL(endpoint).origin : undefined;
-  const name = recipientName(input.provider, input.use);
+  const name = recipientName(input.provider);
   // Bind custom connections to the full endpoint without exposing private URL components.
   const key = createHash("sha256")
     .update(JSON.stringify([input.use, input.provider, endpoint ?? "", input.modelId ?? ""]))
@@ -51,8 +47,7 @@ export function aiRecipient(input: {
   };
 }
 
-function recipientName(provider: string, use: AiDataUse) {
-  if (use === "voice") return voiceCatalogEntry(provider)?.name ?? provider;
+function recipientName(provider: string) {
   if (provider === CLAUDE_CODE_PROVIDER) return "Claude Code";
   return listPiCatalog().find((entry) => entry.provider === provider)?.providerName ?? provider;
 }

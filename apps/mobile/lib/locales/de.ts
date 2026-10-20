@@ -36,7 +36,6 @@ export const DE_MESSAGES: Record<string, string> = {
   Routine: "Routine",
   "Server integrations": "Server-Integrationen",
   Thread: "Thread",
-  Voice: "Stimme",
   // app/sign-in.tsx
   "Already have an account?": "Du hast bereits ein Konto?",
   "Back to sign in": "Zurück zur Anmeldung",
@@ -92,7 +91,6 @@ export const DE_MESSAGES: Record<string, string> = {
   unread: "ungelesen",
   // app/thread.tsx
   "@{name}": "@{name}",
-  "Add a voice provider in Voice settings.": "Füge unter Stimme einen Sprachanbieter hinzu.",
   Agent: "Agent",
   "Allowed once": "Einmal erlaubt",
   "Always allowed": "Immer erlaubt",
@@ -125,7 +123,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Could not open image": "Bild konnte nicht geöffnet werden",
   "Could not open message": "Nachricht konnte nicht geöffnet werden",
   "Could not send answer": "Antwort konnte nicht gesendet werden",
-  "Could not speak": "Vorlesen fehlgeschlagen",
   "Could not update reaction": "Reaktion konnte nicht aktualisiert werden",
   Created: "Erstellt",
   "Delete…": "Löschen…",
@@ -166,7 +163,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Show {label}": "{label} anzeigen",
   "Skill {name}": "Skill {name}",
   "Skipped {items}": "{items} übersprungen",
-  "Speak message": "Nachricht vorlesen",
   Stop: "Stoppen",
   "This removes every message and stops current work. The bot, computer, memory, and routines are kept.":
     "Das entfernt alle Nachrichten und stoppt die laufende Arbeit. Bot, Computer, Erinnerungen und Routinen bleiben erhalten.",
@@ -302,7 +298,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Model updated.": "Modell aktualisiert.",
   "No matching models": "Keine passenden Modelle",
   "Not connected": "Nicht verbunden",
-  "Not now": "Nicht jetzt",
   "Now using {label}.": "{label} ist jetzt aktiv.",
   "OpenAI-compatible server URL": "URL eines OpenAI-kompatiblen Servers",
   Optional: "Optional",
@@ -411,33 +406,16 @@ export const DE_MESSAGES: Record<string, string> = {
   "Project ID": "Projekt-ID",
   "Set up Executor on your server in the web app.":
     "Richte Executor auf deinem Server in der Web-App ein.",
-  // app/voice.tsx
   Connect: "Verbinden",
-  "Connect a voice provider first.": "Verbinde zuerst einen Sprachanbieter.",
   "Connected {name}.": "{name} verbunden.",
   "Could not disconnect": "Trennen fehlgeschlagen",
-  "Could not load voice settings": "Stimmeinstellungen konnten nicht geladen werden",
-  "Could not play a sample": "Beispiel konnte nicht abgespielt werden",
   "Could not save that preference": "Diese Einstellung konnte nicht gespeichert werden",
-  "Could not save that speech model": "Sprachmodell konnte nicht gespeichert werden",
-  "Could not save that voice": "Stimme konnte nicht gespeichert werden",
   "Disconnect {name}?": "{name} trennen?",
   Disconnect: "Trennen",
   "This removes the connection from every space.": "Die Verbindung wird in jedem Space entfernt.",
   "Disconnecting…": "Verbindung wird getrennt…",
-  "Hear a sample": "Beispiel anhören",
-  "Hi, this is how I'll sound when I read replies out loud.":
-    "Hallo, so klinge ich, wenn ich Antworten vorlese.",
-  "On · Free, works offline": "Ein · Kostenlos, funktioniert offline",
-  "Paste a replacement key": "Ersatzschlüssel einfügen",
   "Paste your API key": "Füge deinen API-Schlüssel ein",
   "Replace key": "Schlüssel ersetzen",
-  "Speak + transcribe": "Sprechen + transkribieren",
-  "Speak only": "Nur sprechen",
-  "Speech model": "Sprachmodell",
-  "This device": "Dieses Gerät",
-  "Your phone's built-in voice. Free, no account needed":
-    "Die eingebaute Stimme deines Telefons. Kostenlos, kein Konto nötig",
   // app/(tabs)/account/index.tsx
   "Agent messages": "Agent-Nachrichten",
   "Alerts from routines": "Meldungen von Routinen",
@@ -465,6 +443,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "Needs attention": "Aufmerksamkeit erforderlich",
   "Notification settings": "Benachrichtigungseinstellungen",
   Notifications: "Benachrichtigungen",
+  "Not now": "Nicht jetzt",
   Organic: "Organisch",
   "Questions, approvals, takeover": "Fragen, Freigaben, Übernahme",
   "Replies and completed work": "Antworten und erledigte Arbeit",
@@ -625,8 +604,6 @@ export const DE_MESSAGES: Record<string, string> = {
   "Use an http or https URL": "Verwende eine http- oder https-URL",
   // lib/live-notifications.ts
   "Android blocked notifications.": "Android hat Benachrichtigungen blockiert.",
-  // lib/voice.ts
-  "Could not play that clip.": "Dieser Clip konnte nicht abgespielt werden.",
   // app/models.tsx
   "A sign-in page opened — enter this code there:":
     "Eine Anmeldeseite wurde geöffnet — gib dort diesen Code ein:",
@@ -642,25 +619,7 @@ export const DE_MESSAGES: Record<string, string> = {
     "Warte auf Anmeldung — der Code läuft in etwa {minutes} Minuten ab.",
   "Waiting for sign-in — the link expires in about {minutes} minutes.":
     "Warte auf Anmeldung — der Link läuft in etwa {minutes} Minuten ab.",
-  // call
-  "Allow microphone access to call a bot.": "Erlaube den Mikrofonzugriff, um einen Bot anzurufen.",
-  "Allow speech recognition in Settings, or connect ElevenLabs, OpenAI, or Fish Audio.":
-    "Erlaube die Spracherkennung in den Einstellungen oder verbinde ElevenLabs, OpenAI oder Fish Audio.",
-  Call: "Anrufen",
-  "Calls need transcription": "Anrufe brauchen eine Transkription",
-  "Could not hear that.": "Das war nicht zu verstehen.",
-  "Could not speak that.": "Das konnte nicht vorgelesen werden.",
-  "Could not transcribe that.": "Das konnte nicht transkribiert werden.",
-  "Hang up": "Auflegen",
-  "Hide transcript": "Transkript ausblenden",
-  Mute: "Stummschalten",
-  "On a call with {name}": "Im Gespräch mit {name}",
-  "Open Voice": "Sprache öffnen",
   Settings: "Einstellungen",
-  "Show transcript": "Transkript anzeigen",
-  Transcript: "Transkript",
-  Unmute: "Stummschaltung aufheben",
-  "Voice chat": "Sprachchat",
   // app/agent-models.tsx
   "Could not load models.": "Modelle konnten nicht geladen werden.",
   "In use": "Aktiv",
