@@ -1,15 +1,14 @@
 import { useLingui } from "@lingui/react/macro";
 import type { AvatarStyle } from "@milo/contracts";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@milo/ui-web";
-import { CloudDownload, Gauge, Settings, ShieldCheck, Volume2, XIcon } from "lucide-react";
+import { CloudDownload, Gauge, Settings, ShieldCheck, XIcon } from "lucide-react";
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { ApprovalRulesSettings } from "../components/ApprovalRulesSettings";
 import { desktopBridge } from "../lib/desktop";
 import { GeneralSettingsPanels, UpdatesSettingsPanel } from "./AccountSettingsOverlay";
 import { AgentModelsPanel } from "./AgentModelsPanel";
-import { VoiceSettingsOverlay } from "./VoiceSettingsOverlay";
 
-export type SettingsSection = "general" | "usage" | "approvals" | "voice" | "updates";
+export type SettingsSection = "general" | "usage" | "approvals" | "updates";
 
 type NavItem = {
   id: SettingsSection;
@@ -25,7 +24,6 @@ export function SettingsOverlay({
   onAvatarStyleChange,
   initialSection = "general",
   onClose,
-  onVoiceStatusMaybeChanged,
 }: {
   email?: string | null;
   name: string;
@@ -33,7 +31,6 @@ export function SettingsOverlay({
   onAvatarStyleChange: (style: AvatarStyle) => Promise<void>;
   initialSection?: SettingsSection;
   onClose: () => void;
-  onVoiceStatusMaybeChanged?: () => void | Promise<void>;
   // Still passed by the shell; nothing in v0 settings reads them.
   usage?: { runs: number; inputTokens: number; outputTokens: number } | null;
   isDeploymentOwner?: boolean;
@@ -45,10 +42,8 @@ export function SettingsOverlay({
   const panelRef = useRef<HTMLDivElement>(null);
   const usageRef = useRef<HTMLDivElement>(null);
   const [section, setSection] = useState<SettingsSection>(initialSection);
-  const [voiceBusy, setVoiceBusy] = useState(false);
   // The desktop app updates itself; a browser has nothing to update here.
   const showUpdates = Boolean(desktopBridge()?.update);
-  const panelBusy = voiceBusy;
 
   useEffect(() => {
     setSection(initialSection);
@@ -64,7 +59,6 @@ export function SettingsOverlay({
     { id: "usage", label: t`Usage`, icon: Gauge },
     { id: "general", label: t`General`, icon: Settings },
     { id: "approvals", label: t`Allow list`, icon: ShieldCheck },
-    { id: "voice", label: t`Voice`, icon: Volume2 },
     ...(showUpdates ? [{ id: "updates" as const, label: t`Updates`, icon: CloudDownload }] : []),
   ];
 
@@ -72,38 +66,14 @@ export function SettingsOverlay({
     navItems.find((item) => item.id === section)?.label ??
     (section === "general" ? t`General` : t`Settings`);
 
-  const closeLabel =
-    section === "usage"
-      ? t`Close usage settings`
-      : section === "voice"
-        ? t`Close voice settings`
-        : t`Close user settings`;
-
-  async function refreshVoiceStatus() {
-    await onVoiceStatusMaybeChanged?.();
-  }
-
-  function leaveSettings(next: () => void) {
-    if (panelBusy) return;
-    void refreshVoiceStatus().finally(next);
-  }
-
-  function requestClose() {
-    leaveSettings(onClose);
-  }
-
-  const widePane = section === "voice";
+  const closeLabel = section === "usage" ? t`Close usage settings` : t`Close user settings`;
 
   return (
     <Dialog
       open
-      onOpenChange={(open, details) => {
+      onOpenChange={(open) => {
         if (open) return;
-        if (panelBusy) {
-          details.cancel();
-          return;
-        }
-        requestClose();
+        onClose();
       }}
     >
       <DialogContent
@@ -114,11 +84,7 @@ export function SettingsOverlay({
         initialFocus={() =>
           section === "usage" ? (usageRef.current ?? panelRef.current) : panelRef.current
         }
-        className={`flex max-h-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-h-[calc(100%-5rem)] ${
-          widePane
-            ? "h-[min(760px,calc(100%-2rem))] w-[min(1080px,calc(100%-2rem))] sm:max-w-[1080px]"
-            : "h-[min(720px,calc(100%-2rem))] w-[min(920px,calc(100%-2rem))] sm:max-w-[920px]"
-        }`}
+        className="flex h-[min(720px,calc(100%-2rem))] max-h-[calc(100%-2rem)] w-[min(920px,calc(100%-2rem))] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-h-[calc(100%-5rem)] sm:max-w-[920px]"
       >
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
           <nav
@@ -135,9 +101,8 @@ export function SettingsOverlay({
                   type="button"
                   data-testid={`settings-nav-${item.id}`}
                   aria-current={active ? "page" : undefined}
-                  disabled={panelBusy}
                   onClick={() => setSection(item.id)}
-                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-[13.5px] transition-colors disabled:pointer-events-none disabled:opacity-50 ${
+                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-[13.5px] transition-colors ${
                     active
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -157,20 +122,13 @@ export function SettingsOverlay({
               </DialogTitle>
               <DialogClose
                 aria-label={closeLabel}
-                disabled={panelBusy}
                 render={<Button variant="ghost" size="icon-sm" />}
               >
                 <XIcon />
               </DialogClose>
             </div>
 
-            <div
-              className={`min-h-0 flex-1 ${
-                section === "voice"
-                  ? "flex flex-col overflow-hidden"
-                  : "rk-scroll overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8"
-              }`}
-            >
+            <div className="rk-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 pt-5 sm:px-8 sm:pb-8">
               {section === "general" ? (
                 <GeneralSettingsPanels
                   email={email}
@@ -191,9 +149,6 @@ export function SettingsOverlay({
               ) : null}
               {section === "approvals" ? <ApprovalRulesSettings /> : null}
               {section === "updates" && showUpdates ? <UpdatesSettingsPanel /> : null}
-              {section === "voice" ? (
-                <VoiceSettingsOverlay embedded onClose={requestClose} onBusyChange={setVoiceBusy} />
-              ) : null}
             </div>
           </div>
         </div>

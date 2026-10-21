@@ -32,7 +32,7 @@ import { native, useResolvedAppearance, useThemedStyles } from "../../../lib/nat
 import type { AccountUiLocale } from "../../../lib/ui-locale";
 import { ACCOUNT_UI_LOCALES, UI_LOCALE_LABELS } from "../../../lib/ui-locale";
 
-/** Settings is Usage, General, Allow list and Updates. Voice stays until thread C removes it. */
+/** Settings is Usage, General, Allow list and Updates. */
 export default function Account() {
   const { t, locale } = useI18n();
   const colorScheme = useResolvedAppearance();
@@ -127,7 +127,6 @@ export default function Account() {
             onPress={() => router.push("/allow-list")}
             styles={styles}
           />
-          <NavRow label={t("Voice")} onPress={() => router.push("/voice")} styles={styles} />
         </View>
 
         <Text style={styles.sectionLabel}>{t("General")}</Text>

@@ -7,7 +7,6 @@ import type {
   ModelCatalogEntry,
   ModelCredential,
   ThinkingLevel,
-  VoiceInfo,
 } from "@milo/contracts";
 import {
   BOT_DESCRIPTION_MAX_LENGTH,
@@ -23,7 +22,6 @@ import {
   Textarea,
   Toggle,
 } from "@milo/ui-web";
-import { X } from "lucide-react";
 import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { botProfilePatch } from "../../lib/bot-profile-patch";
 import { thinkingLevelLabel } from "../../lib/model-catalog";
@@ -93,8 +91,6 @@ export function BotSettings({
     color?: string;
     notifyOnFinish?: boolean;
     computerMode: ComputerMode;
-    autoSpeak?: boolean;
-    voiceId?: string | null;
     modelProvider?: string | null;
     modelId?: string | null;
     thinkingLevel?: ThinkingLevel | null;
@@ -111,7 +107,7 @@ export function BotSettings({
   // A roster refresh can skip replacing bots while a reorder is in flight, so
   // this prop keeps the description from when the panel opened. Later saves
   // compare against the description last saved here; otherwise a model or
-  // voice change treats that stale text as an edit and overwrites instructions.
+  // thinking change treats that stale text as an edit and overwrites instructions.
   const savedDescriptionRef = useRef(bot.description ?? "");
   // The profile header owns the avatar, so saves here always carry the bot's current one.
   const color = bot.color;
@@ -121,9 +117,6 @@ export function BotSettings({
     setNotifyOnFinish(bot.notifyOnFinish ?? true);
   }, [bot.notifyOnFinish]);
   const [computerMode, setComputerMode] = useState(bot.computerMode);
-  const [autoSpeak, setAutoSpeak] = useState(bot.autoSpeak);
-  const [voiceId, setVoiceId] = useState(bot.voiceId ?? "");
-  const [voices, setVoices] = useState<VoiceInfo[]>([]);
   const [modelKey, setModelKey] = useState(
     bot.modelProvider && bot.modelId ? modelOptionKey(bot.modelProvider, bot.modelId) : "",
   );
@@ -145,10 +138,6 @@ export function BotSettings({
     }) => Promise<void>
   >(async () => undefined);
   useEffect(() => {
-    void rpc.voice
-      .voices({})
-      .then(setVoices)
-      .catch(() => setVoices([]));
     void Promise.all([rpc.models.credentials(), rpc.models.list(), rpc.me()])
       .then(([nextCredentials, nextCatalog, nextMe]) => {
         setCredentials(nextCredentials);
@@ -250,15 +239,13 @@ export function BotSettings({
         name: nextName || bot.name,
         title: nextTitle,
         // One field feeds both, so it only goes on the wire when it changed: a
-        // model, thinking or voice save must not overwrite longer instructions,
+        // model or thinking save must not overwrite longer instructions,
         // nor fail on a description that is already above its own limit.
         ...botProfilePatch(savedDescriptionRef.current, nextDescription),
         // Unchanged color stays off the wire so a legacy named value cannot fail a name save.
         ...(nextColor !== bot.color ? { color: nextColor } : {}),
         notifyOnFinish: nextNotify,
         computerMode,
-        autoSpeak,
-        voiceId: voiceId || null,
         modelProvider: selected?.provider ?? null,
         modelId: selected?.modelId ?? null,
         ...(modelMetaReady
@@ -430,35 +417,6 @@ export function BotSettings({
             ) : null}
           </>
         )}
-        <label
-          htmlFor={`${ids}-auto-speak`}
-          className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-foreground/75"
-        >
-          <Switch
-            id={`${ids}-auto-speak`}
-            checked={autoSpeak}
-            onCheckedChange={(checked) => setAutoSpeak(checked)}
-          />
-          <Trans>Read replies aloud</Trans>
-        </label>
-        {voices.length ? (
-          <label htmlFor={`${ids}-voice`} className={fieldLabelClass}>
-            <Trans>Voice</Trans>
-            <NativeSelect
-              id={`${ids}-voice`}
-              className="mt-2 w-full"
-              value={voiceId}
-              onChange={(event) => setVoiceId(event.target.value)}
-            >
-              <NativeSelectOption value="">{t`Account default`}</NativeSelectOption>
-              {voices.map((voice) => (
-                <NativeSelectOption key={voice.id} value={voice.id}>
-                  {voice.label}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </label>
-        ) : null}
         {advancedOpened ? <BotCredentialsSection botId={bot.id} /> : null}
       </details>
       {error ? <p className="mt-2 text-[13px] text-destructive">{error}</p> : null}

@@ -9,7 +9,6 @@ import {
 } from "@milo/contracts";
 import {
   blocksToAgentHistoryText,
-  callIdFromClientNonce,
   isApprovalAskBlock,
   isConversationalRun,
   isSecretAskBlock,
@@ -445,9 +444,6 @@ export async function sendUserMessage(
           messageId: message.id,
           role: "user",
           blocks: input.blocks,
-          // Carries the call id on the live event so a spoken turn groups into the
-          // call card immediately, instead of after a refetch reads the nonce.
-          callId: callIdFromClientNonce(message.clientNonce),
         },
       });
       return { message, task, run, busy, event };

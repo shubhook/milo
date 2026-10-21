@@ -48,14 +48,9 @@ test("settings shell is Usage, General and Allow list in a browser", async ({ pa
   await expect(settings.getByRole("heading", { name: "Allow list", exact: true })).toBeVisible();
   await expect(settings.getByTestId("action-confirmation-settings")).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-shell-allow-list");
+  await expect(settings.getByTestId("settings-nav-voice")).toHaveCount(0);
 
-  await settings.getByTestId("settings-nav-voice").click();
-  await expect(settings).toHaveAttribute("data-settings-section", "voice");
-  await expect(settings.getByRole("heading", { name: "Voice", exact: true })).toBeVisible();
-  await expect(settings.getByTestId("voice-settings")).toBeVisible();
-  await captureScreenshot(page, testInfo, "settings-shell-voice");
-
-  await page.getByRole("button", { name: "Close voice settings" }).click();
+  await page.getByRole("button", { name: "Close user settings" }).click();
   await expect(page.getByTestId("user-settings")).toHaveCount(0);
 
   await openUserSettings(page, "usage");

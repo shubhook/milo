@@ -15,14 +15,6 @@ const status: AiConsentStatus = {
       privacyUrl: "https://example.com/privacy",
       allowed: false,
     },
-    {
-      key: "voice",
-      name: "Example Voice",
-      use: "voice",
-      detail: "",
-      privacyUrl: "https://example.com/privacy",
-      allowed: false,
-    },
   ],
 };
 
@@ -85,7 +77,6 @@ describe("foreground AI consent", () => {
     expect(prompt).not.toHaveBeenCalled();
     expect(aiDataUsesForProcedure("threads/get")).toEqual([]);
     expect(aiDataUsesForProcedure("threads/send")).toEqual(["model"]);
-    expect(aiDataUsesForProcedure("voice/prepare")).toEqual(["voice"]);
     expect(
       aiDataUsesForProcedure("routines/update", { routineId: "routine", active: false }),
     ).toEqual([]);
@@ -123,7 +114,7 @@ describe("foreground AI consent", () => {
       keys: ["model"],
     });
   });
-  it("does not share a pending grant across account-space scopes or recipients", async () => {
+  it("does not share a pending grant across account-space scopes", async () => {
     const prompt = vi.fn(async () => true);
     const allow = vi.fn(async () => undefined);
     const statuses = [
@@ -137,25 +128,20 @@ describe("foreground AI consent", () => {
         scope: "account-b-space",
         recipients: [status.recipients[0]!],
       },
-      {
-        ...status,
-        scope: "account-a-space",
-        recipients: [status.recipients[1]!],
-      },
     ];
 
     await Promise.all(
       statuses.map((current) =>
         ensureAiDataConsent({
-          uses: ["model", "voice"],
+          uses: ["model"],
           status: async () => current,
           prompt,
           allow,
         }),
       ),
     );
-    expect(prompt).toHaveBeenCalledTimes(3);
-    expect(allow).toHaveBeenCalledTimes(3);
+    expect(prompt).toHaveBeenCalledTimes(2);
+    expect(allow).toHaveBeenCalledTimes(2);
   });
   it("does not share a grant across independent API contexts", async () => {
     const prompt = vi.fn(async () => true);

@@ -230,7 +230,6 @@ describe("contracts", () => {
     expect(appContract.botSections.update).toBeTruthy();
     expect(appContract.threads.subscribe).toBeTruthy();
     expect(appContract.threads.clear).toBeTruthy();
-    expect(appContract.voice.prepare).toBeTruthy();
     expect(appContract.agentSecrets.list).toBeTruthy();
     expect(appContract.agentSecrets.put).toBeTruthy();
     expect(appContract.agentSecrets.remove).toBeTruthy();

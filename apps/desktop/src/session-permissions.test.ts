@@ -70,12 +70,14 @@ describe("desktop session permissions", () => {
     "http://localhost:5173/chat",
     "http://[::1]:5173/chat",
     "https://192.168.1.20:3100/chat",
-  ])("preserves microphone, notifications and copy in the connected app at %s", (url) => {
+  ])("preserves notifications and copy in the connected app at %s", (url) => {
     const policy = policyFixture(url);
-    for (const permission of ["media", "notifications", "clipboard-sanitized-write"] as const) {
+    for (const permission of ["notifications", "clipboard-sanitized-write"] as const) {
       expect(policy.request(permission)).toBe(true);
       expect(policy.check(permission)).toBe(true);
     }
+    expect(policy.request("media")).toBe(false);
+    expect(policy.check("media")).toBe(false);
   });
 
   it.each([
@@ -114,9 +116,11 @@ describe("desktop session permissions", () => {
   it("denies both same-origin and third-party subframes", () => {
     const policy = policyFixture();
     for (const requestingUrl of [appUrl, providerUrl]) {
-      expect(policy.request("media", { requestingUrl, isMainFrame: false })).toBe(false);
-      expect(policy.check("media", { requestingUrl, isMainFrame: false })).toBe(false);
-      expect(policy.check("media", { requestingUrl, isMainFrame: false }, null)).toBe(false);
+      expect(policy.request("notifications", { requestingUrl, isMainFrame: false })).toBe(false);
+      expect(policy.check("notifications", { requestingUrl, isMainFrame: false })).toBe(false);
+      expect(policy.check("notifications", { requestingUrl, isMainFrame: false }, null)).toBe(
+        false,
+      );
     }
   });
 
@@ -135,34 +139,15 @@ describe("desktop session permissions", () => {
   ])("rejects untrusted or opaque requesting origins: %s", (url) => {
     const policy = policyFixture();
     expect(policy.request("media", { requestingUrl: url })).toBe(false);
-    expect(policy.request("media", { securityOrigin: url })).toBe(false);
+    expect(policy.request("notifications", { requestingUrl: url })).toBe(false);
     expect(policy.check("media", {}, policy.contents, url)).toBe(false);
-    expect(policy.check("media", { requestingUrl: url })).toBe(false);
-    expect(policy.check("media", { securityOrigin: url })).toBe(false);
-    expect(policy.check("media", { embeddingOrigin: url })).toBe(false);
-  });
-
-  it.each([undefined, [], ["video"], ["audio", "video"], ["unknown"]])(
-    "rejects camera and ambiguous media requests: %j",
-    (mediaTypes) => {
-      expect(policyFixture().request("media", { mediaTypes })).toBe(false);
-    },
-  );
-
-  it.each([undefined, "video", "unknown"])("rejects media checks for %s", (mediaType) => {
-    expect(policyFixture().check("media", { mediaType })).toBe(false);
-  });
-
-  it("fails closed when frame or media origin metadata is missing", () => {
-    const policy = policyFixture();
-    expect(policy.request("media", { securityOrigin: undefined })).toBe(false);
-    expect(policy.request("media", { requestingUrl: undefined })).toBe(false);
-    expect(policy.request("media", { isMainFrame: undefined })).toBe(false);
-    expect(policy.check("media", { requestingUrl: undefined })).toBe(false);
-    expect(policy.check("media", { isMainFrame: undefined })).toBe(false);
+    expect(policy.check("notifications", {}, policy.contents, url)).toBe(false);
+    expect(policy.check("notifications", { requestingUrl: url })).toBe(false);
+    expect(policy.check("notifications", { embeddingOrigin: url })).toBe(false);
   });
 
   it.each([
+    "media",
     "clipboard-read",
     "display-capture",
     "geolocation",
@@ -201,20 +186,20 @@ describe("desktop session permissions", () => {
   it("denies setup and storage probes before an app exists", () => {
     const policy = policyFixture();
     policy.setApp(null);
-    expect(policy.request()).toBe(false);
-    expect(policy.check()).toBe(false);
+    expect(policy.request("notifications")).toBe(false);
+    expect(policy.check("notifications")).toBe(false);
     expect(policy.check("notifications", { embeddingOrigin: appUrl }, null)).toBe(false);
   });
 
   it("revokes grants if the app is destroyed or navigates to another origin", () => {
     const policy = policyFixture();
     vi.mocked(policy.contents.getURL).mockReturnValue(providerUrl);
-    expect(policy.request()).toBe(false);
-    expect(policy.check()).toBe(false);
+    expect(policy.request("notifications")).toBe(false);
+    expect(policy.check("notifications")).toBe(false);
     vi.mocked(policy.contents.getURL).mockReturnValue(appUrl);
     vi.mocked(policy.contents.isDestroyed).mockReturnValue(true);
-    expect(policy.request()).toBe(false);
-    expect(policy.check()).toBe(false);
+    expect(policy.request("notifications")).toBe(false);
+    expect(policy.check("notifications")).toBe(false);
   });
 
   it.each(["data:text/html,example", "file:///example.html", "not a url"])(
@@ -223,8 +208,8 @@ describe("desktop session permissions", () => {
       const policy = policyFixture();
       policy.setApp({ webContents: policy.contents, url });
       vi.mocked(policy.contents.getURL).mockReturnValue(url);
-      expect(policy.request()).toBe(false);
-      expect(policy.check()).toBe(false);
+      expect(policy.request("notifications")).toBe(false);
+      expect(policy.check("notifications")).toBe(false);
     },
   );
 
@@ -232,20 +217,20 @@ describe("desktop session permissions", () => {
     const policy = policyFixture();
     const nextContents = { ...policy.contents, getURL: () => providerUrl } as WebContents;
     policy.setApp({ webContents: nextContents, url: providerUrl });
-    expect(policy.request()).toBe(false);
-    expect(policy.check()).toBe(false);
+    expect(policy.request("notifications")).toBe(false);
+    expect(policy.check("notifications")).toBe(false);
     expect(policy.check("notifications", { embeddingOrigin: appUrl }, null)).toBe(false);
     policy.setApp({ webContents: policy.contents, url: appUrl });
-    expect(policy.request()).toBe(true);
-    expect(policy.check()).toBe(true);
+    expect(policy.request("notifications")).toBe(true);
+    expect(policy.check("notifications")).toBe(true);
   });
 
   it("does not grant permissions through a different session partition", () => {
     const policy = policyFixture();
     const other = policyFixture();
     policy.setApp({ webContents: other.contents, url: appUrl });
-    expect(policy.request("media", {}, other.contents)).toBe(false);
-    expect(policy.check("media", {}, other.contents)).toBe(false);
+    expect(policy.request("notifications", {}, other.contents)).toBe(false);
+    expect(policy.check("notifications", {}, other.contents)).toBe(false);
     expect(policy.check("notifications", { embeddingOrigin: appUrl }, null)).toBe(false);
   });
 });

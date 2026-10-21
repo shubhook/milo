@@ -465,44 +465,6 @@ export interface AgentRuntimeCapabilities {
   model?: { provider: string; id: string };
 }
 
-export interface VoiceInfo {
-  id: string;
-  label: string;
-  description?: string;
-}
-
-export interface SpeechClip {
-  bytes: Uint8Array;
-  mimeType: "audio/mpeg" | "audio/wav" | "audio/ogg";
-}
-
-export interface VoiceCapabilities {
-  catalog: boolean;
-  synthesize: boolean;
-  transcribe: boolean;
-}
-
-export interface VoiceVerifyResult {
-  ok: boolean;
-  message?: string;
-}
-
-export interface VoiceSynthesizeRequest {
-  text: string;
-  voiceId: string;
-  apiKey: string;
-  /** Connection speech model. Fish uses this, then `FISH_TTS_MODEL`, then s2.1-pro. */
-  model?: string;
-  signal?: AbortSignal;
-}
-
-export interface VoiceTranscribeRequest {
-  audio: Uint8Array;
-  mimeType: string;
-  apiKey: string;
-  signal?: AbortSignal;
-}
-
 export interface BackgroundJobPayloads {
   "run.continue": { runId: string };
   "routine.wakeup": { routineId: string; scheduledFor: string };

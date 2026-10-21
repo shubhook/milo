@@ -193,10 +193,6 @@ msgstr "访问令牌（可选）"
 msgid "Account"
 msgstr "账户"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Account default"
-msgstr "账户默认"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Account label"
 msgstr ""
@@ -437,7 +433,6 @@ msgstr "API 已恢复，但更新未完成。请查看宿主日志。"
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/lib/localized-provider-hint.ts
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "API key"
 msgstr "API 密钥"
 
@@ -841,11 +836,6 @@ msgstr ""
 msgid "Close user settings"
 msgstr "关闭用户设置"
 
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Close voice settings"
-msgstr "关闭语音设置"
-
 #: src/components/AskCard.tsx
 msgid "Code"
 msgstr "代码"
@@ -934,7 +924,6 @@ msgstr "确认密码"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/OnboardingApps.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "连接"
 
@@ -979,7 +968,6 @@ msgstr "连接你的应用"
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
 msgstr "已连接"
 
@@ -987,11 +975,6 @@ msgstr "已连接"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connected · {0}"
 msgstr "已连接 · {0}"
-
-#. placeholder {0}: selected.name
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Connected {0}."
-msgstr "已连接 {0}。"
 
 #. placeholder {0}: selected.label
 #. placeholder {0}: selectedLabelRef.current ?? "this model"
@@ -1007,7 +990,6 @@ msgstr "已连接，下一条消息起即可使用其工具。"
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
 msgstr "正在连接…"
 
@@ -1108,10 +1090,6 @@ msgstr "无法连接"
 msgid "Could not connect this provider"
 msgstr "无法连接此提供方"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not connect this voice provider"
-msgstr "无法连接此语音提供方"
-
 #: src/pages/Shell.tsx
 msgid "Could not connect to the computer screen"
 msgstr ""
@@ -1176,10 +1154,6 @@ msgstr "无法断开 OAuth"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not disconnect this provider"
 msgstr ""
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not disconnect this voice provider"
-msgstr "无法断开此语音提供方"
 
 #: src/pages/shell/message-cards.tsx
 msgid "Could not dismiss"
@@ -1275,10 +1249,6 @@ msgstr "无法加载此文件。"
 msgid "Could not load update status"
 msgstr "无法加载更新状态"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not load voice settings"
-msgstr "无法加载语音设置"
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not open file"
 msgstr ""
@@ -1290,10 +1260,6 @@ msgstr ""
 #: src/components/computer/TerminalApp.tsx
 msgid "Could not open terminal"
 msgstr "无法打开终端"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not play a test clip"
-msgstr "无法播放测试片段"
 
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Auth.tsx
@@ -1383,14 +1349,6 @@ msgstr "无法保存技能"
 msgid "Could not save that choice"
 msgstr "无法保存该选择"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that speech model"
-msgstr "无法保存该语音模型"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that voice"
-msgstr "无法保存该语音"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Could not save the credential"
 msgstr ""
@@ -1406,10 +1364,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Could not send reset email"
 msgstr "无法发送重置邮件"
-
-#: src/lib/call-session.ts
-msgid "Could not send that"
-msgstr "无法发送"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not start OAuth"
@@ -1672,7 +1626,6 @@ msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
 msgstr "断开"
 
@@ -1686,7 +1639,6 @@ msgid "Disconnected {0}."
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
 msgstr "正在断开…"
 
@@ -1989,18 +1941,6 @@ msgstr "将 {0} 交给我"
 msgid "Hand to me"
 msgstr "交给我"
 
-#: src/components/call/CallCard.tsx
-msgid "Hang up"
-msgstr "挂断"
-
-#: src/lib/call-session.ts
-msgid "Hang up first, then enter the code on screen."
-msgstr "请先挂断，然后输入屏幕上的代码。"
-
-#: src/lib/call-session.ts
-msgid "Hang up, then enter the code on screen."
-msgstr "请挂断，然后输入屏幕上的代码。"
-
 #: src/pages/RoutineEditor.tsx
 msgid "header"
 msgstr "请求头"
@@ -2019,14 +1959,6 @@ msgstr "请求头名称"
 msgid "Header value"
 msgstr "请求头值"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hear a sample"
-msgstr "试听"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hi, this is how I'll sound when I read replies out loud."
-msgstr "你好，这是我朗读回复时的声音。"
-
 #: src/pages/Shell.tsx
 msgid "Hide bots"
 msgstr ""
@@ -2034,10 +1966,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Hide password"
 msgstr "隐藏密码"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Hide transcript"
-msgstr "隐藏文字记录"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "High"
@@ -2067,10 +1995,6 @@ msgstr "如何检查"
 #: src/pages/Shell.tsx
 msgid "I’m done"
 msgstr "我做完了"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "If you heard that, voice is ready."
-msgstr "如果听到了，说明语音已就绪。"
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2241,10 +2165,6 @@ msgstr "正在加载预览…"
 msgid "Loading tools…"
 msgstr ""
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Loading voice providers…"
-msgstr "正在加载语音提供方…"
-
 #: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
@@ -2396,10 +2316,6 @@ msgstr "消息…"
 msgid "Messaged {peer}"
 msgstr "已发给 {peer}"
 
-#: src/lib/call-session.ts
-msgid "Microphone failed"
-msgstr "麦克风失败"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
 msgstr "最低"
@@ -2479,10 +2395,6 @@ msgstr "把它们移到共享记忆。"
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "移动到"
-
-#: src/components/call/CallCard.tsx
-msgid "Mute"
-msgstr "静音"
 
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Artifacts.tsx
@@ -2707,11 +2619,6 @@ msgstr "OAuth 连接失败"
 msgid "OAuth expired"
 msgstr ""
 
-#. placeholder {0}: call.botName
-#: src/components/call/CallCard.tsx
-msgid "On a call with {0}"
-msgstr "正在与 {0} 通话"
-
 #: src/pages/RoutineEditor.tsx
 msgid "On a schedule"
 msgstr "按计划"
@@ -2782,7 +2689,6 @@ msgid "Opening your Space…"
 msgstr "正在打开工作区…"
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Optional"
 msgstr "可选"
 
@@ -2831,17 +2737,9 @@ msgstr "密码已更新"
 msgid "Passwords do not match"
 msgstr "两次密码不一致"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste a replacement key"
-msgstr "粘贴替换密钥"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Paste the OpenAI-compatible address from your server. Milo adds /v1 if needed."
 msgstr "粘贴服务器的 OpenAI 兼容地址。需要时 Milo 会补上 /v1。"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste your API key"
-msgstr "粘贴你的 API 密钥"
 
 #: src/pages/RoutineEditor.tsx
 #: src/pages/Routines.tsx
@@ -2851,10 +2749,6 @@ msgstr "已暂停"
 #: src/pages/BotContextMenu.tsx
 msgid "Pin"
 msgstr "置顶"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Playing…"
-msgstr "播放中…"
 
 #: src/pages/RoutineEditor.tsx
 msgid "POST to"
@@ -2887,7 +2781,6 @@ msgid "Protected input"
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "提供方"
 
@@ -2910,10 +2803,6 @@ msgstr "回应"
 #: src/pages/Shell.tsx
 msgid "Reactions"
 msgstr "表情回应"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Read replies aloud"
-msgstr "朗读回复"
 
 #: src/pages/KnowledgeSection.tsx
 msgid "read-only"
@@ -3075,10 +2964,6 @@ msgstr "重新打开"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Replace API key"
 msgstr "替换 API 密钥"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Replace key"
-msgstr "替换密钥"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Replace value"
@@ -3294,10 +3179,6 @@ msgstr "正在保存…"
 msgid "Say hi"
 msgstr "打个招呼"
 
-#: src/lib/call-session.ts
-msgid "Say yes or no, or answer in a sentence."
-msgstr "回答是或否，或一句话说明。"
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/Shell.tsx
@@ -3384,7 +3265,6 @@ msgstr "服务器名称"
 msgid "Server URL"
 msgstr "服务器 URL"
 
-#: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-profile.tsx
@@ -3441,10 +3321,6 @@ msgstr "显示密码"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"
 msgstr ""
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Show transcript"
-msgstr "显示文字记录"
 
 #: src/lib/localized-provider-hint.ts
 #: src/pages/Auth.tsx
@@ -3528,26 +3404,6 @@ msgstr "工作区默认"
 msgid "Spaces"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Speak"
-msgstr "朗读"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak + transcribe"
-msgstr "朗读 + 转写"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak only"
-msgstr "仅朗读"
-
-#: src/pages/Shell.tsx
-msgid "Speak this reply"
-msgstr "朗读这条回复"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speech model"
-msgstr "语音模型"
-
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Start recording"
 msgstr "开始录制"
@@ -3570,10 +3426,6 @@ msgstr "步骤"
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "停止"
-
-#: src/pages/Shell.tsx
-msgid "Stop speaking"
-msgstr "停止朗读"
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Stop teaching"
@@ -3769,10 +3621,6 @@ msgstr "工具源"
 msgid "Tools"
 msgstr ""
 
-#: src/components/call/CallCard.tsx
-msgid "Transcript"
-msgstr "文字记录"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg token"
@@ -3805,10 +3653,6 @@ msgstr "不可用"
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr ""
-
-#: src/components/call/CallCard.tsx
-msgid "Unmute"
-msgstr "取消静音"
 
 #: src/pages/BotContextMenu.tsx
 msgid "Unpin"
@@ -3939,17 +3783,6 @@ msgstr "视图"
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "查看聊天"
-
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Voice"
-msgstr "语音"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Voice chat"
-msgstr "语音聊天"
 
 #: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx

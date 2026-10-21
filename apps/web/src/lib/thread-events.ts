@@ -461,7 +461,6 @@ export function reduceThreadSnapshot(
     const role = (event.payload.role as ThreadMessage["role"]) ?? "bot";
     const blocks = (event.payload.blocks as ThreadMessage["blocks"]) ?? [];
     const id = String(event.payload.messageId ?? event.id);
-    const known = prev.messages.find((message) => message.id === id);
     const next: ThreadMessage = {
       id,
       threadId: event.threadId,
@@ -470,7 +469,6 @@ export function reduceThreadSnapshot(
       blocks,
       botId: event.botId,
       runId: event.runId,
-      callId: typeof event.payload.callId === "string" ? event.payload.callId : known?.callId,
       replyToMessageId:
         typeof event.payload.replyToMessageId === "string"
           ? event.payload.replyToMessageId

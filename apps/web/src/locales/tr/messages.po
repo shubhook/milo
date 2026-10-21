@@ -193,10 +193,6 @@ msgstr "Erişim token'ı (isteğe bağlı)"
 msgid "Account"
 msgstr "Hesap"
 
-#: src/pages/shell/bot-panel.tsx
-msgid "Account default"
-msgstr "Hesap varsayılanı"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Account label"
 msgstr ""
@@ -437,7 +433,6 @@ msgstr ""
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/lib/localized-provider-hint.ts
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "API key"
 msgstr "API anahtarı"
 
@@ -841,11 +836,6 @@ msgstr ""
 msgid "Close user settings"
 msgstr "Kullanıcı ayarlarını kapat"
 
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Close voice settings"
-msgstr "Ses ayarlarını kapat"
-
 #: src/components/AskCard.tsx
 msgid "Code"
 msgstr "Kod"
@@ -934,7 +924,6 @@ msgstr "Parolayı doğrulayın"
 
 #: src/components/integrations/IntegrationSetup.tsx
 #: src/pages/OnboardingApps.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connect"
 msgstr "Bağlan"
 
@@ -979,7 +968,6 @@ msgstr "Uygulamalarını bağla"
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connected"
 msgstr "Bağlandı"
 
@@ -987,11 +975,6 @@ msgstr "Bağlandı"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Connected · {0}"
 msgstr "Bağlı · {0}"
-
-#. placeholder {0}: selected.name
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Connected {0}."
-msgstr "{0} bağlandı."
 
 #. placeholder {0}: selected.label
 #. placeholder {0}: selectedLabelRef.current ?? "this model"
@@ -1007,7 +990,6 @@ msgstr "Bağlandı. Araçları bir sonraki mesajından itibaren kullanılabilir.
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/OnboardingApps.tsx
 #: src/pages/shell/message-cards.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Connecting…"
 msgstr "Bağlanıyor…"
 
@@ -1108,10 +1090,6 @@ msgstr "Bağlanılamadı"
 msgid "Could not connect this provider"
 msgstr "Bu sağlayıcı bağlanamadı"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not connect this voice provider"
-msgstr "Bu ses sağlayıcısı bağlanamadı"
-
 #: src/pages/Shell.tsx
 msgid "Could not connect to the computer screen"
 msgstr ""
@@ -1176,10 +1154,6 @@ msgstr "OAuth bağlantısı kesilemedi"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Could not disconnect this provider"
 msgstr ""
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not disconnect this voice provider"
-msgstr "Bu ses sağlayıcısının bağlantısı kesilemedi"
 
 #: src/pages/shell/message-cards.tsx
 msgid "Could not dismiss"
@@ -1275,10 +1249,6 @@ msgstr "Bu dosya yüklenemedi."
 msgid "Could not load update status"
 msgstr ""
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not load voice settings"
-msgstr "Ses ayarları yüklenemedi"
-
 #: src/components/computer/FilesApp.tsx
 msgid "Could not open file"
 msgstr ""
@@ -1290,10 +1260,6 @@ msgstr ""
 #: src/components/computer/TerminalApp.tsx
 msgid "Could not open terminal"
 msgstr "Terminal açılamadı"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not play a test clip"
-msgstr "Deneme sesi çalınamadı"
 
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Auth.tsx
@@ -1383,14 +1349,6 @@ msgstr "Beceri kaydedilemedi"
 msgid "Could not save that choice"
 msgstr "Bu seçim kaydedilemedi"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that speech model"
-msgstr "Bu konuşma modeli kaydedilemedi"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Could not save that voice"
-msgstr "Bu ses kaydedilemedi"
-
 #: src/pages/shell/bot-credentials.tsx
 msgid "Could not save the credential"
 msgstr ""
@@ -1406,10 +1364,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Could not send reset email"
 msgstr "Sıfırlama e-postası gönderilemedi"
-
-#: src/lib/call-session.ts
-msgid "Could not send that"
-msgstr "Gönderilemedi"
 
 #: src/pages/McpServersOverlay.tsx
 msgid "Could not start OAuth"
@@ -1672,7 +1626,6 @@ msgstr ""
 
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnect"
 msgstr "Bağlantıyı kes"
 
@@ -1686,7 +1639,6 @@ msgid "Disconnected {0}."
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Disconnecting…"
 msgstr "Bağlantı kesiliyor…"
 
@@ -1989,18 +1941,6 @@ msgstr "{0} işlemlerini bana bırak"
 msgid "Hand to me"
 msgstr "Bana bırak"
 
-#: src/components/call/CallCard.tsx
-msgid "Hang up"
-msgstr "Aramayı sonlandır"
-
-#: src/lib/call-session.ts
-msgid "Hang up first, then enter the code on screen."
-msgstr ""
-
-#: src/lib/call-session.ts
-msgid "Hang up, then enter the code on screen."
-msgstr ""
-
 #: src/pages/RoutineEditor.tsx
 msgid "header"
 msgstr ""
@@ -2019,14 +1959,6 @@ msgstr "Üstbilgi adı"
 msgid "Header value"
 msgstr "Üstbilgi değeri"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hear a sample"
-msgstr "Örnek dinle"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Hi, this is how I'll sound when I read replies out loud."
-msgstr "Merhaba, yanıtları sesli okuduğumda böyle duyulacağım."
-
 #: src/pages/Shell.tsx
 msgid "Hide bots"
 msgstr ""
@@ -2034,10 +1966,6 @@ msgstr ""
 #: src/pages/Auth.tsx
 msgid "Hide password"
 msgstr ""
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Hide transcript"
-msgstr "Dökümü gizle"
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "High"
@@ -2067,10 +1995,6 @@ msgstr "Nasıl kontrol edilir"
 #: src/pages/Shell.tsx
 msgid "I’m done"
 msgstr "Bitirdim"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "If you heard that, voice is ready."
-msgstr "Bunu duyduysan ses hazır."
 
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Image upload area"
@@ -2241,10 +2165,6 @@ msgstr "Önizleme yükleniyor…"
 msgid "Loading tools…"
 msgstr ""
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Loading voice providers…"
-msgstr "Ses sağlayıcıları yükleniyor…"
-
 #: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
@@ -2396,10 +2316,6 @@ msgstr "Mesaj…"
 msgid "Messaged {peer}"
 msgstr "{peer} botuna mesaj gönderildi"
 
-#: src/lib/call-session.ts
-msgid "Microphone failed"
-msgstr "Mikrofon hatası"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Minimal"
 msgstr "Minimal"
@@ -2479,10 +2395,6 @@ msgstr "Bunları ortak hafızana taşı."
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Taşı"
-
-#: src/components/call/CallCard.tsx
-msgid "Mute"
-msgstr "Sesi kapat"
 
 #: src/components/teach/SkillDraftCard.tsx
 #: src/pages/Artifacts.tsx
@@ -2707,11 +2619,6 @@ msgstr "OAuth bağlantısı başarısız"
 msgid "OAuth expired"
 msgstr ""
 
-#. placeholder {0}: call.botName
-#: src/components/call/CallCard.tsx
-msgid "On a call with {0}"
-msgstr "{0} ile görüşmede"
-
 #: src/pages/RoutineEditor.tsx
 msgid "On a schedule"
 msgstr ""
@@ -2782,7 +2689,6 @@ msgid "Opening your Space…"
 msgstr "Çalışma alanın açılıyor…"
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Optional"
 msgstr "İsteğe bağlı"
 
@@ -2831,17 +2737,9 @@ msgstr "Parola güncellendi"
 msgid "Passwords do not match"
 msgstr "Parolalar eşleşmiyor"
 
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste a replacement key"
-msgstr "Yeni bir anahtar yapıştır"
-
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Paste the OpenAI-compatible address from your server. Milo adds /v1 if needed."
 msgstr "Sunucundaki OpenAI uyumlu adresi yapıştır. Gerekirse Milo /v1 ekler."
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Paste your API key"
-msgstr "API anahtarını yapıştır"
 
 #: src/pages/RoutineEditor.tsx
 #: src/pages/Routines.tsx
@@ -2851,10 +2749,6 @@ msgstr ""
 #: src/pages/BotContextMenu.tsx
 msgid "Pin"
 msgstr "Sabitle"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Playing…"
-msgstr "Çalınıyor…"
 
 #: src/pages/RoutineEditor.tsx
 msgid "POST to"
@@ -2887,7 +2781,6 @@ msgid "Protected input"
 msgstr ""
 
 #: src/pages/ModelSettingsOverlay.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
 msgid "Providers"
 msgstr "Sağlayıcılar"
 
@@ -2910,10 +2803,6 @@ msgstr "Tepki ver"
 #: src/pages/Shell.tsx
 msgid "Reactions"
 msgstr "Tepkiler"
-
-#: src/pages/shell/bot-panel.tsx
-msgid "Read replies aloud"
-msgstr "Yanıtları sesli oku"
 
 #: src/pages/KnowledgeSection.tsx
 msgid "read-only"
@@ -3075,10 +2964,6 @@ msgstr "Yeniden aç"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "Replace API key"
 msgstr "API anahtarını değiştir"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Replace key"
-msgstr "Anahtarı değiştir"
 
 #: src/pages/shell/bot-credentials.tsx
 msgid "Replace value"
@@ -3294,10 +3179,6 @@ msgstr "Kaydediliyor…"
 msgid "Say hi"
 msgstr "Merhaba de"
 
-#: src/lib/call-session.ts
-msgid "Say yes or no, or answer in a sentence."
-msgstr "Evet ya da hayır de veya bir cümleyle yanıtla."
-
 #: src/pages/ModelSettingsOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/Shell.tsx
@@ -3384,7 +3265,6 @@ msgstr "Sunucu adı"
 msgid "Server URL"
 msgstr "Sunucu URL'si"
 
-#: src/components/call/CallCard.tsx
 #: src/pages/SettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/bot-profile.tsx
@@ -3441,10 +3321,6 @@ msgstr ""
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Show tool activity"
 msgstr ""
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Show transcript"
-msgstr "Dökümü göster"
 
 #: src/lib/localized-provider-hint.ts
 #: src/pages/Auth.tsx
@@ -3528,26 +3404,6 @@ msgstr "Alan varsayılanı"
 msgid "Spaces"
 msgstr ""
 
-#: src/pages/Shell.tsx
-msgid "Speak"
-msgstr "Seslendir"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak + transcribe"
-msgstr "Seslendir + yazıya dök"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speak only"
-msgstr "Yalnızca seslendir"
-
-#: src/pages/Shell.tsx
-msgid "Speak this reply"
-msgstr "Bu yanıtı seslendir"
-
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Speech model"
-msgstr "Konuşma modeli"
-
 #: src/components/teach/TeachComputerOverlay.tsx
 msgid "Start recording"
 msgstr "Kaydı başlat"
@@ -3570,10 +3426,6 @@ msgstr "Adımlar"
 #: src/pages/Shell.tsx
 msgid "Stop"
 msgstr "Durdur"
-
-#: src/pages/Shell.tsx
-msgid "Stop speaking"
-msgstr "Seslendirmeyi durdur"
 
 #: src/components/teach/TeachRecordingChrome.tsx
 msgid "Stop teaching"
@@ -3769,10 +3621,6 @@ msgstr "Araç kaynakları"
 msgid "Tools"
 msgstr ""
 
-#: src/components/call/CallCard.tsx
-msgid "Transcript"
-msgstr "Döküm"
-
 #: src/pages/PluginsOverlay.tsx
 msgid "Treg token"
 msgstr "Treg token'ı"
@@ -3805,10 +3653,6 @@ msgstr ""
 #: src/pages/PluginsOverlay.tsx
 msgid "Uninstall"
 msgstr ""
-
-#: src/components/call/CallCard.tsx
-msgid "Unmute"
-msgstr "Sesi aç"
 
 #: src/pages/BotContextMenu.tsx
 msgid "Unpin"
@@ -3939,17 +3783,6 @@ msgstr "Görünüm"
 #: src/pages/RoutineRunHistory.tsx
 msgid "View chat"
 msgstr "Sohbeti görüntüle"
-
-#: src/pages/SettingsOverlay.tsx
-#: src/pages/Shell.tsx
-#: src/pages/shell/bot-panel.tsx
-#: src/pages/VoiceSettingsOverlay.tsx
-msgid "Voice"
-msgstr "Ses"
-
-#: src/components/call/VoiceChatCard.tsx
-msgid "Voice chat"
-msgstr "Sesli sohbet"
 
 #: src/components/UsageLimitNotice.tsx
 #: src/pages/Auth.tsx

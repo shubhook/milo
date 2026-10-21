@@ -180,14 +180,6 @@ describeWithDatabase("API authorization and resource isolation", () => {
       ["export/bot", { botId: "missing-bot" }],
       ["notifications/registerPush", { token: "ExponentPushToken[not-real]" }],
       ["search/query", { q: "anything" }],
-      ["voice/catalog"],
-      ["voice/status"],
-      ["voice/credentials"],
-      ["voice/connect", { provider: "elevenlabs", apiKey: "not-a-real-key" }],
-      ["voice/disconnect", { provider: "elevenlabs" }],
-      ["voice/setVoice", { voiceId: "missing-voice" }],
-      ["voice/voices", {}],
-      ["voice/prepare", { text: "Nope" }],
     ]);
 
     const results = await Promise.all(
@@ -355,7 +347,6 @@ describeWithDatabase("API authorization and resource isolation", () => {
       ],
       ["artifacts/get", { botId: ownerBot.id, artifactId: ownerArtifact.id }],
       ["export/bot", { botId: ownerBot.id }],
-      ["voice/prepare", { text: "stolen speech", botId: ownerBot.id }],
     ];
     await Promise.all(
       botIdCalls.map(([procedure, input]) => expectDenied(app, intruder, procedure, input)),
@@ -684,69 +675,21 @@ describeWithDatabase("API authorization and resource isolation", () => {
       label: "Copy provider",
       modelId: "copy/model",
     });
-    const voice = await rpc<{ id: string; voiceId: string }>(app, cookie, "voice/connect", {
-      provider: "scripted",
-      apiKey: "fake-copy-voice-key",
-    });
 
     const created = await rpc<Space>(app, cookie, "spaces/create", { name: "Copied defaults" });
-    const [modelPreference, voicePreference] = await Promise.all([
-      handles.prisma.spaceModelPreference.findUnique({
-        where: {
-          spaceId_userId_credentialId: {
-            spaceId: created.id,
-            userId: actor.userId,
-            credentialId: model.id,
-          },
+    const modelPreference = await handles.prisma.spaceModelPreference.findUnique({
+      where: {
+        spaceId_userId_credentialId: {
+          spaceId: created.id,
+          userId: actor.userId,
+          credentialId: model.id,
         },
-      }),
-      handles.prisma.spaceVoicePreference.findUnique({
-        where: {
-          spaceId_userId_credentialId: {
-            spaceId: created.id,
-            userId: actor.userId,
-            credentialId: voice.id,
-          },
-        },
-      }),
-    ]);
+      },
+    });
 
     expect(modelPreference).toMatchObject({ modelId: "copy/model", isDefault: true });
-    expect(voicePreference).toMatchObject({ voiceId: voice.voiceId, isDefault: true });
-    await rpc(
-      app,
-      cookie,
-      "voice/setVoice",
-      { provider: "scripted", voiceId: "space-specific-voice" },
-      created.id,
-    );
-    await expect(
-      handles.prisma.spaceVoicePreference.findUniqueOrThrow({
-        where: {
-          spaceId_userId_credentialId: {
-            spaceId: actor.spaceId,
-            userId: actor.userId,
-            credentialId: voice.id,
-          },
-        },
-      }),
-    ).resolves.toMatchObject({ voiceId: voice.voiceId, isDefault: true });
-    await expect(
-      handles.prisma.spaceVoicePreference.findUniqueOrThrow({
-        where: {
-          spaceId_userId_credentialId: {
-            spaceId: created.id,
-            userId: actor.userId,
-            credentialId: voice.id,
-          },
-        },
-      }),
-    ).resolves.toMatchObject({ voiceId: "space-specific-voice", isDefault: true });
     await expect(
       handles.prisma.userModelCredential.count({ where: { userId: actor.userId } }),
-    ).resolves.toBe(1);
-    await expect(
-      handles.prisma.userVoiceCredential.count({ where: { userId: actor.userId } }),
     ).resolves.toBe(1);
   });
 

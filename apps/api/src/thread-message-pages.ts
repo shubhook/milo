@@ -1,5 +1,5 @@
 import type { MessageBlock, ThreadMessage, ThreadMessagePage } from "@milo/contracts";
-import { callIdFromClientNonce, isPeerReceiptBlocks } from "@milo/core";
+import { isPeerReceiptBlocks } from "@milo/core";
 import type { Prisma, PrismaClient } from "@milo/db";
 
 type MessageDb = PrismaClient | Prisma.TransactionClient;
@@ -190,7 +190,6 @@ function toThreadMessage(row: {
     replyToMessageId: row.replyToMessageId ?? undefined,
     replyQuote: row.replyQuote ?? undefined,
     runId: row.runId ?? undefined,
-    callId: callIdFromClientNonce(row.clientNonce),
     createdAt: row.createdAt.toISOString(),
   };
 }

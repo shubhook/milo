@@ -183,7 +183,7 @@ test("chat composer puts the message above one row of controls", async ({ page }
 
   const boxes = await page.getByTestId("composer-bar").evaluate((composer) =>
     Object.fromEntries(
-      ["Attach file", "Message Chief", "Voice", "Send"].map((label) => {
+      ["Attach file", "Message Chief", "Send"].map((label) => {
         const element = composer.querySelector<HTMLElement>(`[aria-label="${label}"]`);
         if (!element) throw new Error(`Missing composer control: ${label}`);
         const box = element.getBoundingClientRect();
@@ -192,7 +192,7 @@ test("chat composer puts the message above one row of controls", async ({ page }
     ),
   );
 
-  const controls = ["Attach file", "Voice", "Send"].map((label) => boxes[label]!.center);
+  const controls = ["Attach file", "Send"].map((label) => boxes[label]!.center);
   expect(Math.max(...controls) - Math.min(...controls)).toBeLessThanOrEqual(1);
   expect(boxes["Message Chief"]!.bottom).toBeLessThanOrEqual(boxes["Attach file"]!.top);
 });

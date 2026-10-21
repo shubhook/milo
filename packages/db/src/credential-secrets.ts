@@ -2,34 +2,23 @@ import type { PrismaClient } from "./client.js";
 import { Prisma } from "./client.js";
 import { withTransactionRetry } from "./transaction-retry.js";
 
-type CredentialSecretClient = Pick<
-  PrismaClient,
-  "secret" | "userModelCredential" | "userVoiceCredential"
->;
+type CredentialSecretClient = Pick<PrismaClient, "secret" | "userModelCredential">;
 
 export async function deleteUnreferencedCredentialSecret(
   prisma: CredentialSecretClient,
   input: {
-    credentialKind: "model" | "voice";
+    credentialKind: "model";
     credentialId: string;
     secretId: string;
   },
 ): Promise<void> {
-  const [modelReferences, voiceReferences] = await Promise.all([
-    prisma.userModelCredential.count({
-      where: {
-        secretId: input.secretId,
-        ...(input.credentialKind === "model" ? { id: { not: input.credentialId } } : {}),
-      },
-    }),
-    prisma.userVoiceCredential.count({
-      where: {
-        secretId: input.secretId,
-        ...(input.credentialKind === "voice" ? { id: { not: input.credentialId } } : {}),
-      },
-    }),
-  ]);
-  if (modelReferences + voiceReferences === 0) {
+  const modelReferences = await prisma.userModelCredential.count({
+    where: {
+      secretId: input.secretId,
+      id: { not: input.credentialId },
+    },
+  });
+  if (modelReferences === 0) {
     await prisma.secret.deleteMany({ where: { id: input.secretId } });
   }
 }
